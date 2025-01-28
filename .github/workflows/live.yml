@@ -30,7 +30,7 @@ jobs:
       uses: SamKirkland/FTP-Deploy-Action@4.3.3
       with:
         server: iad1-shared-e1-05.dreamhost.com
-        username: dh_rcdg7r
+        username: dh_rcdg7rr
         password: Ovindu@012
         timeout_minutes : 1
         max_attempts : 3
