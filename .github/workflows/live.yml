@@ -34,6 +34,7 @@ jobs:
         password: Ovindu@012
         timeout_minutes : 1
         max_attempts : 3
+        server-dir: system.sisintravels.com/
 
     - name: Check website status
       run: curl -I https://system.sisintravels.com
