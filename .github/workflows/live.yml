@@ -29,7 +29,7 @@ jobs:
     - name: Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.3.3
       with:
-        server: iad1-shared-e1-05.dreamhost.com
+        server: iad1-shared-b7-40.dreamhost.com
         username: dh_rcdg7rr
         password: Ovindu@012
         timeout_minutes : 1
