@@ -31,7 +31,7 @@ jobs:
       with:
         server: iad1-shared-e1-05.dreamhost.com
         username: dh_rcdg7r
-        password: Ovindu@12
+        password: Ovindu@012
         timeout_minutes : 1
         max_attempts : 3
 
