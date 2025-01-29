@@ -7,6 +7,8 @@ use App\Http\Controllers\HotelController;
 use App\Http\Controllers\MarketController;
 use App\Http\Controllers\MealPlanController;
 use App\Http\Controllers\RoomCategoryController;
+use App\Http\Controllers\RoomTypeController;
+use App\Http\Controllers\TravelRouteController;
 use App\Http\Controllers\UserController;
 use App\Models\Hotel;
 use Illuminate\Support\Facades\Route;
@@ -60,6 +62,12 @@ Route::middleware('auth')->group(function () {
 
     // Room Categories Routes
     Route::resource('room_categories', RoomCategoryController::class);
+
+    // Room Types Routes
+    Route::resource('room_types', RoomTypeController::class);
+
+    // Travel_Routes Routes 
+    Route::resource('travel_routes', TravelRouteController::class);
 
 
 });
