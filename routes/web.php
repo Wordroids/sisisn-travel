@@ -3,8 +3,10 @@
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CustomersController;
+use App\Http\Controllers\HotelController;
 use App\Http\Controllers\MarketController;
 use App\Http\Controllers\UserController;
+use App\Models\Hotel;
 use Illuminate\Support\Facades\Route;
 
 
@@ -47,6 +49,10 @@ Route::middleware('auth')->group(function () {
 
     // Currencies Routes
     Route::resource('currencies', CurrencyController::class);
+
+    // Hotel Routes 
+    Route::resource('hotels', HotelController::class);
+
 });
 
 require __DIR__ . '/auth.php';
