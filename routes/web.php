@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CustomersController;
+use App\Http\Controllers\MarketController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +40,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/customers/{customer}/edit', [CustomersController::class, 'edit'])->name('customers.edit');
     Route::put('/customers/{customer}', [CustomersController::class, 'update'])->name('customers.update');
     Route::delete('/customers/{customer}', [CustomersController::class, 'destroy'])->name('customers.destroy');
+
+    // Markets Routes
+    Route::resource('markets', MarketController::class);
 });
 
 require __DIR__ . '/auth.php';
