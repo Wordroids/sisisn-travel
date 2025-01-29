@@ -12,7 +12,7 @@ class UserController extends Controller
         $all_users = User::all();
         $user_count = User::count();
 
-        return view('users.index')->with([
+        return view('pages.users.index')->with([
             'users' => $all_users,
             'user_count' => $user_count
         ]);

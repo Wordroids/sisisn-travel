@@ -40,7 +40,6 @@
                             </tr>
                         </thead>
                         <tbody>
-
                             @foreach ($users as $user )
                             <tr class="border-b test:border-gray-600 hover:bg-gray-100 test:hover:bg-gray-700">
 
@@ -91,10 +90,6 @@
                                 </td>
                             </tr>
                             @endforeach
-
-
-
-
                         </tbody>
                     </table>
                 </div>
