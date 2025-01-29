@@ -2,71 +2,65 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreCustomersRequest;
-use App\Http\Requests\UpdateCustomersRequest;
 use App\Models\Customers;
+use Illuminate\Http\Request;
 
 class CustomersController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $allCustomers = Customers::all();
-        $customerCount = Customers::count();
-
-        return view('pages.customers.index')->with([
-            'customers' => $allCustomers,
-            'customerCount' => $customerCount
-        ]);
+        $customers = Customers::latest()->paginate(10);
+        return view('pages.customers.index', compact('customers'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('pages.customers.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreCustomersRequest $request)
+    public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:customers',
+            'phone' => 'required|string|max:20',
+            'whatsapp' => 'required|string|max:20',
+            'country' => 'required|string|max:100',
+        ]);
+
+        Customers::create($request->all());
+
+        return redirect()->route('customers.index')->with('success', 'Customer added successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Customers $customers)
+    public function show(Customers $customer)
     {
-        //
+        return view('pages.customers.show', compact('customer'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Customers $customers)
+    public function edit(Customers $customer)
     {
-        //
+        return view('pages.customers.edit', compact('customer'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateCustomersRequest $request, Customers $customers)
+    public function update(Request $request, Customers $customer)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => "required|string|email|max:255|unique:customers,email,{$customer->id}",
+            'phone' => 'required|string|max:20',
+            'whatsapp' => 'required|string|max:20',
+            'country' => 'required|string|max:100',
+        ]);
+
+        $customer->update($request->all());
+
+        return redirect()->route('customers.index')->with('success', 'Customer updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Customers $customers)
+    public function destroy(Customers $customer)
     {
-        //
+        $customer->delete();
+        return redirect()->route('customers.index')->with('success', 'Customer deleted successfully.');
     }
 }
