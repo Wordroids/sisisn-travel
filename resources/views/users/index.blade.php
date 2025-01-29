@@ -98,29 +98,7 @@
                         </tbody>
                     </table>
                 </div>
-                <nav class="flex flex-col items-start justify-between p-4 space-y-3 md:flex-row md:items-center md:space-y-0" aria-label="Table navigation">
-                    <div class="flex items-center space-x-3">
-                        <label for="rows" class="text-xs font-normal text-gray-500 test:text-gray-400">Rows per page</label><select id="rows" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block py-1.5 pl-3.5 pr-6 test:bg-gray-700 test:border-gray-600 test:placeholder-gray-400 test:text-white test:focus:ring-primary-500 test:focus:border-primary-500">
-                            <option selected="" value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                        <div class="text-xs font-normal text-gray-500 test:text-gray-400">
-                            <span class="font-semibold text-gray-900 test:text-white">1-10</span>
-                            of
-                            <span class="font-semibold text-gray-900 test:text-white">100</span>
-                        </div>
-                    </div>
-                    <ul class="inline-flex items-stretch -space-x-px">
-                        <li>
-                            <a href="#" class="flex text-sm w-20 items-center justify-center h-full py-1.5 px-3 ml-0 text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 test:bg-gray-800 test:border-gray-700 test:text-gray-400 test:hover:bg-gray-700 test:hover:text-white">Previous</a>
-                        </li>
-                        <li>
-                            <a href="#" class="flex text-sm w-20 items-center justify-center h-full py-1.5 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 test:bg-gray-800 test:border-gray-700 test:text-gray-400 test:hover:bg-gray-700 test:hover:text-white">Next</a>
-                        </li>
-                    </ul>
-                </nav>
+               
             </div>
         </div>
     </section>
