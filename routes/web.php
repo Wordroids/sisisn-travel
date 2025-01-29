@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\HotelController;
 use App\Http\Controllers\MarketController;
 use App\Http\Controllers\MealPlanController;
+use App\Http\Controllers\RoomCategoryController;
 use App\Http\Controllers\UserController;
 use App\Models\Hotel;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +57,10 @@ Route::middleware('auth')->group(function () {
 
     // Meal Plans Routes 
     Route::resource('meal_plans', MealPlanController::class);
+
+    // Room Categories Routes
+    Route::resource('room_categories', RoomCategoryController::class);
+
 
 });
 
