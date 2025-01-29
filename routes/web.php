@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\MarketController;
@@ -43,6 +44,9 @@ Route::middleware('auth')->group(function () {
 
     // Markets Routes
     Route::resource('markets', MarketController::class);
+
+    // Currencies Routes
+    Route::resource('currencies', CurrencyController::class);
 });
 
 require __DIR__ . '/auth.php';

@@ -751,6 +751,15 @@
                             Markets
                         </a>
                     </li>
+
+                    <!-- Currency  -->
+                    <li>
+                        <a
+                            href="{{ route('currencies.index') }}"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">
+                            Currencies
+                        </a>
+                    </li>
                 </ul>
             </li>
 
