@@ -603,6 +603,7 @@
     <div class="overflow-y-auto py-5 px-3 h-full bg-blue-600 ">
 
         <ul class="space-y-2">
+            <!-- Dashboard  -->
             <li>
                 <a
                     href="#"
@@ -622,6 +623,7 @@
                 </a>
             </li>
 
+            <!-- Users  -->
             <li>
                 <button
                     type="button"
@@ -658,7 +660,7 @@
                             href="{{ route('users.index') }}"
                             class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">All Users</a>
                     </li>
-                    
+
                     <li>
                         <a
                             href="{{ route('customers.index') }}"
@@ -667,8 +669,86 @@
                 </ul>
             </li>
 
+            <!-- System Data Menu -->
+            <li>
+                <button
+                    type="button"
+                    class="flex items-center p-2 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700"
+                    aria-controls="dropdown-system-data"
+                    data-collapse-toggle="dropdown-system-data">
+                    <svg
+                        aria-hidden="true"
+                        class="flex-shrink-0 w-6 h-6 text-white transition duration-75 group-hover:text-gray-900"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            fill-rule="evenodd"
+                            d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm4 8a1 1 0 100 2h4a1 1 0 100-2H8zm0-4a1 1 0 100 2h4a1 1 0 100-2H8z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="flex-1 ml-3 text-left whitespace-nowrap">System Data</span>
+                    <svg
+                        aria-hidden="true"
+                        class="w-6 h-6"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            fill-rule="evenodd"
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+                <ul id="dropdown-system-data" class="hidden py-2 space-y-2">
+                    <li>
+                        <a
+                            href="{{ route('customers.index') }}"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">
+                            Customer Data
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">
+                            Vehicle Fleet
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">
+                            Hotels
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">
+                            Routes
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">
+                            Drivers
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">
+                            Guides
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+
         </ul>
 
     </div>
-  
+
 </aside>
