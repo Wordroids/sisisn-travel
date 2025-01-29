@@ -660,12 +660,6 @@
                             href="{{ route('users.index') }}"
                             class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">All Users</a>
                     </li>
-
-                    <li>
-                        <a
-                            href="{{ route('customers.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">Customers</a>
-                    </li>
                 </ul>
             </li>
 
@@ -766,6 +760,15 @@
                             href="{{ route('currencies.index') }}"
                             class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">
                             Currencies
+                        </a>
+                    </li>
+
+                    <!-- Meals -->
+                    <li>
+                        <a
+                            href="{{ route('meal_plans.index') }}"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">
+                            Meals
                         </a>
                     </li>
                 </ul>
