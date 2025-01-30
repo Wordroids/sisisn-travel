@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\HotelController;
 use App\Http\Controllers\MarketController;
 use App\Http\Controllers\MealPlanController;
+use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoomCategoryController;
 use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\TravelRouteController;
@@ -69,7 +70,11 @@ Route::middleware('auth')->group(function () {
     // Travel_Routes Routes 
     Route::resource('travel_routes', TravelRouteController::class);
 
-
+    //Quotations Routes
+    Route::get('/quotations/create/step-01', [QuotationController::class, 'step_one'])->name('quotations.step_one');
+    Route::post('/quotations/step-01/store', [QuotationController::class, 'store_step_one'])->name('quotations.store_step_one');
+    
+    Route::get('/quotations/create/{id}/step2', [QuotationController::class, 'step_two'])->name('quotations.step2');
 });
 
 require __DIR__ . '/auth.php';
