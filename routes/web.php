@@ -73,10 +73,12 @@ Route::middleware('auth')->group(function () {
     //Quotations Routes
     Route::get('/quotations/create/step-01', [QuotationController::class, 'step_one'])->name('quotations.step_one');
     Route::post('/quotations/step-01/store', [QuotationController::class, 'store_step_one'])->name('quotations.store_step_one');
-    
+
     Route::get('/quotations/create/{id}/step2', [QuotationController::class, 'step_two'])->name('quotations.step2');
     Route::post('/quotations/{id}/step2/store', [QuotationController::class, 'store_step_two'])->name('quotations.step2.store');
 
+    Route::get('/quotations/create/{id}/step3', [QuotationController::class, 'step_three'])->name('quotations.step3');
+    Route::post('/quotations/{id}/step3/store', [QuotationController::class, 'store_step_three'])->name('quotations.step3.store');
 });
 
 require __DIR__ . '/auth.php';
