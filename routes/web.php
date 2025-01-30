@@ -75,6 +75,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/quotations/step-01/store', [QuotationController::class, 'store_step_one'])->name('quotations.store_step_one');
     
     Route::get('/quotations/create/{id}/step2', [QuotationController::class, 'step_two'])->name('quotations.step2');
+    Route::post('/quotations/{id}/step2/store', [QuotationController::class, 'store_step_two'])->name('quotations.step2.store');
+
 });
 
 require __DIR__ . '/auth.php';

@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('currency')->default('USD'); // Default currency
             $table->decimal('conversion_rate', 10, 2); // Auto-filled conversion rate
             $table->decimal('markup_per_person', 10, 2); // System-defined markup per person
+            $table->foreignId('pax_slab_id')->constrained('pax_slabs')->onDelete('cascade'); // Links to selected Pax Slab
             $table->enum('status', ['draft', 'pending', 'approved', 'rejected'])->default('draft'); // Quotation status
             $table->timestamps();
         });

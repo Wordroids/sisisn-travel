@@ -22,5 +22,6 @@ class Quotation extends Model
         'conversion_rate',       // Auto-filled based on selected currency
         'markup_per_person',     // System-defined markup per person
         'status',                // ['draft', 'pending', 'approved', 'rejected']
+        'pax_slab_id',           // Links to selected Pax Slab
     ];
 }

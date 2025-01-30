@@ -128,11 +128,11 @@
 
                 <div class="grid gap-6 grid-cols-4">
                     <div class="mb-4">
-                        <label class="block mb-2 text-sm font-medium text-gray-900 test:text-white">Pax Slab</label>
-                        <select name="currency_id" class="block mb-2 w-full border-gray-300 rounded-md shadow-sm" required>
-                            <option value="">Select Currency</option>
-                            @foreach ($currencies as $currency)
-                            <option value="{{ $currency->id }}">{{ $currency->code }}</option>
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Pax Slab</label>
+                        <select name="pax_slab_id" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Select Pax Slab</option>
+                            @foreach ($paxSlabs as $paxSlab)
+                            <option value="{{ $paxSlab->id }}">{{ $paxSlab->name }}</option>
                             @endforeach
                         </select>
                     </div>
