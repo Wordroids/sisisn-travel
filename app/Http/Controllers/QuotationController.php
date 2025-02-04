@@ -31,6 +31,24 @@ class QuotationController extends Controller
         return view('pages.quotations.index', compact('quotations'));
     }
 
+    public function show($id)
+    {
+        $quotation = Quotation::with([
+            'market',
+            'customer',
+            'paxSlabs.paxSlab',
+            'paxSlabs.vehicleType',
+            'accommodations.hotel',
+            'accommodations.mealPlan',
+            'accommodations.roomType',
+            'travelPlans.route',
+            'travelPlans.vehicleType'
+        ])->findOrFail($id);
+
+        return view('pages.quotations.show', compact('quotation'));
+    }
+
+
     /**
      * Show the form for creating a new resource.
      */

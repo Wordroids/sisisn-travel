@@ -90,6 +90,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/quotations', [QuotationController::class, 'index'])->name('quotations.index');
     Route::get('/quotations/{id}', [QuotationController::class, 'show'])->name('quotations.show');
+
     
 
 

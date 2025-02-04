@@ -36,4 +36,21 @@ class Quotation extends Model
     {
         return $this->belongsTo(Customers::class);
     }
+    // ✅ Relationship with Pax Slabs (Many-to-Many via QuotationPaxSlab)
+    public function paxSlabs()
+    {
+        return $this->hasMany(QuotationPaxSlab::class, 'quotation_id');
+    }
+
+    // ✅ Relationship with Accommodations
+    public function accommodations()
+    {
+        return $this->hasMany(QuotationAccommodation::class, 'quotation_id');
+    }
+
+    // ✅ Relationship with Travel Plans
+    public function travelPlans()
+    {
+        return $this->hasMany(QuotationTravelPlan::class, 'quotation_id');
+    }
 }
