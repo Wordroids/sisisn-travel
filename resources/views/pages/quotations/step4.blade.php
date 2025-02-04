@@ -60,25 +60,41 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            let travelIndex = 1;
+    document.addEventListener("DOMContentLoaded", function () {
+        let travelIndex = 1;
 
-            document.querySelector("#add-travel").addEventListener("click", function () {
-                let newTravel = document.querySelector(".travel-entry").cloneNode(true);
-                newTravel.querySelectorAll("select, input").forEach(input => {
-                    input.name = input.name.replace("[0]", "[" + travelIndex + "]");
-                    input.value = "";
-                });
-                document.querySelector("#travel-plan-section").appendChild(newTravel);
-                travelIndex++;
+        function addTravelEntry() {
+            let newTravel = document.querySelector(".travel-entry").cloneNode(true);
+
+            // Clear values and update indexes
+            newTravel.querySelectorAll("select, input").forEach(input => {
+                input.name = input.name.replace(/\[\d+\]/, "[" + travelIndex + "]");
+                input.value = "";
             });
 
-            document.querySelectorAll(".route-select").forEach(select => {
-                select.addEventListener("change", function () {
-                    let mileage = this.options[this.selectedIndex].getAttribute("data-mileage");
-                    this.closest(".travel-entry").querySelector(".mileage-input").value = mileage;
-                });
+            // Append new entry
+            document.querySelector("#travel-plan-section").appendChild(newTravel);
+
+            // Attach event listener to the new route dropdown
+            newTravel.querySelector(".route-select").addEventListener("change", function () {
+                let mileage = this.options[this.selectedIndex].getAttribute("data-mileage");
+                this.closest(".travel-entry").querySelector(".mileage-input").value = mileage;
+            });
+
+            travelIndex++;
+        }
+
+        // Attach event listener to "Add Travel" button
+        document.querySelector("#add-travel").addEventListener("click", addTravelEntry);
+
+        // Attach event listener to existing route dropdowns
+        document.querySelectorAll(".route-select").forEach(select => {
+            select.addEventListener("change", function () {
+                let mileage = this.options[this.selectedIndex].getAttribute("data-mileage");
+                this.closest(".travel-entry").querySelector(".mileage-input").value = mileage;
             });
         });
-    </script>
+    });
+</script>
+
 </x-app-layout>

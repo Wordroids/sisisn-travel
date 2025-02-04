@@ -169,35 +169,41 @@ class QuotationController extends Controller
     public function store_step_three(Request $request, $id)
     {
         $quotation = Quotation::findOrFail($id);
-
+    
+        // Validate input
         $request->validate([
-            'accommodation' => 'required|array',
-            'accommodation.*.hotel_id' => 'required|exists:hotels,id',
-            'accommodation.*.start_date' => 'required|date',
-            'accommodation.*.end_date' => 'required|date|after_or_equal:accommodation.*.start_date',
-            'accommodation.*.nights' => 'required|integer|min:1',
-            'accommodation.*.meal_plan_id' => 'required|exists:meal_plans,id',
-            'accommodation.*.room_category_id' => 'required|exists:room_categories,id',
-            'accommodation.*.room_type_id' => 'required|exists:room_types,id',
-            'accommodation.*.total_cost' => 'required|numeric',
+            'accommodations' => 'required|array',
+            'accommodations.*.hotel_id' => 'required|exists:hotels,id',
+            'accommodations.*.start_date' => 'required|date',
+            'accommodations.*.end_date' => 'required|date|after_or_equal:accommodations.*.start_date',
+            'accommodations.*.meal_plan_id' => 'required|exists:meal_plans,id',
+            'accommodations.*.room_category_id' => 'required|exists:room_categories,id',
+            'accommodations.*.room_type_id' => 'required|exists:room_types,id',
+            'accommodations.*.per_night_cost' => 'required|numeric|min:0',
+            'accommodations.*.nights' => 'required|integer|min:1',
+            'accommodations.*.total_cost' => 'required|numeric|min:0',
         ]);
-
-        foreach ($request->accommodation as $acc) {
+        // dd($request->all());
+        
+    
+        foreach ($request->accommodations as $accommodation) {
             QuotationAccommodation::create([
                 'quotation_id' => $quotation->id,
-                'hotel_id' => $acc['hotel_id'],
-                'start_date' => $acc['start_date'],
-                'end_date' => $acc['end_date'],
-                'nights' => $acc['nights'],
-                'meal_plan_id' => $acc['meal_plan_id'],
-                'room_category_id' => $acc['room_category_id'],
-                'room_type_id' => $acc['room_type_id'],
-                'total_cost' => $acc['total_cost'],
+                'hotel_id' => $accommodation['hotel_id'],
+                'start_date' => $accommodation['start_date'],
+                'end_date' => $accommodation['end_date'],
+                'meal_plan_id' => $accommodation['meal_plan_id'],
+                'room_category_id' => $accommodation['room_category_id'],
+                'room_type_id' => $accommodation['room_type_id'],
+                'per_night_cost' => $accommodation['per_night_cost'],
+                'nights' => $accommodation['nights'],
+                'total_cost' => $accommodation['total_cost'],
             ]);
         }
-
-        return redirect()->route('quotations.step4', $quotation->id)->with('success', 'Accommodation details saved.');
+    
+        return redirect()->route('quotations.step4', $quotation->id)->with('success', 'Accommodation saved.');
     }
+    
 
     public function step_four($id)
     {
