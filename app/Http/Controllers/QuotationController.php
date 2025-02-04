@@ -11,9 +11,13 @@ use App\Models\Market;
 use App\Models\MealPlan;
 use App\Models\PaxSlab;
 use App\Models\Quotation;
+use App\Models\QuotationAccommodation;
 use App\Models\QuotationPaxSlab;
+use App\Models\QuotationTravelPlan;
 use App\Models\RoomCategory;
 use App\Models\RoomType;
+use App\Models\TravelRoute;
+use App\Models\VehicleType;
 use Illuminate\Http\Request;
 
 class QuotationController extends Controller
@@ -23,7 +27,8 @@ class QuotationController extends Controller
      */
     public function index()
     {
-        //
+        $quotations = Quotation::with(['market', 'customer'])->latest()->get();
+        return view('pages.quotations.index', compact('quotations'));
     }
 
     /**
@@ -34,7 +39,7 @@ class QuotationController extends Controller
         $markets = Market::all();
         $customers = Customers::all();
         $currencies = Currency::all();
-        $paxSlabs = PaxSlab::all(); // Fetch Pax Slabs from 
+        $paxSlabs = PaxSlab::ordered()->get(); // Fetch ordered Pax Slabs
 
         // Generate Quote & Booking Reference
         $quoteReference = 'QT/SP/' . (Quotation::max('id') + 1001);
@@ -45,6 +50,7 @@ class QuotationController extends Controller
 
     public function store_step_one(Request $request)
     {
+
         $request->validate([
             'market_id' => 'required|exists:markets,id',
             'customer_id' => 'nullable|exists:customers,id',
@@ -85,43 +91,49 @@ class QuotationController extends Controller
     {
         $quotation = Quotation::findOrFail($id);
 
-        // Fetch the selected Pax Slab from DB
-        $selectedPaxSlab = PaxSlab::find($quotation->pax_slab_id);
+        // Fetch all Pax Slabs in order
+        $selectedPaxSlab = PaxSlab::findOrFail($quotation->pax_slab_id);
+
+        // Fetch all previous slabs (including selected one) based on order
+        $paxSlabs = PaxSlab::where('order', '<=', $selectedPaxSlab->order)->orderBy('order')->get();
+
 
         // Define vehicle types and their default rates
-        $vehicleTypes = [
-            'Car' => 32,
-            'Van' => 40,
-            'Mini Coach' => 50,
-            'New Coach' => 110,
-            '45 Seat Coach' => 120,
-        ];
 
-        return view('pages.quotations.step-02', compact('quotation', 'selectedPaxSlab', 'vehicleTypes'));
+        $vehicleTypes = VehicleType::all();
+
+        return view('pages.quotations.step-02', compact('quotation', 'paxSlabs', 'vehicleTypes'));
     }
 
     public function store_step_two(Request $request, $id)
     {
         $quotation = Quotation::findOrFail($id);
 
+        // Validate the incoming request
         $request->validate([
             'pax_slab' => 'required|array',
             'pax_slab.*.exact_pax' => 'required|integer|min:1',
-            'pax_slab.*.vehicle_type' => 'required|string',
-            'pax_slab.*.vehicle_payout_rate' => 'required|numeric',
+            'pax_slab.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
+            'pax_slab.*.vehicle_payout_rate' => 'required|numeric|min:0',
         ]);
 
-        foreach ($request->pax_slab as $index => $slab) {
-            QuotationPaxSlab::create([
-                'quotation_id' => $quotation->id,
-                'exact_pax' => $slab['exact_pax'],
-                'vehicle_type' => $slab['vehicle_type'],
-                'vehicle_payout_rate' => $slab['vehicle_payout_rate'],
-            ]);
+        // Loop through the Pax Slabs and store each row
+        foreach ($request->pax_slab as $paxSlabId => $slab) {
+            QuotationPaxSlab::updateOrCreate(
+                [
+                    'quotation_id' => $quotation->id,
+                    'pax_slab_id' => $paxSlabId,
+                ],
+                [
+                    'exact_pax' => $slab['exact_pax'],
+                    'vehicle_type_id' => $slab['vehicle_type_id'],
+                    'vehicle_payout_rate' => $slab['vehicle_payout_rate'],
+                ]
+            );
         }
-
         return redirect()->route('quotations.step3', $quotation->id)->with('success', 'Pax Slab details saved.');
     }
+
 
     public function step_three($id)
     {
@@ -167,5 +179,46 @@ class QuotationController extends Controller
         }
 
         return redirect()->route('quotations.step4', $quotation->id)->with('success', 'Accommodation details saved.');
+    }
+
+    public function step_four($id)
+    {
+        $quotation = Quotation::findOrFail($id);
+
+        // Fetch system data for selection
+        $routes = TravelRoute::all();
+
+        // Define vehicle types and their default rates
+        $vehicleTypes = VehicleType::all();
+
+        return view('pages.quotations.step4', compact('quotation', 'routes', 'vehicleTypes'));
+    }
+
+    public function store_step_four(Request $request, $id)
+    {
+        $quotation = Quotation::findOrFail($id);
+
+        $request->validate([
+            'travel' => 'required|array',
+            'travel.*.start_date' => 'required|date',
+            'travel.*.end_date' => 'required|date|after_or_equal:travel.*.start_date',
+            'travel.*.route_id' => 'required|exists:travel_routes,id',
+            'travel.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
+            'travel.*.mileage' => 'required|numeric',
+        ]);
+
+        foreach ($request->travel as $travel) {
+            QuotationTravelPlan::create([
+                'quotation_id' => $quotation->id,
+                'start_date' => $travel['start_date'],
+                'end_date' => $travel['end_date'],
+                'route_id' => $travel['route_id'],
+                'vehicle_type_id' => $travel['vehicle_type_id'],
+                'mileage' => $travel['mileage'],
+            ]);
+        }
+
+        // Redirect to Quotation List page after final step
+        return redirect()->route('quotations.index')->with('success', 'Quotation process completed successfully.');
     }
 }

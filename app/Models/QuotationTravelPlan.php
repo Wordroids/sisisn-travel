@@ -5,29 +5,31 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class QuotationPaxSlab extends Model
+class QuotationTravelPlan extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'quotation_id',
-        'pax_slab_id', // Ensure this column exists
+        'start_date',
+        'end_date',
+        'route_id',
         'vehicle_type_id',
-        'exact_pax',
-        'vehicle_payout_rate',
+        'mileage',
     ];
 
     public function quotation()
     {
         return $this->belongsTo(Quotation::class);
     }
-    public function paxSlab()
+
+    public function route()
     {
-        return $this->belongsTo(PaxSlab::class);
+        return $this->belongsTo(TravelRoute::class);
     }
 
     public function vehicleType()
     {
-        return $this->belongsTo(VehicleType::class);
+        return $this->belongsTo(vehicleType::class);
     }
 }

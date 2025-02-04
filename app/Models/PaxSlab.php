@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,5 +13,12 @@ class PaxSlab extends Model
         'name',
         'min_pax',
         'max_pax',
+        'order'
     ];
+
+
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('order', 'asc');
+    }
 }

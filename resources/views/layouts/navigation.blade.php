@@ -603,7 +603,7 @@
     <div class="overflow-y-auto py-5 px-3 h-full bg-blue-600 ">
 
         <ul class="space-y-2">
-            <!-- Dashboard  -->
+            <!-- Quote  -->
             <li>
                 <a
                     href="{{ route('quotations.step_one') }}"
@@ -787,6 +787,19 @@
                             href="{{ route('room_types.index') }}"
                             class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">
                             Room Types
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ route('pax_slabs.index') }}"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">
+                            Pax Slabs
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ route('vehicle_types.index') }}" class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">
+                            Vehicle Types
                         </a>
                     </li>
                 </ul>

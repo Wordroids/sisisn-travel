@@ -8,7 +8,8 @@ return new class extends Migration {
     {
         Schema::create('pax_slabs', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Pax Slab name (e.g., "01 Pax", "02 Pax", "03 Pax", etc.)
+            $table->string('name'); // Pax Slab name (e.g., "01 Pax", "02 Pax", "03 Pax", etc.).
+            $table->integer('order')->default(0); // Order of the pax slab
             $table->integer('min_pax'); // Minimum pax count for this slab
             $table->integer('max_pax'); // Maximum pax count for this slab
             $table->timestamps();

@@ -8,10 +8,11 @@ return new class extends Migration {
     {
         Schema::create('quotation_pax_slabs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('quotation_id')->constrained()->onDelete('cascade'); // Links to quotation
-            $table->integer('exact_pax'); // Number of pax
-            $table->string('vehicle_type'); // Selected vehicle type
-            $table->decimal('vehicle_payout_rate', 10, 2); // Auto-filled based on vehicle type
+            $table->foreignId('quotation_id')->constrained()->onDelete('cascade');
+            $table->foreignId('pax_slab_id')->constrained('pax_slabs')->onDelete('cascade'); // Ensure this exists
+            $table->foreignId('vehicle_type_id')->constrained('vehicle_types')->onDelete('cascade');
+            $table->integer('exact_pax');
+            $table->decimal('vehicle_payout_rate', 10, 2);
             $table->timestamps();
         });
     }

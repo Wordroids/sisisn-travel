@@ -24,4 +24,16 @@ class Quotation extends Model
         'status',                // ['draft', 'pending', 'approved', 'rejected']
         'pax_slab_id',           // Links to selected Pax Slab
     ];
+
+    // ✅ Relationship with Market
+    public function market()
+    {
+        return $this->belongsTo(Market::class);
+    }
+
+    // ✅ Relationship with Customer
+    public function customer()
+    {
+        return $this->belongsTo(Customers::class);
+    }
 }

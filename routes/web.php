@@ -6,11 +6,13 @@ use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\HotelController;
 use App\Http\Controllers\MarketController;
 use App\Http\Controllers\MealPlanController;
+use App\Http\Controllers\PaxSlabController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoomCategoryController;
 use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\TravelRouteController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VehicleTypeController;
 use App\Models\Hotel;
 use Illuminate\Support\Facades\Route;
 
@@ -19,7 +21,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/linkstorage', function () {
     Illuminate\Support\Facades\Artisan::call('storage:link');
 });
-
 
 
 Route::get('/', function () {
@@ -70,6 +71,10 @@ Route::middleware('auth')->group(function () {
     // Travel_Routes Routes 
     Route::resource('travel_routes', TravelRouteController::class);
 
+    // Pax Slabs Routes
+    Route::resource('pax_slabs', PaxSlabController::class);
+    Route::post('/pax_slabs/reorder', [PaxSlabController::class, 'reorder'])->name('pax_slabs.reorder');
+
     //Quotations Routes
     Route::get('/quotations/create/step-01', [QuotationController::class, 'step_one'])->name('quotations.step_one');
     Route::post('/quotations/step-01/store', [QuotationController::class, 'store_step_one'])->name('quotations.store_step_one');
@@ -79,6 +84,17 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/quotations/create/{id}/step3', [QuotationController::class, 'step_three'])->name('quotations.step3');
     Route::post('/quotations/{id}/step3/store', [QuotationController::class, 'store_step_three'])->name('quotations.step3.store');
+
+    Route::get('/quotations/create/{id}/step4', [QuotationController::class, 'step_four'])->name('quotations.step4');
+    Route::post('/quotations/{id}/step4/store', [QuotationController::class, 'store_step_four'])->name('quotations.step4.store');
+
+    Route::get('/quotations', [QuotationController::class, 'index'])->name('quotations.index');
+    Route::get('/quotations/{id}', [QuotationController::class, 'show'])->name('quotations.show');
+    
+
+
+
+    Route::resource('vehicle_types', VehicleTypeController::class);
 });
 
 require __DIR__ . '/auth.php';

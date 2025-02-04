@@ -9,48 +9,37 @@
             <!-- Pax Slab Table -->
             <div class="overflow-x-auto bg-gray-100 p-4 rounded-lg">
                 <table class="w-full text-sm text-left text-gray-500">
-                    <thead class="text-gray-700 bg-gray-200">
-                        <tr>
-                            @for ($i = 1; $i <= $selectedPaxSlab->max_pax; $i++)
-                                <th class="px-4 py-2 text-center font-semibold">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }} Pax</th>
-                            @endfor
-                        </tr>
-                    </thead>
+                    
                     <tbody>
-                        <!-- Exact No. of Pax Row -->
+                        @foreach ($paxSlabs as $paxSlab)
                         <tr>
-                            @for ($i = 1; $i <= $selectedPaxSlab->max_pax; $i++)
-                                <td class="px-4 py-2 text-center">
-                                    <input type="number" name="pax_slab[{{ $i }}][exact_pax]" 
-                                           class="block w-full border-gray-300 rounded-md shadow-sm p-2 text-center" required>
-                                </td>
-                            @endfor
-                        </tr>
+                            <th class="px-4 py-2 text-center font-semibold">{{ $paxSlab->name }}</th>
+                            <!-- Exact No. of Pax -->
+                            <td class="px-4 py-2 text-center">
+                                <input type="number" name="pax_slab[{{ $paxSlab->id }}][exact_pax]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm p-2 text-center" required>
+                            </td>
 
-                        <!-- Vehicle Type Row -->
-                        <tr>
-                            @for ($i = 1; $i <= $selectedPaxSlab->max_pax; $i++)
-                                <td class="px-4 py-2 text-center">
-                                    <select name="pax_slab[{{ $i }}][vehicle_type]" 
-                                            class="block w-full border-gray-300 rounded-md shadow-sm vehicle-select p-2" required>
-                                        <option value="">Select Vehicle</option>
-                                        @foreach ($vehicleTypes as $vehicle => $rate)
-                                            <option value="{{ $vehicle }}" data-rate="{{ $rate }}">{{ $vehicle }}</option>
-                                        @endforeach
-                                    </select>
-                                </td>
-                            @endfor
-                        </tr>
+                            <!-- Vehicle Type -->
+                            <td class="px-4 py-2 text-center">
+                                <select name="pax_slab[{{ $paxSlab->id }}][vehicle_type_id]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm vehicle-select p-2" required>
+                                    <option value="">Select Vehicle</option>
+                                    @foreach ($vehicleTypes as $vehicleType)
+                                    <option value="{{ $vehicleType->id }}" data-rate="{{ $vehicleType->default_rate }}">
+                                        {{ $vehicleType->name }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </td>
 
-                        <!-- Vehicle Payout Rate Row -->
-                        <tr>
-                            @for ($i = 1; $i <= $selectedPaxSlab->max_pax; $i++)
-                                <td class="px-4 py-2 text-center">
-                                    <input type="number" name="pax_slab[{{ $i }}][vehicle_payout_rate]" 
-                                           class="block w-full border-gray-300 rounded-md shadow-sm payout-rate p-2 text-center" required>
-                                </td>
-                            @endfor
+                            <!-- Vehicle Payout Rate -->
+                            <td class="px-4 py-2 text-center">
+                                <input type="number" name="pax_slab[{{ $paxSlab->id }}][vehicle_payout_rate]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm payout-rate p-2 text-center" readonly required>
+                            </td>
                         </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
@@ -65,10 +54,17 @@
     </div>
 
     <script>
-        document.querySelectorAll('.vehicle-select').forEach(select => {
-            select.addEventListener('change', function() {
-                let rate = this.options[this.selectedIndex].getAttribute('data-rate');
-                this.closest('td').querySelector('.payout-rate').value = rate;
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.vehicle-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    let rate = this.options[this.selectedIndex].getAttribute('data-rate');
+
+                    // Find the correct payout rate input field within the same row
+                    let payoutRateInput = this.closest('tr').querySelector('.payout-rate');
+                    if (payoutRateInput) {
+                        payoutRateInput.value = rate;
+                    }
+                });
             });
         });
     </script>
