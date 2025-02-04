@@ -27,7 +27,7 @@ class QuotationController extends Controller
      */
     public function index()
     {
-        $quotations = Quotation::with(['market', 'customer'])->latest()->get();
+        $quotations = Quotation::with(['market', 'customer'])->latest()->paginate(10);
         return view('pages.quotations.index', compact('quotations'));
     }
 
