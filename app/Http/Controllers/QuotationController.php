@@ -169,7 +169,7 @@ class QuotationController extends Controller
     public function store_step_three(Request $request, $id)
     {
         $quotation = Quotation::findOrFail($id);
-    
+
         // Validate input
         $request->validate([
             'accommodations' => 'required|array',
@@ -184,8 +184,8 @@ class QuotationController extends Controller
             'accommodations.*.total_cost' => 'required|numeric|min:0',
         ]);
         // dd($request->all());
-        
-    
+
+
         foreach ($request->accommodations as $accommodation) {
             QuotationAccommodation::create([
                 'quotation_id' => $quotation->id,
@@ -200,10 +200,10 @@ class QuotationController extends Controller
                 'total_cost' => $accommodation['total_cost'],
             ]);
         }
-    
+
         return redirect()->route('quotations.step4', $quotation->id)->with('success', 'Accommodation saved.');
     }
-    
+
 
     public function step_four($id)
     {
@@ -242,7 +242,27 @@ class QuotationController extends Controller
             ]);
         }
 
+        //Change the Quotation status to 'pending'
+        $quotation->status = 'pending';
+        $quotation->save();
+
         // Redirect to Quotation List page after final step
         return redirect()->route('quotations.index')->with('success', 'Quotation process completed successfully.');
+    }
+
+
+    public function updateStatus(Request $request, $id)
+    {
+        $quotation = Quotation::findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|in:pending,approved,rejected'
+        ]);
+
+        $quotation->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Quotation status updated successfully!']);
     }
 }

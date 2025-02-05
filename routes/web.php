@@ -96,6 +96,9 @@ Route::middleware('auth')->group(function () {
 
 
     Route::resource('vehicle_types', VehicleTypeController::class);
+
+    Route::post('/quotations/update-status/{id}', [QuotationController::class, 'updateStatus'])->name('quotations.updateStatus');
+
 });
 
 require __DIR__ . '/auth.php';
