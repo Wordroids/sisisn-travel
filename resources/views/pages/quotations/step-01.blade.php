@@ -60,7 +60,7 @@
                     <div class="mb-4 grid grid-cols-4">
                         <div class="col-span-3">
                             <label class="block text-sm font-medium text-gray-700">Customer</label>
-                            <select name="customer_id" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <select id="customer_id" name="customer_id" class="block w-full border-gray-300 rounded-md shadow-sm" required>
                                 <option value="">Select Customer</option>
                                 @foreach ($customers as $customer)
                                 <option value="{{ $customer->id }}">{{ $customer->name }}</option>
@@ -70,7 +70,7 @@
 
 
                         <div class="text-center items-center justify-center flex mt-5">
-                            <button class="bg-blue-700 text-white p-2 text-sm">+ Add</button>
+                            <button class="bg-blue-700 text-white p-2 text-sm" onclick="openCustomerModal()">+ Add</button>
                         </div>
                     </div>
 
@@ -150,6 +150,42 @@
 
     </div>
 
+
+    <!-- Customer Modal -->
+    <div id="customerModal" class="fixed inset-0 z-50 hidden overflow-auto bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h3 class="text-lg font-semibold mb-4">Add New Customer</h3>
+            <form id="customerForm">
+                @csrf
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Name</label>
+                    <input type="text" name="name" id="customer_name" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" name="email" id="customer_email" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Phone</label>
+                    <input type="text" name="phone" id="customer_phone" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Whatsapp</label>
+                    <input type="text" name="whatsapp" id="customer_whatsapp" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Country</label>
+                    <input type="text" name="country" id="customer_country" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                        onclick="closeCustomerModal()">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const startDateInput = document.querySelector("input[name='start_date']");
@@ -199,7 +235,48 @@
         });
     </script>
 
+    <script>
+        function openCustomerModal() {
+            document.getElementById('customerModal').classList.remove('hidden');
+        }
 
+        function closeCustomerModal() {
+            document.getElementById('customerModal').classList.add('hidden');
+        }
+
+        document.getElementById('customerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            let formData = new FormData(this);
+
+            fetch("{{ route('customers.store') }}", {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value,
+                        "X-Requested-With": "XMLHttpRequest" // ✅ Important!
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log(data);
+                        let customerDropdown = document.getElementById('customer_id');
+                        let newOption = document.createElement("option");
+                        newOption.value = data.customer.id;
+                        newOption.textContent = data.customer.name;
+                        newOption.selected = true;
+                        customerDropdown.appendChild(newOption);
+
+                        closeCustomerModal();
+                    } else {
+                        alert("Error adding customer!");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+
+        });
+    </script>
 
 
 </x-app-layout>

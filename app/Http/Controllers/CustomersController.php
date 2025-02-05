@@ -28,7 +28,14 @@ class CustomersController extends Controller
             'country' => 'required|string|max:100',
         ]);
 
-        Customers::create($request->all());
+        $customer = Customers::create($request->all());
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'customer' => $customer
+            ]);
+        }
 
         return redirect()->route('customers.index')->with('success', 'Customer added successfully.');
     }
