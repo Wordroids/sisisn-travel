@@ -15,8 +15,6 @@ return new class extends Migration {
             $table->integer('nights');
             $table->foreignId('meal_plan_id')->constrained()->onDelete('cascade');
             $table->foreignId('room_category_id')->constrained()->onDelete('cascade');
-            $table->foreignId('room_type_id')->constrained()->onDelete('cascade');
-            $table->decimal('total_cost', 10, 2);
             $table->timestamps();
         });
     }
