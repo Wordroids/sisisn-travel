@@ -16,8 +16,6 @@ class QuotationAccommodation extends Model
         'nights',
         'meal_plan_id',
         'room_category_id',
-        'room_type_id',
-        'total_cost',
     ];
 
     public function quotation()
@@ -43,5 +41,10 @@ class QuotationAccommodation extends Model
     public function roomType()
     {
         return $this->belongsTo(RoomType::class);
+    }
+
+    public function roomDetails()
+    {
+        return $this->hasMany(QuotationAccommodationRoomDetails::class, 'quotation_accommodation_id');
     }
 }

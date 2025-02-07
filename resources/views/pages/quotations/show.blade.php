@@ -44,35 +44,50 @@
         </div>
 
         <!-- Accommodation Details -->
-        <div class="bg-white p-6 rounded-lg shadow-sm mt-6">
-            <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">Accommodation Details</h3>
-            <div class="overflow-x-auto mt-4">
+<div class="bg-white p-6 rounded-lg shadow-sm mt-6">
+    <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">Accommodation Details</h3>
+    @foreach ($quotation->accommodations as $accommodation)
+        <div class="bg-gray-50 p-4 rounded-lg mt-4">
+            <!-- Hotel Info -->
+            <div class="mb-4">
+                <h4 class="font-semibold text-gray-800">{{ $accommodation->hotel->name }}</h4>
+                <div class="grid grid-cols-4 gap-4 text-sm mt-2">
+                    <p><span class="text-gray-600">Date:</span> {{ $accommodation->start_date }} - {{ $accommodation->end_date }}</p>
+                    <p><span class="text-gray-600">Nights:</span> {{ $accommodation->nights }}</p>
+                    <p><span class="text-gray-600">Meal Plan:</span> {{ $accommodation->mealPlan->name }}</p>
+                    <p><span class="text-gray-600">Room Category:</span> {{ $accommodation->roomCategory->name }}</p>
+                </div>
+            </div>
+
+            <!-- Room Details Table -->
+            <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left text-gray-700 border rounded-lg shadow">
                     <thead class="bg-gray-200 text-gray-700">
                         <tr>
-                            <th class="px-4 py-3 text-left">Hotel</th>
-                            <th class="px-4 py-3 text-center">Date Range</th>
-                            <th class="px-4 py-3 text-center">Meal Plan</th>
-                            <th class="px-4 py-3 text-center">Room Type</th>
-                            <th class="px-4 py-3 text-center">Total Nights</th>
-                            <th class="px-4 py-3 text-center">Total Cost</th>
+                            <th class="px-4 py-2 text-left">Room Type</th>
+                            <th class="px-4 py-2 text-center">Per Night Cost</th>
+                            <th class="px-4 py-2 text-center">Nights</th>
+                            <th class="px-4 py-2 text-center">Total Cost</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y">
-                        @foreach ($quotation->accommodations as $accommodation)
-                            <tr class="bg-gray-50 hover:bg-gray-100 transition">
-                                <td class="px-4 py-3">{{ $accommodation->hotel->name }}</td>
-                                <td class="px-4 py-3 text-center">{{ $accommodation->start_date }} - {{ $accommodation->end_date }}</td>
-                                <td class="px-4 py-3 text-center">{{ $accommodation->mealPlan->name }}</td>
-                                <td class="px-4 py-3 text-center">{{ $accommodation->roomType->name }}</td>
-                                <td class="px-4 py-3 text-center">{{ $accommodation->nights }}</td>
-                                <td class="px-4 py-3 text-center font-semibold text-green-600">{{ $accommodation->total_cost }}</td>
+                        @foreach ($accommodation->roomDetails as $detail)
+                            <tr class="hover:bg-gray-100 transition">
+                                <td class="px-4 py-2">{{ ucfirst($detail->room_type) }}</td>
+                                <td class="px-4 py-2 text-center">{{ number_format($detail->per_night_cost, 2) }}</td>
+                                <td class="px-4 py-2 text-center">{{ $detail->nights }}</td>
+                                <td class="px-4 py-2 text-center font-semibold text-green-600">
+                                    {{ number_format($detail->total_cost, 2) }}
+                                </td>
                             </tr>
                         @endforeach
+                        
                     </tbody>
                 </table>
             </div>
         </div>
+    @endforeach
+</div>
 
         <!-- Travel Plan -->
         <div class="bg-white p-6 rounded-lg shadow-sm mt-6">

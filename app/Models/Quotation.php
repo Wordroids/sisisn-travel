@@ -53,4 +53,6 @@ class Quotation extends Model
     {
         return $this->hasMany(QuotationTravelPlan::class, 'quotation_id');
     }
+
+    
 }
