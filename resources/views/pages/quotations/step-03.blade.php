@@ -95,9 +95,9 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Check-in / Check-out</label>
                                     <div class="grid grid-cols-2 gap-4">
                                         <input type="date" name="accommodations[${cardIndex}][start_date]" 
-                                            class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                                            class="block w-full border-gray-300 rounded-md shadow-sm checkin-date" required>
                                         <input type="date" name="accommodations[${cardIndex}][end_date]" 
-                                            class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                                            class="block w-full border-gray-300 rounded-md shadow-sm checkout-date" required>
                                     </div>
                                 </div>
 
@@ -201,6 +201,27 @@
                     </div>
                 `;
                 document.querySelector("#accommodation-section").insertAdjacentHTML("beforeend", cardHtml);
+
+                // Set min dates for the newly added card
+        const newCard = document.querySelector("#accommodation-section").lastElementChild;
+        const checkInInput = newCard.querySelector('.checkin-date');
+        const checkOutInput = newCard.querySelector('.checkout-date');
+        
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Set minimum dates
+        checkInInput.min = today;
+        checkOutInput.min = today;
+        
+        // Add event listener to update checkout min date when checkin changes
+        checkInInput.addEventListener('change', function() {
+            checkOutInput.min = this.value;
+            if (checkOutInput.value && checkOutInput.value < this.value) {
+                checkOutInput.value = this.value;
+            }
+        });
+
             }
 
             // Event Listeners
