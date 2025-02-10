@@ -3,30 +3,43 @@
 
         <!-- Progress Bar  -->
         <div>
-            <ol class="flex items-center w-full text-sm font-medium text-center text-gray-500 test:text-gray-400 sm:text-base">
-                <li class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
-                    <span class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-blue-200 test:after:text-blue-500">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+            <ol
+                class="flex items-center w-full text-sm font-medium text-center text-gray-500 test:text-gray-400 sm:text-base">
+                <li
+                    class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
+                    <span
+                        class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-blue-200 test:after:text-blue-500">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                         </svg>
                         Reference <span class="hidden sm:inline-flex sm:ms-2">Info</span>
                     </span>
                 </li>
-                <li class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
-                    <span class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                <li
+                    class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
+                    <span
+                        class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                         </svg>
                         Pax <span class="hidden sm:inline-flex sm:ms-2">Slab</span>
                     </span>
                 </li>
-                
-                <li class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
-                    <span class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+
+                <li
+                    class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
+                    <span
+                        class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                         </svg>
-                        Accommodation 
+                        Accommodation
                     </span>
                 </li>
                 <li class="flex items-center">
@@ -36,7 +49,7 @@
             </ol>
         </div>
 
-        
+
         <p class="text-gray-700 mt-10 mb-8">Quotation Reference: <strong>{{ $quotation->quote_reference }}</strong></p>
 
         <form method="POST" action="{{ route('quotations.step3.store', $quotation->id) }}">
@@ -67,9 +80,12 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const hotelSelectOptions = `@foreach ($hotels as $hotel)<option value="{{ $hotel->id }}">{{ $hotel->name }}</option>@endforeach`;
-            const mealPlanOptions = `@foreach ($mealPlans as $mealPlan)<option value="{{ $mealPlan->id }}">{{ $mealPlan->name }}</option>@endforeach`;
-            const roomCategoryOptions = `@foreach ($roomCategories as $roomCategory)<option value="{{ $roomCategory->id }}">{{ $roomCategory->name }}</option>@endforeach`;
+            const hotelSelectOptions =
+                `@foreach ($hotels as $hotel)<option value="{{ $hotel->id }}">{{ $hotel->name }}</option>@endforeach`;
+            const mealPlanOptions =
+                `@foreach ($mealPlans as $mealPlan)<option value="{{ $mealPlan->id }}">{{ $mealPlan->name }}</option>@endforeach`;
+            const roomCategoryOptions =
+                `@foreach ($roomCategories as $roomCategory)<option value="{{ $roomCategory->id }}">{{ $roomCategory->name }}</option>@endforeach`;
 
             function addAccommodationCard() {
                 let cardIndex = document.querySelectorAll('#accommodation-section > div').length;
@@ -202,38 +218,54 @@
                 `;
                 document.querySelector("#accommodation-section").insertAdjacentHTML("beforeend", cardHtml);
 
-                // Set min dates for the newly added card
-        const newCard = document.querySelector("#accommodation-section").lastElementChild;
-        const checkInInput = newCard.querySelector('.checkin-date');
-        const checkOutInput = newCard.querySelector('.checkout-date');
-        
-        // Get today's date in YYYY-MM-DD format
-        const today = new Date().toISOString().split('T')[0];
-        
-        // Set minimum dates
-        checkInInput.min = today;
-        checkOutInput.min = today;
-        
-        // Add event listener to update checkout min date when checkin changes
-        checkInInput.addEventListener('change', function() {
-            checkOutInput.min = this.value;
-            if (checkOutInput.value && checkOutInput.value < this.value) {
-                checkOutInput.value = this.value;
-            }
-        });
+                function calculateNights(checkIn, checkOut) {
+                    const start = new Date(checkIn);
+                    const end = new Date(checkOut);
+                    const diffTime = end - start; // Remove Math.abs() to handle dates in correct order
+                    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // This will give actual nights
+                }
+
+                // Update the event listener for date changes
+                document.addEventListener("change", function(e) {
+                    if (e.target.classList.contains("checkin-date") || e.target.classList.contains(
+                            "checkout-date")) {
+                        const card = e.target.closest('.accommodation-card');
+                        const checkInDate = card.querySelector('.checkin-date').value;
+                        const checkOutDate = card.querySelector('.checkout-date').value;
+
+                        if (checkInDate && checkOutDate) {
+                            const nights = calculateNights(checkInDate, checkOutDate);
+                            if (nights <= 0) {
+                                alert('Check-out date must be after check-in date');
+                                e.target.value = ''; // Clear the invalid date
+                                return;
+                            }
+                            // Update all night inputs in the card
+                            const nightInputs = card.querySelectorAll('.total-nights');
+                            nightInputs.forEach(input => {
+                                input.value = nights;
+                                // Trigger input event to recalculate totals
+                                input.dispatchEvent(new Event('input'));
+                            });
+                        }
+                    }
+                });
 
             }
 
             // Event Listeners
             document.getElementById("add-hotel").addEventListener("click", addAccommodationCard);
 
+            // Replace the existing input event listener with this updated version
             document.addEventListener("input", function(e) {
-                if (e.target.classList.contains("total-nights")) {
-                    const nightsInput = e.target;
-                    const nights = nightsInput.value;
-                    const perNightCostInput = nightsInput.parentElement.previousElementSibling.querySelector('.per-night-cost');
-                    const totalCostInput = nightsInput.parentElement.nextElementSibling.querySelector('.total-cost');
+                if (e.target.classList.contains("per-night-cost") || e.target.classList.contains(
+                        "total-nights")) {
+                    const container = e.target.closest('.grid');
+                    const perNightCostInput = container.querySelector('.per-night-cost');
+                    const nightsInput = container.querySelector('.total-nights');
+                    const totalCostInput = container.querySelector('.total-cost');
                     const cost = perNightCostInput.value;
+                    const nights = nightsInput.value;
 
                     if (cost && nights) {
                         totalCostInput.value = (parseFloat(cost) * parseInt(nights)).toFixed(2);
