@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="max-w-6xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+    <div class="max-w-7xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
         <h2 class="text-2xl font-semibold mb-4">Step 2: Pax Slab Details</h2>
         <p class="text-gray-700">Quotation Reference: <strong>{{ $quotation->quote_reference }}</strong></p>
 

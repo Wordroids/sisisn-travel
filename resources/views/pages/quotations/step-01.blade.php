@@ -1,6 +1,6 @@
 <x-app-layout>
 
-    <div class="max-w-6xl mx-auto mt-10">
+    <div class="max-w-7xl mx-auto mt-10">
 
         <!-- Progress Bar  -->
         <div>
