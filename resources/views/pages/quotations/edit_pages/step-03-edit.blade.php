@@ -2,27 +2,40 @@
     <div class="max-w-7xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
         <!-- Progress Bar -->
         <div>
-            <ol class="flex items-center w-full text-sm font-medium text-center text-gray-500 test:text-gray-400 sm:text-base">
-                <li class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
-                    <span class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-blue-200 test:after:text-blue-500">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+            <ol
+                class="flex items-center w-full text-sm font-medium text-center text-gray-500 test:text-gray-400 sm:text-base">
+                <li
+                    class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
+                    <span
+                        class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-blue-200 test:after:text-blue-500">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                         </svg>
                         Reference <span class="hidden sm:inline-flex sm:ms-2">Info</span>
                     </span>
                 </li>
-                <li class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
-                    <span class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                <li
+                    class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
+                    <span
+                        class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                         </svg>
                         Pax <span class="hidden sm:inline-flex sm:ms-2">Slab</span>
                     </span>
                 </li>
-                <li class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
-                    <span class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                <li
+                    class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
+                    <span
+                        class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                         </svg>
                         Accommodation
                     </span>
@@ -66,30 +79,33 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-        const hotelSelectOptions = `@foreach ($hotels as $hotel)<option value="{{ $hotel->id }}">{{ $hotel->name }}</option>@endforeach`;
-        const mealPlanOptions = `@foreach ($mealPlans as $mealPlan)<option value="{{ $mealPlan->id }}">{{ $mealPlan->name }}</option>@endforeach`;
-        const roomCategoryOptions = `@foreach ($roomCategories as $roomCategory)<option value="{{ $roomCategory->id }}">{{ $roomCategory->name }}</option>@endforeach`;
-        
-        const quotationStartDate = "{{ $quotation->start_date }}";
-        const quotationEndDate = "{{ $quotation->end_date }}";
+            const hotelSelectOptions =
+                `@foreach ($hotels as $hotel)<option value="{{ $hotel->id }}">{{ $hotel->name }}</option>@endforeach`;
+            const mealPlanOptions =
+                `@foreach ($mealPlans as $mealPlan)<option value="{{ $mealPlan->id }}">{{ $mealPlan->name }}</option>@endforeach`;
+            const roomCategoryOptions =
+                `@foreach ($roomCategories as $roomCategory)<option value="{{ $roomCategory->id }}">{{ $roomCategory->name }}</option>@endforeach`;
 
-        // Load existing accommodations
-        const existingAccommodations = @json($quotation->accommodations->load('roomDetails'));
-        
-        // Loop through existing accommodations and create cards
-        existingAccommodations.forEach(accommodation => {
-            addAccommodationCard(accommodation);
-        });
+            const quotationStartDate = "{{ $quotation->start_date }}";
+            const quotationEndDate = "{{ $quotation->end_date }}";
 
-        // If no existing accommodations, add an empty card
-        if (existingAccommodations.length === 0) {
-            addAccommodationCard();
-        }
+            // Load existing accommodations
+            const existingAccommodations = @json($quotation->accommodations->load('roomDetails'));
 
-        function addAccommodationCard(existingData = null) {
-            let cardIndex = document.querySelectorAll('#accommodation-section > div').length;
+            // Loop through existing accommodations and create cards
+            existingAccommodations.forEach(accommodation => {
+                addAccommodationCard(accommodation);
+            });
 
-            let cardHtml = `
+            // If no existing accommodations, add an empty card
+            if (existingAccommodations.length === 0) {
+                addAccommodationCard();
+            }
+
+            function addAccommodationCard(existingData = null) {
+                let cardIndex = document.querySelectorAll('#accommodation-section > div').length;
+
+                let cardHtml = `
                 <div class="bg-gray-50 rounded-lg p-6 relative accommodation-card">
                     <button type="button" class="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 remove-card">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,45 +178,49 @@
                 </div>
             `;
 
-            document.querySelector("#accommodation-section").insertAdjacentHTML("beforeend", cardHtml);
+                document.querySelector("#accommodation-section").insertAdjacentHTML("beforeend", cardHtml);
 
-            const newCard = document.querySelectorAll('.accommodation-card')[cardIndex];
-            const hotelSelect = newCard.querySelector('.hotel-select');
-            
-            initializeTomSelect(hotelSelect);
+                const newCard = document.querySelectorAll('.accommodation-card')[cardIndex];
+                const hotelSelect = newCard.querySelector('.hotel-select');
 
-            // Set selected values if existingData is provided
-            if (existingData) {
-                const tomSelect = hotelSelect.tomselect;
-                tomSelect.setValue(existingData.hotel_id);
+                initializeTomSelect(hotelSelect);
 
-                const card = document.querySelectorAll('.accommodation-card')[cardIndex];
-                card.querySelector(`select[name="accommodations[${cardIndex}][hotel_id]"]`).value = existingData.hotel_id;
-                card.querySelector(`select[name="accommodations[${cardIndex}][meal_plan_id]"]`).value = existingData.meal_plan_id;
-                card.querySelector(`select[name="accommodations[${cardIndex}][room_category_id]"]`).value = existingData.room_category_id;
+                // Set selected values if existingData is provided
+                if (existingData) {
+                    const tomSelect = hotelSelect.tomselect;
+                    tomSelect.setValue(existingData.hotel_id);
+
+                    const card = document.querySelectorAll('.accommodation-card')[cardIndex];
+                    card.querySelector(`select[name="accommodations[${cardIndex}][hotel_id]"]`).value = existingData
+                        .hotel_id;
+                    card.querySelector(`select[name="accommodations[${cardIndex}][meal_plan_id]"]`).value =
+                        existingData.meal_plan_id;
+                    card.querySelector(`select[name="accommodations[${cardIndex}][room_category_id]"]`).value =
+                        existingData.room_category_id;
+                }
+
+                // Initialize event listeners for the new card
+                initializeCardEvents(cardIndex);
             }
 
-            // Initialize event listeners for the new card
-            initializeCardEvents(cardIndex);
-        }
+            // Add function to initialize Tom Select
+            function initializeTomSelect(selectElement) {
+                return new TomSelect(selectElement, {
+                    create: false,
+                    sortField: {
+                        field: "text",
+                        direction: "asc"
+                    },
+                    placeholder: 'Search for a hotel...',
+                    maxOptions: null,
+                });
+            }
 
-        // Add function to initialize Tom Select
-        function initializeTomSelect(selectElement) {
-            return new TomSelect(selectElement, {
-                create: false,
-                sortField: {
-                    field: "text",
-                    direction: "asc"
-                },
-                placeholder: 'Search for a hotel...',
-                maxOptions: null,
-            });
-        }
+            function createRoomTypeHtml(type, cardIndex, existingData) {
+                const roomDetails = existingData ? existingData.room_details.find(detail => detail.room_type ===
+                    type) : null;
 
-        function createRoomTypeHtml(type, cardIndex, existingData) {
-            const roomDetails = existingData ? existingData.room_details.find(detail => detail.room_type === type) : null;
-            
-            return `
+                return `
                 <div class="bg-white p-4 rounded-md shadow-sm">
                     <div class="flex items-center justify-between mb-2">
                         <span class="font-medium text-gray-700">${type.charAt(0).toUpperCase() + type.slice(1)} Room</span>
@@ -232,125 +252,127 @@
                     </div>
                 </div>
             `;
-        }
-
-             // Add hotel button event listener
-        document.getElementById("add-hotel").addEventListener("click", () => addAccommodationCard());
-
-// Remove hotel card event listener
-document.addEventListener("click", function(e) {
-    if (e.target.closest('.remove-card')) {
-        const card = e.target.closest('.accommodation-card');
-        if (document.querySelectorAll('.accommodation-card').length > 1) {
-            // Destroy Tom Select instance before removing the card
-            const select = card.querySelector('.hotel-select');
-            if (select.tomselect) {
-                select.tomselect.destroy();
             }
-            card.remove();
-        } else {
-            alert('At least one hotel accommodation is required.');
-        }
-    }
-});
 
-// Date validation and calculation event listener
-document.addEventListener("change", function(e) {
-    if (e.target.classList.contains("checkin-date") || e.target.classList.contains("checkout-date")) {
-        const card = e.target.closest('.accommodation-card');
-        const checkInInput = card.querySelector('.checkin-date');
-        const checkOutInput = card.querySelector('.checkout-date');
+            // Add hotel button event listener
+            document.getElementById("add-hotel").addEventListener("click", () => addAccommodationCard());
 
-        if (checkInInput.value && checkOutInput.value) {
-            validateAndCalculateDates(checkInInput, checkOutInput, card);
-        }
-    }
-});
+            // Remove hotel card event listener
+            document.addEventListener("click", function(e) {
+                if (e.target.closest('.remove-card')) {
+                    const card = e.target.closest('.accommodation-card');
+                    if (document.querySelectorAll('.accommodation-card').length > 1) {
+                        // Destroy Tom Select instance before removing the card
+                        const select = card.querySelector('.hotel-select');
+                        if (select.tomselect) {
+                            select.tomselect.destroy();
+                        }
+                        card.remove();
+                    } else {
+                        alert('At least one hotel accommodation is required.');
+                    }
+                }
+            });
 
-// Cost calculation event listener
-document.addEventListener("input", function(e) {
-    if (e.target.classList.contains("per-night-cost") || e.target.classList.contains("total-nights")) {
-        calculateRoomCosts(e.target);
-    }
-});
+            // Date validation and calculation event listener
+            document.addEventListener("change", function(e) {
+                if (e.target.classList.contains("checkin-date") || e.target.classList.contains(
+                        "checkout-date")) {
+                    const card = e.target.closest('.accommodation-card');
+                    const checkInInput = card.querySelector('.checkin-date');
+                    const checkOutInput = card.querySelector('.checkout-date');
 
-function validateAndCalculateDates(checkInInput, checkOutInput, card) {
-    const checkIn = new Date(checkInInput.value);
-    const checkOut = new Date(checkOutInput.value);
-    const quotationStart = new Date(quotationStartDate);
-    const quotationEnd = new Date(quotationEndDate);
+                    if (checkInInput.value && checkOutInput.value) {
+                        validateAndCalculateDates(checkInInput, checkOutInput, card);
+                    }
+                }
+            });
 
-    if (checkOut <= checkIn) {
-        alert('Check-out date must be after check-in date');
-        checkOutInput.value = '';
-        return;
-    }
+            // Cost calculation event listener
+            document.addEventListener("input", function(e) {
+                if (e.target.classList.contains("per-night-cost") || e.target.classList.contains(
+                        "total-nights")) {
+                    calculateRoomCosts(e.target);
+                }
+            });
 
-    if (checkIn < quotationStart || checkOut > quotationEnd) {
-        alert('Accommodation dates must be within the quotation date range');
-        if (checkIn < quotationStart) checkInInput.value = '';
-        if (checkOut > quotationEnd) checkOutInput.value = '';
-        return;
-    }
+            function validateAndCalculateDates(checkInInput, checkOutInput, card) {
+                const checkIn = new Date(checkInInput.value);
+                const checkOut = new Date(checkOutInput.value);
+                const quotationStart = new Date(quotationStartDate);
+                const quotationEnd = new Date(quotationEndDate);
 
-    const nights = calculateNights(checkIn, checkOut);
-    updateNightsAndTotals(card, nights);
-}
+                if (checkOut <= checkIn) {
+                    alert('Check-out date must be after check-in date');
+                    checkOutInput.value = '';
+                    return;
+                }
 
-function calculateNights(checkIn, checkOut) {
-    const diffTime = checkOut - checkIn;
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}
+                if (checkIn < quotationStart || checkOut > quotationEnd) {
+                    alert('Accommodation dates must be within the quotation date range');
+                    if (checkIn < quotationStart) checkInInput.value = '';
+                    if (checkOut > quotationEnd) checkOutInput.value = '';
+                    return;
+                }
 
-function updateNightsAndTotals(card, nights) {
-    const nightInputs = card.querySelectorAll('.total-nights');
-    nightInputs.forEach(input => {
-        input.value = nights;
-        calculateRoomCosts(input);
-    });
-}
+                const nights = calculateNights(checkIn, checkOut);
+                updateNightsAndTotals(card, nights);
+            }
 
-function calculateRoomCosts(input) {
-    const container = input.closest('.grid');
-    const perNightCostInput = container.querySelector('.per-night-cost');
-    const nightsInput = container.querySelector('.total-nights');
-    const totalCostInput = container.querySelector('.total-cost');
+            function calculateNights(checkIn, checkOut) {
+                const diffTime = checkOut - checkIn;
+                return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            }
 
-    if (perNightCostInput.value && nightsInput.value) {
-        const total = (parseFloat(perNightCostInput.value) * parseInt(nightsInput.value)).toFixed(2);
-        totalCostInput.value = total;
-    } else {
-        totalCostInput.value = '';
-    }
-}
+            function updateNightsAndTotals(card, nights) {
+                const nightInputs = card.querySelectorAll('.total-nights');
+                nightInputs.forEach(input => {
+                    input.value = nights;
+                    calculateRoomCosts(input);
+                });
+            }
 
-function initializeCardEvents(cardIndex) {
-    const card = document.querySelectorAll('.accommodation-card')[cardIndex];
-    
-    // Initialize date inputs
-    const checkInInput = card.querySelector('.checkin-date');
-    const checkOutInput = card.querySelector('.checkout-date');
-    
-    checkInInput.addEventListener('change', () => {
-        checkOutInput.min = checkInInput.value;
-    });
-    
-    checkOutInput.addEventListener('change', () => {
-        checkInInput.max = checkOutInput.value;
-    });
+            function calculateRoomCosts(input) {
+                const container = input.closest('.grid');
+                const perNightCostInput = container.querySelector('.per-night-cost');
+                const nightsInput = container.querySelector('.total-nights');
+                const totalCostInput = container.querySelector('.total-cost');
 
-    // Initialize cost calculations
-    const roomTypes = ['single', 'double', 'triple'];
-    roomTypes.forEach(type => {
-        const container = card.querySelector(`[name="accommodations[${cardIndex}][room_types][${type}][per_night_cost]"]`).closest('.grid');
-        const inputs = container.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.addEventListener('input', () => calculateRoomCosts(input));
+                if (perNightCostInput.value && nightsInput.value) {
+                    const total = (parseFloat(perNightCostInput.value) * parseInt(nightsInput.value)).toFixed(2);
+                    totalCostInput.value = total;
+                } else {
+                    totalCostInput.value = '';
+                }
+            }
+
+            function initializeCardEvents(cardIndex) {
+                const card = document.querySelectorAll('.accommodation-card')[cardIndex];
+
+                // Initialize date inputs
+                const checkInInput = card.querySelector('.checkin-date');
+                const checkOutInput = card.querySelector('.checkout-date');
+
+                checkInInput.addEventListener('change', () => {
+                    checkOutInput.min = checkInInput.value;
+                });
+
+                checkOutInput.addEventListener('change', () => {
+                    checkInInput.max = checkOutInput.value;
+                });
+
+                // Initialize cost calculations
+                const roomTypes = ['single', 'double', 'triple'];
+                roomTypes.forEach(type => {
+                    const container = card.querySelector(
+                            `[name="accommodations[${cardIndex}][room_types][${type}][per_night_cost]"]`)
+                        .closest('.grid');
+                    const inputs = container.querySelectorAll('input');
+                    inputs.forEach(input => {
+                        input.addEventListener('input', () => calculateRoomCosts(input));
+                    });
+                });
+            }
         });
-    });
-}
-});
-
-
-</script>
+    </script>
 </x-app-layout>
