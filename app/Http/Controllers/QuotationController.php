@@ -404,6 +404,51 @@ public function updateStepThree(Request $request, $id)
         return redirect()->route('quotations.index')->with('success', 'Quotation process completed successfully.');
     }
 
+    public function editStepFour($id)
+{
+    $quotation = Quotation::with('travelPlans')->findOrFail($id);
+    $routes = TravelRoute::all();
+    $vehicleTypes = VehicleType::all();
+
+    return view('pages.quotations.edit_pages.step-04-edit', compact(
+        'quotation',
+        'routes',
+        'vehicleTypes'
+    ));
+}
+
+public function updateStepFour(Request $request, $id)
+{
+    $quotation = Quotation::findOrFail($id);
+
+    $request->validate([
+        'travel' => 'required|array',
+        'travel.*.start_date' => 'required|date',
+        'travel.*.end_date' => 'required|date|after_or_equal:travel.*.start_date',
+        'travel.*.route_id' => 'required|exists:travel_routes,id',
+        'travel.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
+        'travel.*.mileage' => 'required|numeric',
+    ]);
+
+    // Delete existing travel plans
+    $quotation->travelPlans()->delete();
+
+    // Create new travel plans
+    foreach ($request->travel as $travel) {
+        QuotationTravelPlan::create([
+            'quotation_id' => $quotation->id,
+            'start_date' => $travel['start_date'],
+            'end_date' => $travel['end_date'],
+            'route_id' => $travel['route_id'],
+            'vehicle_type_id' => $travel['vehicle_type_id'],
+            'mileage' => $travel['mileage'],
+        ]);
+    }
+
+    return redirect()->route('quotations.index')
+        ->with('success', 'Travel plans updated successfully.');
+}
+
     public function updateStatus(Request $request, $id)
     {
         $quotation = Quotation::findOrFail($id);

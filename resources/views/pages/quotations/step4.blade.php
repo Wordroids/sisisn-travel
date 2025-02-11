@@ -59,7 +59,13 @@
             @csrf
 
             <div id="travel-plan-section">
-                <div class="travel-entry border p-4 rounded-lg mb-4 bg-gray-100">
+                <div class="travel-entry border p-4 rounded-lg mb-4 bg-gray-100 relative">
+                    <button type="button" class="remove-travel absolute top-2 right-2 text-red-500 hover:text-red-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                     <div class="grid grid-cols-4 gap-4">
                         <!-- Date Range -->
                         <div>
@@ -106,65 +112,126 @@
                     </div>
                 </div>
             </div>
+    </div>
 
-            <!-- Add Another Travel Plan Button -->
-            <button type="button" id="add-travel"
-                class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">+ Add Another Travel
-                Plan</button>
+    <!-- Add Another Travel Plan Button -->
+    <button type="button" id="add-travel" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">+
+        Add Another Travel
+        Plan</button>
 
-            <div class="flex justify-between mt-6">
-                <a href="{{ route('quotations.edit_step_three', $quotation->id) }}"
-                    class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">Back</a>
-                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Save &
-                    Next</button>
-            </div>
-        </form>
+    <div class="flex justify-between mt-6">
+        <a href="{{ route('quotations.edit_step_three', $quotation->id) }}"
+            class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">Back</a>
+        <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Save &
+            Next</button>
+    </div>
+    </form>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             let travelIndex = 1;
+            const quotationStartDate = "{{ $quotation->start_date }}";
+        const quotationEndDate = "{{ $quotation->end_date }}";
 
-            // Function to set min dates for date inputs
-            function setMinDates(container) {
-                const today = new Date().toISOString().split('T')[0];
-                const startDateInput = container.querySelector('input[name*="start_date"]');
-                const endDateInput = container.querySelector('input[name*="end_date"]');
+        // Function to set min/max dates for date inputs
+        function setMinDates(container) {
+            const startDateInput = container.querySelector('input[name*="start_date"]');
+            const endDateInput = container.querySelector('input[name*="end_date"]');
 
-                startDateInput.min = today;
-                endDateInput.min = today;
+            // Set min and max dates based on quotation date range
+            startDateInput.min = quotationStartDate;
+            startDateInput.max = quotationEndDate;
+            endDateInput.min = quotationStartDate;
+            endDateInput.max = quotationEndDate;
 
-                startDateInput.addEventListener('change', function() {
+            // When start date changes, update end date constraints
+            startDateInput.addEventListener('change', function() {
+                if (this.value) {
                     endDateInput.min = this.value;
-                    if (endDateInput.value && endDateInput.value < this.value) {
+                    if (endDateInput.value && new Date(endDateInput.value) < new Date(this.value)) {
                         endDateInput.value = this.value;
                     }
-                });
-            }
+                }
 
-            function addTravelEntry() {
-                let newTravel = document.querySelector(".travel-entry").cloneNode(true);
+                // Validate against quotation date range
+                const selectedDate = new Date(this.value);
+                const qStartDate = new Date(quotationStartDate);
+                const qEndDate = new Date(quotationEndDate);
 
-                // Clear values and update indexes
-                newTravel.querySelectorAll("select, input").forEach(input => {
-                    input.name = input.name.replace(/\[\d+\]/, "[" + travelIndex + "]");
-                    input.value = "";
-                });
+                if (selectedDate < qStartDate || selectedDate > qEndDate) {
+                    alert('Travel dates must be within the quotation date range');
+                    this.value = '';
+                    return;
+                }
+            });
 
-                // Append new entry
-                document.querySelector("#travel-plan-section").appendChild(newTravel);
+            // When end date changes, validate against quotation range
+            endDateInput.addEventListener('change', function() {
+                if (this.value) {
+                    startDateInput.max = this.value;
+                    
+                    // Validate against quotation date range
+                    const selectedDate = new Date(this.value);
+                    const qStartDate = new Date(quotationStartDate);
+                    const qEndDate = new Date(quotationEndDate);
 
-                // Set min dates for the new entry
-                setMinDates(newTravel);
+                    if (selectedDate < qStartDate || selectedDate > qEndDate) {
+                        alert('Travel dates must be within the quotation date range');
+                        this.value = '';
+                        return;
+                    }
 
-                // Attach event listener to the new route dropdown
-                newTravel.querySelector(".route-select").addEventListener("change", function() {
-                    let mileage = this.options[this.selectedIndex].getAttribute("data-mileage");
-                    this.closest(".travel-entry").querySelector(".mileage-input").value = mileage;
-                });
+                    // Validate end date is after start date
+                    if (startDateInput.value && selectedDate < new Date(startDateInput.value)) {
+                        alert('End date must be after start date');
+                        this.value = '';
+                        return;
+                    }
+                }
+            });
+        }
 
-                travelIndex++;
-            }
+        // Rest of your existing code...
+        function addTravelEntry() {
+            let newTravel = document.querySelector(".travel-entry").cloneNode(true);
+
+            // Clear values and update indexes
+            newTravel.querySelectorAll("select, input").forEach(input => {
+                input.name = input.name.replace(/\[\d+\]/, "[" + travelIndex + "]");
+                input.value = "";
+            });
+
+            // Append new entry
+            document.querySelector("#travel-plan-section").appendChild(newTravel);
+
+            // Set min/max dates for the new entry
+            setMinDates(newTravel);
+
+            // Attach event listener to the new route dropdown
+            newTravel.querySelector(".route-select").addEventListener("change", function() {
+                let mileage = this.options[this.selectedIndex].getAttribute("data-mileage");
+                this.closest(".travel-entry").querySelector(".mileage-input").value = mileage;
+            });
+
+            travelIndex++;
+        }
+
+        // Initialize min dates for the first travel entry
+        setMinDates(document.querySelector(".travel-entry"));
+
+
+            // Add remove travel plan functionality
+            document.addEventListener("click", function(e) {
+                if (e.target.closest('.remove-travel')) {
+                    const travelEntry = e.target.closest('.travel-entry');
+                    if (document.querySelectorAll('.travel-entry').length > 1) {
+                        travelEntry.remove();
+                    } else {
+                        alert('At least one travel plan is required.');
+                    }
+                }
+            });
 
             // Initialize min dates for the first travel entry
             setMinDates(document.querySelector(".travel-entry"));
