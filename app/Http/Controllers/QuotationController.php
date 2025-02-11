@@ -292,6 +292,73 @@ class QuotationController extends Controller
         return redirect()->route('quotations.step4', $quotation->id)->with('success', 'Accommodation details saved successfully.');
     }
 
+    public function editStepThree($id)
+{
+    $quotation = Quotation::with(['accommodations.roomDetails'])->findOrFail($id);
+    
+    $hotels = Hotel::all();
+    $mealPlans = MealPlan::all();
+    $roomCategories = RoomCategory::all();
+
+    return view('pages.quotations.edit_pages.step-03-edit', compact(
+        'quotation',
+        'hotels',
+        'mealPlans',
+        'roomCategories'
+    ));
+}
+
+public function updateStepThree(Request $request, $id)
+{
+    $quotation = Quotation::findOrFail($id);
+
+    $request->validate([
+        'accommodations' => 'required|array',
+        'accommodations.*.hotel_id' => 'required|exists:hotels,id',
+        'accommodations.*.start_date' => 'required|date',
+        'accommodations.*.end_date' => 'required|date|after_or_equal:accommodations.*.start_date',
+        'accommodations.*.meal_plan_id' => 'required|exists:meal_plans,id',
+        'accommodations.*.room_category_id' => 'required|exists:room_categories,id',
+        'accommodations.*.room_types' => 'required|array',
+        'accommodations.*.room_types.*.per_night_cost' => 'required|numeric|min:0',
+        'accommodations.*.room_types.*.nights' => 'nullable|integer|min:0',
+        'accommodations.*.room_types.*.total_cost' => 'nullable|numeric|min:0',
+    ]);
+
+    // Delete existing accommodations
+    $quotation->accommodations()->delete();
+
+    // Create new accommodations
+    foreach ($request->accommodations as $accommodation) {
+        $totalNights = collect($accommodation['room_types'])->sum('nights');
+
+        $quotationAccommodation = QuotationAccommodation::create([
+            'quotation_id' => $quotation->id,
+            'hotel_id' => $accommodation['hotel_id'],
+            'start_date' => $accommodation['start_date'],
+            'end_date' => $accommodation['end_date'],
+            'nights' => $totalNights,
+            'meal_plan_id' => $accommodation['meal_plan_id'],
+            'room_category_id' => $accommodation['room_category_id'],
+        ]);
+
+        foreach ($accommodation['room_types'] as $type => $details) {
+            if (!empty($details['nights']) && $details['nights'] > 0) {
+                QuotationAccommodationRoomDetails::create([
+                    'quotation_accommodation_id' => $quotationAccommodation->id,
+                    'room_type' => $type,
+                    'per_night_cost' => $details['per_night_cost'],
+                    'nights' => $details['nights'],
+                    'total_cost' => $details['total_cost'],
+                ]);
+            }
+        }
+    }
+
+    return redirect()->route('quotations.step4', $quotation->id)
+        ->with('success', 'Accommodation details updated successfully.');
+}
+
     public function step_four($id)
     {
         $quotation = Quotation::findOrFail($id);

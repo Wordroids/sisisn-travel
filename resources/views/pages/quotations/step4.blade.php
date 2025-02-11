@@ -113,7 +113,7 @@
                 Plan</button>
 
             <div class="flex justify-between mt-6">
-                <a href="{{ route('quotations.step3', $quotation->id) }}"
+                <a href="{{ route('quotations.edit_step_three', $quotation->id) }}"
                     class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">Back</a>
                 <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Save &
                     Next</button>
