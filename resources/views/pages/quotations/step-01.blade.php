@@ -135,11 +135,12 @@
 
                     <div class="mb-4">
                         <label class="block mb-2 text-sm font-medium text-gray-900">Currency</label>
-                        <select name="currency_id" id="currency_id"
+                        <select name="currency_id" id="currency_id" 
                             class="block w-full border-gray-300 rounded-md shadow-sm" required>
                             @foreach ($currencies as $currency)
-                                <option value="{{ $currency->id }}" data-rate="{{ $currency->conversion_rate }}"
-                                    {{ $currency->code == 'USD' ? 'selected' : '' }}>
+                                <option value="{{ $currency->id }}" 
+                                    data-rate="{{ $currency->conversion_rate }}"
+                                    {{ strtolower($currency->code) === 'usd' ? 'selected' : '' }}>
                                     {{ $currency->code }}
                                 </option>
                             @endforeach
@@ -147,27 +148,41 @@
                     </div>
 
                     <div class="flex gap-3">
-                        <div class="mb-4">
-                            <label for="conversion_rate"
-                                class="block mb-2 text-sm font-medium text-gray-900">Conversion Rate</label>
-                            <input type="text" name="conversion_rate" id="conversion_rate"
-                                class="block w-full border-gray-300 rounded-md shadow-sm"
-                                value="{{ $currencies->where('code', 'USD')->first()->conversion_rate ?? '' }}"
-                                readonly>
+                        <div class="flex gap-3">
+                            <div class="mb-4">
+                                <label for="conversion_rate"
+                                    class="block mb-2 text-sm font-medium text-gray-900">Conversion Rate</label>
+                                <input type="text" name="conversion_rate" id="conversion_rate"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm"
+                                    value="{{ $currencies->where('code', 'USD')->first()->conversion_rate ?? '' }}"
+                                    readonly>
+                            </div>
                         </div>
-                        <div class="w-1/2">
-                            <label for="markup_per_pax"
-                                class="block mb-2 text-sm font-medium text-gray-900 test:text-white">Markup per
-                                Pax</label>
-                            <input type="text" name="markup_per_pax" id="markup_per_pax"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 test:bg-gray-700 test:border-gray-600 test:placeholder-gray-400 test:text-white test:focus:ring-primary-500 test:focus:border-primary-500">
-                        </div>
+                        
+                        
                     </div>
 
 
                 </div>
 
                 <div class="grid gap-6 grid-cols-4">
+
+                    <div class="mb-4">
+                        <label for="markup_id" class="block mb-2 text-sm font-medium text-gray-900 test:text-white">
+                            Markup Value Per Pax
+                        </label>
+                        <select name="markup_per_pax" id="markup_id" 
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 test:bg-gray-700 test:border-gray-600 test:placeholder-gray-400 test:text-white test:focus:ring-primary-500 test:focus:border-primary-500"
+                            required>
+                            <option value="">Select Markup</option>
+                            @foreach ($markups as $markup)
+                                <option value="{{ $markup->amount }}" data-amount="{{ $markup->amount }}">
+                                    {{ $markup->name }} ({{ $markup->amount }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="mb-4">
                         <label class="block mb-2 text-sm font-medium text-gray-900">Pax Slab</label>
                         <select name="pax_slab_id" class="block w-full border-gray-300 rounded-md shadow-sm" required>
@@ -180,17 +195,17 @@
                 </div>
 
                 <div class="flex justify-between mt-6">
-                    @if(isset($navigation['back']))
-                        <a href="{{ $navigation['back'] }}" 
-                           class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+                    @if (isset($navigation['back']))
+                        <a href="{{ $navigation['back'] }}"
+                            class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
                             Back
                         </a>
                     @else
                         <div></div> {{-- Empty div to maintain spacing --}}
                     @endif
-                
-                    <button type="submit" 
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+
+                    <button type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
                         {{ $navigation['submit_text'] ?? 'Start Quote' }}
                     </button>
                 </div>
@@ -244,25 +259,25 @@
         </div>
     </div>
 
-    
+
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const currencySelect = document.querySelector("#currency_id");
-            const conversionRateInput = document.querySelector("#conversion_rate");
+    const currencySelect = document.getElementById('currency_id');
+    const conversionRateInput = document.getElementById('conversion_rate');
 
-            function updateConversionRate() {
-                let selectedOption = currencySelect.options[currencySelect.selectedIndex];
-                let rate = selectedOption.getAttribute("data-rate");
-                conversionRateInput.value = rate || "";
-            }
+    function updateConversionRate() {
+        const selectedOption = currencySelect.options[currencySelect.selectedIndex];
+        const rate = selectedOption.getAttribute('data-rate');
+        conversionRateInput.value = rate || "";
+    }
 
-            // Auto-set conversion rate on page load
-            updateConversionRate();
+    // Set initial USD rate
+    updateConversionRate();
 
-            // Update conversion rate when selecting a currency
-            currencySelect.addEventListener("change", updateConversionRate);
-        });
+    // Update rate when currency changes
+    currencySelect.addEventListener('change', updateConversionRate);
+});
     </script>
 
     <script>

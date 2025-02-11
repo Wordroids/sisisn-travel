@@ -69,14 +69,15 @@
             </button>
 
             <div class="flex justify-between mt-6">
-                @if(isset($navigation['back']))
-                    <a href="{{ $navigation['back'] }}" class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
+                @if (isset($navigation['back']))
+                    <a href="{{ $navigation['back'] }}"
+                        class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
                         Back
                     </a>
                 @else
                     <div></div> {{-- Empty div to maintain spacing --}}
                 @endif
-            
+
                 <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
                     Save & Next
                 </button>
@@ -112,27 +113,28 @@
                             <!-- Left Column -->
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Hotel</label>
-                                    <select name="accommodations[${cardIndex}][hotel_id]" class="block w-full border-gray-300 rounded-md shadow-sm" required>
-                                        <option value="">Select Hotel</option>${hotelSelectOptions}
-                                    </select>
-                                </div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Hotel</label>
+                        <select name="accommodations[${cardIndex}][hotel_id]" class="hotel-select block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Select Hotel</option>
+                            ${hotelSelectOptions}
+                        </select>
+                    </div>
 
                                 <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Check-in / Check-out</label>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="date" name="accommodations[${cardIndex}][start_date]" 
-                        class="block w-full border-gray-300 rounded-md shadow-sm checkin-date" 
-                        min="${quotationStartDate}" 
-                        max="${quotationEndDate}"
-                        required>
-                    <input type="date" name="accommodations[${cardIndex}][end_date]" 
-                        class="block w-full border-gray-300 rounded-md shadow-sm checkout-date" 
-                        min="${quotationStartDate}" 
-                        max="${quotationEndDate}"
-                        required>
-                </div>
-            </div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Check-in / Check-out</label>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <input type="date" name="accommodations[${cardIndex}][start_date]" 
+                                            class="block w-full border-gray-300 rounded-md shadow-sm checkin-date" 
+                                            min="${quotationStartDate}" 
+                                            max="${quotationEndDate}"
+                                            required>
+                                        <input type="date" name="accommodations[${cardIndex}][end_date]" 
+                                            class="block w-full border-gray-300 rounded-md shadow-sm checkout-date" 
+                                            min="${quotationStartDate}" 
+                                            max="${quotationEndDate}"
+                                            required>
+                                    </div>
+                                </div>
 
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
@@ -234,6 +236,18 @@
                     </div>
                 `;
                 document.querySelector("#accommodation-section").insertAdjacentHTML("beforeend", cardHtml);
+
+                const newCard = document.querySelector("#accommodation-section").lastElementChild;
+                const selectElement = newCard.querySelector('.hotel-select');
+                new TomSelect(selectElement, {
+                    create: false,
+                    sortField: {
+                        field: "text",
+                        direction: "asc"
+                    },
+                    placeholder: 'Search for a hotel...',
+                    maxOptions: null,
+                });
 
                 function calculateNights(checkIn, checkOut) {
                     const start = new Date(checkIn);
@@ -351,6 +365,6 @@
             }
         }
         });
-        });
+        
     </script>
 </x-app-layout>

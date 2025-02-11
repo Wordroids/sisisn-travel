@@ -54,5 +54,10 @@ class Quotation extends Model
         return $this->hasMany(QuotationTravelPlan::class, 'quotation_id');
     }
 
+    public function markupvalue()
+    {
+        return $this->belongsTo(MarkUpValue::class);
+    }
+
     
 }

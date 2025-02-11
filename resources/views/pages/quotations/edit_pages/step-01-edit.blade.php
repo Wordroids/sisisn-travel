@@ -136,15 +136,31 @@
                             <input type="text" name="conversion_rate" id="conversion_rate" value="{{ $quotation->conversion_rate }}"
                                 class="block w-full border-gray-300 rounded-md shadow-sm" readonly>
                         </div>
-                        <div class="w-1/2">
-                            <label for="markup_per_pax" class="block mb-2 text-sm font-medium text-gray-900">Markup per Pax</label>
-                            <input type="text" name="markup_per_pax" id="markup_per_pax" value="{{ $quotation->markup_per_person }}"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5">
-                        </div>
+                        
                     </div>
                 </div>
 
                 <div class="grid gap-6 grid-cols-4">
+
+                    <div class="mb-4">
+                        <label for="markup_id" class="block mb-2 text-sm font-medium text-gray-900">
+                            Markup Value Per Pax
+                        </label>
+                        <select name="markup_per_pax" id="markup_id" 
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                            required>
+                            <option value="">Select Markup</option>
+                            @foreach ($markups as $markup)
+                                <option value="{{ $markup->amount }}" 
+                                        data-amount="{{ $markup->amount }}"
+                                        {{ $quotation->markup_per_person == $markup->amount ? 'selected' : '' }}>
+                                    {{ $markup->name }} ({{ $markup->amount }})
+                                </option>
+                            @endforeach
+                        </select>
+                        
+                    </div>
+
                     <div class="mb-4">
                         <label class="block mb-2 text-sm font-medium text-gray-900">Pax Slab</label>
                         <select name="pax_slab_id" class="block w-full border-gray-300 rounded-md shadow-sm" required>
@@ -311,5 +327,6 @@
 
             endDateInput.addEventListener("change", calculateDaysAndNights);
         });
+
     </script>
 </x-app-layout>

@@ -101,12 +101,12 @@
                         <!-- Left Column -->
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Hotel</label>
-                                <select name="accommodations[${cardIndex}][hotel_id]" class="block w-full border-gray-300 rounded-md shadow-sm" required>
-                                    <option value="">Select Hotel</option>
-                                    ${hotelSelectOptions}
-                                </select>
-                            </div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Hotel</label>
+                            <select name="accommodations[${cardIndex}][hotel_id]" class="hotel-select block w-full border-gray-300 rounded-md shadow-sm" required>
+                                <option value="">Select Hotel</option>
+                                ${hotelSelectOptions}
+                            </select>
+                        </div>
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Check-in / Check-out</label>
@@ -164,8 +164,16 @@
 
             document.querySelector("#accommodation-section").insertAdjacentHTML("beforeend", cardHtml);
 
+            const newCard = document.querySelectorAll('.accommodation-card')[cardIndex];
+            const hotelSelect = newCard.querySelector('.hotel-select');
+            
+            initializeTomSelect(hotelSelect);
+
             // Set selected values if existingData is provided
             if (existingData) {
+                const tomSelect = hotelSelect.tomselect;
+                tomSelect.setValue(existingData.hotel_id);
+
                 const card = document.querySelectorAll('.accommodation-card')[cardIndex];
                 card.querySelector(`select[name="accommodations[${cardIndex}][hotel_id]"]`).value = existingData.hotel_id;
                 card.querySelector(`select[name="accommodations[${cardIndex}][meal_plan_id]"]`).value = existingData.meal_plan_id;
@@ -174,6 +182,19 @@
 
             // Initialize event listeners for the new card
             initializeCardEvents(cardIndex);
+        }
+
+        // Add function to initialize Tom Select
+        function initializeTomSelect(selectElement) {
+            return new TomSelect(selectElement, {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                },
+                placeholder: 'Search for a hotel...',
+                maxOptions: null,
+            });
         }
 
         function createRoomTypeHtml(type, cardIndex, existingData) {
@@ -221,6 +242,11 @@ document.addEventListener("click", function(e) {
     if (e.target.closest('.remove-card')) {
         const card = e.target.closest('.accommodation-card');
         if (document.querySelectorAll('.accommodation-card').length > 1) {
+            // Destroy Tom Select instance before removing the card
+            const select = card.querySelector('.hotel-select');
+            if (select.tomselect) {
+                select.tomselect.destroy();
+            }
             card.remove();
         } else {
             alert('At least one hotel accommodation is required.');
@@ -324,5 +350,7 @@ function initializeCardEvents(cardIndex) {
     });
 }
 });
+
+
 </script>
 </x-app-layout>

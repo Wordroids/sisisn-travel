@@ -17,46 +17,47 @@ use App\Models\QuotationTravelPlan;
 use App\Models\RoomCategory;
 use App\Models\TravelRoute;
 use App\Models\VehicleType;
+use App\Models\MarkUpValue;
 use Illuminate\Http\Request;
 use App\Models\QuotationAccommodationRoomDetails;
 
 class QuotationController extends Controller
 {
-    private function getNavigation($currentStep, $quotationId = null, $isEditing = false) 
-{
-    $steps = [
-        'step1' => [
-            'back' => route('quotations.index'),
-            'next' => $quotationId ? route('quotations.step2', ['id' => $quotationId]) : '#',
-            'title' => 'Basic Information',
-            'number' => 1,
-            'submit_text' => $isEditing ? 'Update & Next' : 'Start Quote'
-        ],
-        'step2' => [
-            'back' => $isEditing ? route('quotations.edit_step_one', $quotationId) : route('quotations.step_one'),
-            'next' => $quotationId ? route('quotations.step3', ['id' => $quotationId]) : '#',
-            'title' => 'Pax Slab Details',
-            'number' => 2,
-            'submit_text' => $isEditing ? 'Update & Next' : 'Save & Next'
-        ],
-        'step3' => [
-            'back' => $quotationId ? ($isEditing ? route('quotations.edit_step_two', $quotationId) : route('quotations.step2', ['id' => $quotationId])) : '#',
-            'next' => $quotationId ? route('quotations.step4', ['id' => $quotationId]) : '#',
-            'title' => 'Accommodation Details',
-            'number' => 3,
-            'submit_text' => $isEditing ? 'Update & Next' : 'Save & Next'
-        ],
-        'step4' => [
-            'back' => $quotationId ? ($isEditing ? route('quotations.edit_step_three', $quotationId) : route('quotations.step3', ['id' => $quotationId])) : '#',
-            'next' => route('quotations.index'),
-            'title' => 'Travel Plans',
-            'number' => 4,
-            'submit_text' => $isEditing ? 'Update & Complete' : 'Save & Complete'
-        ]
-    ];
+    private function getNavigation($currentStep, $quotationId = null, $isEditing = false)
+    {
+        $steps = [
+            'step1' => [
+                'back' => route('quotations.index'),
+                'next' => $quotationId ? route('quotations.step2', ['id' => $quotationId]) : '#',
+                'title' => 'Basic Information',
+                'number' => 1,
+                'submit_text' => $isEditing ? 'Update & Next' : 'Start Quote',
+            ],
+            'step2' => [
+                'back' => $isEditing ? route('quotations.edit_step_one', $quotationId) : route('quotations.step_one'),
+                'next' => $quotationId ? route('quotations.step3', ['id' => $quotationId]) : '#',
+                'title' => 'Pax Slab Details',
+                'number' => 2,
+                'submit_text' => $isEditing ? 'Update & Next' : 'Save & Next',
+            ],
+            'step3' => [
+                'back' => $quotationId ? ($isEditing ? route('quotations.edit_step_two', $quotationId) : route('quotations.step2', ['id' => $quotationId])) : '#',
+                'next' => $quotationId ? route('quotations.step4', ['id' => $quotationId]) : '#',
+                'title' => 'Accommodation Details',
+                'number' => 3,
+                'submit_text' => $isEditing ? 'Update & Next' : 'Save & Next',
+            ],
+            'step4' => [
+                'back' => $quotationId ? ($isEditing ? route('quotations.edit_step_three', $quotationId) : route('quotations.step3', ['id' => $quotationId])) : '#',
+                'next' => route('quotations.index'),
+                'title' => 'Travel Plans',
+                'number' => 4,
+                'submit_text' => $isEditing ? 'Update & Complete' : 'Save & Complete',
+            ],
+        ];
 
-    return $steps[$currentStep] ?? [];
-}
+        return $steps[$currentStep] ?? [];
+    }
     /**
      * Display a listing of the resource.
      */
@@ -84,6 +85,8 @@ class QuotationController extends Controller
         $customers = Customers::all();
         $currencies = Currency::all();
         $paxSlabs = PaxSlab::ordered()->get(); // Fetch ordered Pax Slabs
+        $markups = MarkUpValue::all();
+        
 
         // Generate Quote & Booking Reference
         $quoteReference = 'QT/SP/' . (Quotation::max('id') + 1001);
@@ -91,7 +94,7 @@ class QuotationController extends Controller
 
         $navigation = $this->getNavigation('step1', null, false);
 
-        return view('pages.quotations.step-01')->with(['markets' => $markets, 'customers' => $customers, 'currencies' => $currencies, 'quoteReference' => $quoteReference, 'bookingReference' => $bookingReference, 'paxSlabs' => $paxSlabs, 'navigation' => $navigation]);
+        return view('pages.quotations.step-01')->with(['markets' => $markets, 'customers' => $customers, 'currencies' => $currencies, 'quoteReference' => $quoteReference, 'bookingReference' => $bookingReference, 'paxSlabs' => $paxSlabs, 'navigation' => $navigation , 'markups' => $markups]);
     }
 
     public function store_step_one(Request $request)
@@ -138,14 +141,16 @@ class QuotationController extends Controller
         $customers = Customers::all();
         $currencies = Currency::all();
         $paxSlabs = PaxSlab::ordered()->get();
+        $markups = MarkUpValue::all();
 
         $navigation = $this->getNavigation('step1', $id, true);
 
-        return view('pages.quotations.edit_pages.step-01-edit', compact('quotation', 'markets', 'customers', 'currencies', 'paxSlabs', 'navigation'));
+        return view('pages.quotations.edit_pages.step-01-edit', compact('quotation', 'markets', 'customers', 'currencies', 'paxSlabs', 'navigation', 'markups'));
     }
 
     public function updateStepOne(Request $request, $id)
     {
+        //dd($request->all());
         $quotation = Quotation::findOrFail($id);
 
         $request->validate([
@@ -172,8 +177,6 @@ class QuotationController extends Controller
             'markup_per_person' => $request->markup_per_pax,
             'pax_slab_id' => $request->pax_slab_id,
         ]);
-
-
 
         return redirect()->route('quotations.edit_step_two', $id)->with('success', 'Quotation details updated successfully.');
     }
@@ -487,6 +490,10 @@ class QuotationController extends Controller
                 'mileage' => $travel['mileage'],
             ]);
         }
+
+        //Change the Quotation status to 'pending'
+        $quotation->status = 'pending';
+        $quotation->save();
 
         return redirect()->route('quotations.index')->with('success', 'Travel plans updated successfully.');
     }
