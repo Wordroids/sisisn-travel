@@ -68,11 +68,18 @@
                 Add Another Hotel
             </button>
 
-            <div class="flex justify-between mt-8">
-                <a href="{{ route('quotations.step2', $quotation->id) }}"
-                    class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">Back</a>
-                <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
-                    Save & Continue
+            <div class="flex justify-between mt-6">
+                @if (isset($navigation['back']))
+                    <a href="{{ $navigation['back'] }}"
+                        class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
+                        Back
+                    </a>
+                @else
+                    <div></div> {{-- Empty div to maintain spacing --}}
+                @endif
+
+                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                    Save & Next
                 </button>
             </div>
         </form>
@@ -89,6 +96,11 @@
 
             function addAccommodationCard() {
                 let cardIndex = document.querySelectorAll('#accommodation-section > div').length;
+
+                // Get quotation dates from PHP variables
+                const quotationStartDate = "{{ $quotation->start_date }}".split(' ')[0]; // Extract date part only
+                const quotationEndDate = "{{ $quotation->end_date }}".split(' ')[0]; // Extract date part only
+
                 let cardHtml = `
                     <div class="bg-gray-50 rounded-lg p-6 relative accommodation-card">
                         <button type="button" class="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 remove-card">
@@ -101,19 +113,26 @@
                             <!-- Left Column -->
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Hotel</label>
-                                    <select name="accommodations[${cardIndex}][hotel_id]" class="block w-full border-gray-300 rounded-md shadow-sm" required>
-                                        <option value="">Select Hotel</option>${hotelSelectOptions}
-                                    </select>
-                                </div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Hotel</label>
+                        <select name="accommodations[${cardIndex}][hotel_id]" class="hotel-select block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Select Hotel</option>
+                            ${hotelSelectOptions}
+                        </select>
+                    </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Check-in / Check-out</label>
                                     <div class="grid grid-cols-2 gap-4">
                                         <input type="date" name="accommodations[${cardIndex}][start_date]" 
-                                            class="block w-full border-gray-300 rounded-md shadow-sm checkin-date" required>
+                                            class="block w-full border-gray-300 rounded-md shadow-sm checkin-date" 
+                                            min="${quotationStartDate}" 
+                                            max="${quotationEndDate}"
+                                            required>
                                         <input type="date" name="accommodations[${cardIndex}][end_date]" 
-                                            class="block w-full border-gray-300 rounded-md shadow-sm checkout-date" required>
+                                            class="block w-full border-gray-300 rounded-md shadow-sm checkout-date" 
+                                            min="${quotationStartDate}" 
+                                            max="${quotationEndDate}"
+                                            required>
                                     </div>
                                 </div>
 
@@ -218,6 +237,18 @@
                 `;
                 document.querySelector("#accommodation-section").insertAdjacentHTML("beforeend", cardHtml);
 
+                const newCard = document.querySelector("#accommodation-section").lastElementChild;
+                const selectElement = newCard.querySelector('.hotel-select');
+                new TomSelect(selectElement, {
+                    create: false,
+                    sortField: {
+                        field: "text",
+                        direction: "asc"
+                    },
+                    placeholder: 'Search for a hotel...',
+                    maxOptions: null,
+                });
+
                 function calculateNights(checkIn, checkOut) {
                     const start = new Date(checkIn);
                     const end = new Date(checkOut);
@@ -275,6 +306,8 @@
                 }
             });
 
+
+
             document.addEventListener("click", function(e) {
                 if (e.target.closest('.remove-card')) {
                     e.target.closest('.accommodation-card').remove();
@@ -284,5 +317,54 @@
             // Add initial card
             addAccommodationCard();
         });
+    </script>
+
+    <script>
+        document.addEventListener("change", function(e) {
+        if (e.target.classList.contains("checkin-date") || e.target.classList.contains("checkout-date")) {
+            const card = e.target.closest('.accommodation-card');
+            const checkInInput = card.querySelector('.checkin-date');
+            const checkOutInput = card.querySelector('.checkout-date');
+
+            // When check-in date changes, update check-out min date
+            if (e.target.classList.contains("checkin-date")) {
+                checkOutInput.min = checkInInput.value;
+            }
+
+            // When check-out date changes, update check-in max date
+            if (e.target.classList.contains("checkout-date")) {
+                checkInInput.max = checkOutInput.value;
+            }
+
+            if (checkInInput.value && checkOutInput.value) {
+                const nights = calculateNights(checkInInput.value, checkOutInput.value);
+                if (nights <= 0) {
+                    alert('Check-out date must be after check-in date');
+                    e.target.value = '';
+                    return;
+                }
+
+                // Validate against quotation date range
+                const checkIn = new Date(checkInInput.value);
+                const checkOut = new Date(checkOutInput.value);
+                const quotationStart = new Date(quotationStartDate);
+                const quotationEnd = new Date(quotationEndDate);
+
+                if (checkIn < quotationStart || checkOut > quotationEnd) {
+                    alert('Accommodation dates must be within the quotation date range');
+                    e.target.value = '';
+                    return;
+                }
+
+                // Update night inputs
+                const nightInputs = card.querySelectorAll('.total-nights');
+                nightInputs.forEach(input => {
+                    input.value = nights;
+                    input.dispatchEvent(new Event('input'));
+                });
+            }
+        }
+        });
+        
     </script>
 </x-app-layout>

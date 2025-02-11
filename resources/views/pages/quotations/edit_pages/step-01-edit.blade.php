@@ -1,8 +1,6 @@
 <x-app-layout>
-
     <div class="max-w-7xl mx-auto mt-10">
-
-        <!-- Progress Bar  -->
+        <!-- Progress Bar (Same as step-01.blade.php) -->
         <div>
             <ol
                 class="flex items-center w-full text-sm font-medium text-center text-gray-500 test:text-gray-400 sm:text-base">
@@ -45,102 +43,87 @@
         </div>
 
         <div class="pt-16">
-            <form action="{{ route('quotations.store_step_one') }}" method="post" enctype="multipart/form-data">
+            <form action="{{ route('quotations.update_step_one', $quotation->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                @method('PUT')
 
                 <div class="grid gap-6 grid-cols-4">
                     <div class="mb-4">
-                        <label for="quote_reference"
-                            class="block mb-2 text-sm font-medium text-gray-900 test:text-white">Quote Reference</label>
-                        <input disabled type="text" value="{{ $quoteReference }}" name="" id=""
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 test:bg-gray-700 test:border-gray-600 test:placeholder-gray-400 test:text-white test:focus:ring-primary-500 test:focus:border-primary-500">
-                        <input hidden type="text" value="{{ $quoteReference }}" name="quote_reference"
-                            id="quote_reference"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 test:bg-gray-700 test:border-gray-600 test:placeholder-gray-400 test:text-white test:focus:ring-primary-500 test:focus:border-primary-500">
+                        <label for="quote_reference" class="block mb-2 text-sm font-medium text-gray-900">Quote Reference</label>
+                        <input disabled type="text" value="{{ $quotation->quote_reference }}" 
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5">
+                        <input hidden type="text" value="{{ $quotation->quote_reference }}" name="quote_reference">
                     </div>
 
                     <div class="mb-4">
-                        <label for="booking_reference"
-                            class="block mb-2 text-sm font-medium text-gray-900 test:text-white">Booking
-                            Reference</label>
-                        <input disabled type="text" value="{{ $bookingReference }}" name="" id=""
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 test:bg-gray-700 test:border-gray-600 test:placeholder-gray-400 test:text-white test:focus:ring-primary-500 test:focus:border-primary-500">
-                        <input hidden type="text" value="{{ $bookingReference }}" name="booking_reference"
-                            id="booking_reference"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 test:bg-gray-700 test:border-gray-600 test:placeholder-gray-400 test:text-white test:focus:ring-primary-500 test:focus:border-primary-500">
+                        <label for="booking_reference" class="block mb-2 text-sm font-medium text-gray-900">Booking Reference</label>
+                        <input disabled type="text" value="{{ $quotation->booking_reference }}"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5">
+                        <input hidden type="text" value="{{ $quotation->booking_reference }}" name="booking_reference">
                     </div>
                 </div>
 
                 <div class="grid gap-6 grid-cols-4">
-                    <!-- Market Drop Down -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Market</label>
                         <select name="market_id" class="block w-full border-gray-300 rounded-md shadow-sm" required>
                             <option value="">Select Market</option>
                             @foreach ($markets as $market)
-                                <option value="{{ $market->id }}">{{ $market->name }}</option>
+                                <option value="{{ $market->id }}" {{ $quotation->market_id == $market->id ? 'selected' : '' }}>
+                                    {{ $market->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
 
-                    <!-- Customer Drop Down -->
                     <div class="mb-4 grid grid-cols-4">
                         <div class="col-span-3">
                             <label class="block text-sm font-medium text-gray-700">Customer</label>
-                            <select id="customer_id" name="customer_id"
-                                class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <select id="customer_id" name="customer_id" class="block w-full border-gray-300 rounded-md shadow-sm" required>
                                 <option value="">Select Customer</option>
                                 @foreach ($customers as $customer)
-                                    <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+                                    <option value="{{ $customer->id }}" {{ $quotation->customer_id == $customer->id ? 'selected' : '' }}>
+                                        {{ $customer->name }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
-
-
                         <div class="text-center items-center justify-center flex mt-5">
-                            <button class="bg-blue-700 text-white p-2 text-sm" onclick="openCustomerModal()">+
-                                Add</button>
+                            <button type="button" class="bg-blue-700 text-white p-2 text-sm" onclick="openCustomerModal()">+ Add</button>
                         </div>
                     </div>
 
-                    <!-- Date Range  -->
                     <div class="mb-4 col-span-2">
                         <label class="block text-sm font-medium text-gray-700">Date Range</label>
                         <div class="grid grid-cols-2 gap-4">
-                            <input type="date" name="start_date"
+                            <input type="date" name="start_date" value="{{ $quotation->start_date }}"
                                 class="block w-full border-gray-300 rounded-md shadow-sm" required>
-                            <input type="date" name="end_date"
+                            <input type="date" name="end_date" value="{{ $quotation->end_date }}"
                                 class="block w-full border-gray-300 rounded-md shadow-sm" required>
                         </div>
-
                     </div>
                 </div>
 
-
                 <div class="grid gap-6 grid-cols-4">
-
                     <div class="mb-4">
-                        <label for="no_of_days" class="block mb-2 text-sm font-medium text-gray-900 test:text-white">N.O
-                            Of days</label>
-                        <input type="text" name="no_of_days" id="no_of_days"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 test:bg-gray-700 test:border-gray-600 test:placeholder-gray-400 test:text-white test:focus:ring-primary-500 test:focus:border-primary-500">
+                        <label for="no_of_days" class="block mb-2 text-sm font-medium text-gray-900">N.O Of days</label>
+                        <input type="text" name="no_of_days" id="no_of_days" value="{{ $quotation->duration }}"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5">
                     </div>
 
                     <div class="mb-4">
-                        <label for="no_of_nights"
-                            class="block mb-2 text-sm font-medium text-gray-900 test:text-white">N.O Of Nights</label>
-                        <input type="text" name="no_of_nights" id="no_of_nights"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 test:bg-gray-700 test:border-gray-600 test:placeholder-gray-400 test:text-white test:focus:ring-primary-500 test:focus:border-primary-500">
+                        <label for="no_of_nights" class="block mb-2 text-sm font-medium text-gray-900">N.O Of Nights</label>
+                        <input type="text" name="no_of_nights" id="no_of_nights" value="{{ $quotation->duration - 1 }}"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5">
                     </div>
 
                     <div class="mb-4">
                         <label class="block mb-2 text-sm font-medium text-gray-900">Currency</label>
-                        <select name="currency_id" id="currency_id" 
-                            class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                        <select name="currency_id" id="currency_id" class="block w-full border-gray-300 rounded-md shadow-sm" required>
                             @foreach ($currencies as $currency)
                                 <option value="{{ $currency->id }}" 
                                     data-rate="{{ $currency->conversion_rate }}"
-                                    {{ strtolower($currency->code) === 'usd' ? 'selected' : '' }}>
+                                    {{ $currency->code == $quotation->currency ? 'selected' : '' }}>
                                     {{ $currency->code }}
                                 </option>
                             @endforeach
@@ -148,39 +131,34 @@
                     </div>
 
                     <div class="flex gap-3">
-                        <div class="flex gap-3">
-                            <div class="mb-4">
-                                <label for="conversion_rate"
-                                    class="block mb-2 text-sm font-medium text-gray-900">Conversion Rate</label>
-                                <input type="text" name="conversion_rate" id="conversion_rate"
-                                    class="block w-full border-gray-300 rounded-md shadow-sm"
-                                    value="{{ $currencies->where('code', 'USD')->first()->conversion_rate ?? '' }}"
-                                    readonly>
-                            </div>
+                        <div class="mb-4">
+                            <label for="conversion_rate" class="block mb-2 text-sm font-medium text-gray-900">Conversion Rate</label>
+                            <input type="text" name="conversion_rate" id="conversion_rate" value="{{ $quotation->conversion_rate }}"
+                                class="block w-full border-gray-300 rounded-md shadow-sm" readonly>
                         </div>
                         
-                        
                     </div>
-
-
                 </div>
 
                 <div class="grid gap-6 grid-cols-4">
 
                     <div class="mb-4">
-                        <label for="markup_id" class="block mb-2 text-sm font-medium text-gray-900 test:text-white">
+                        <label for="markup_id" class="block mb-2 text-sm font-medium text-gray-900">
                             Markup Value Per Pax
                         </label>
                         <select name="markup_per_pax" id="markup_id" 
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 test:bg-gray-700 test:border-gray-600 test:placeholder-gray-400 test:text-white test:focus:ring-primary-500 test:focus:border-primary-500"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                             required>
                             <option value="">Select Markup</option>
                             @foreach ($markups as $markup)
-                                <option value="{{ $markup->amount }}" data-amount="{{ $markup->amount }}">
+                                <option value="{{ $markup->amount }}" 
+                                        data-amount="{{ $markup->amount }}"
+                                        {{ $quotation->markup_per_person == $markup->amount ? 'selected' : '' }}>
                                     {{ $markup->name }} ({{ $markup->amount }})
                                 </option>
                             @endforeach
                         </select>
+                        
                     </div>
 
                     <div class="mb-4">
@@ -188,34 +166,23 @@
                         <select name="pax_slab_id" class="block w-full border-gray-300 rounded-md shadow-sm" required>
                             <option value="">Select Pax Slab</option>
                             @foreach ($paxSlabs as $paxSlab)
-                                <option value="{{ $paxSlab->id }}">{{ $paxSlab->name }}</option>
+                                <option value="{{ $paxSlab->id }}" {{ $quotation->pax_slab_id == $paxSlab->id ? 'selected' : '' }}>
+                                    {{ $paxSlab->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
                 </div>
 
                 <div class="flex justify-between mt-6">
-                    @if (isset($navigation['back']))
-                        <a href="{{ $navigation['back'] }}"
-                            class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
-                            Back
-                        </a>
-                    @else
-                        <div></div> {{-- Empty div to maintain spacing --}}
-                    @endif
-
-                    <button type="submit"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                        {{ $navigation['submit_text'] ?? 'Start Quote' }}
+                    
+                    <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md">
+                        Update & Next
                     </button>
                 </div>
-
             </form>
-
         </div>
-
     </div>
-
 
     <!-- Customer Modal -->
     <div id="customerModal"
@@ -259,25 +226,23 @@
         </div>
     </div>
 
-
-
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-    const currencySelect = document.getElementById('currency_id');
-    const conversionRateInput = document.getElementById('conversion_rate');
+            const currencySelect = document.querySelector("#currency_id");
+            const conversionRateInput = document.querySelector("#conversion_rate");
 
-    function updateConversionRate() {
-        const selectedOption = currencySelect.options[currencySelect.selectedIndex];
-        const rate = selectedOption.getAttribute('data-rate');
-        conversionRateInput.value = rate || "";
-    }
+            function updateConversionRate() {
+                let selectedOption = currencySelect.options[currencySelect.selectedIndex];
+                let rate = selectedOption.getAttribute("data-rate");
+                conversionRateInput.value = rate || "";
+            }
 
-    // Set initial USD rate
-    updateConversionRate();
+            // Auto-set conversion rate on page load
+            updateConversionRate();
 
-    // Update rate when currency changes
-    currencySelect.addEventListener('change', updateConversionRate);
-});
+            // Update conversion rate when selecting a currency
+            currencySelect.addEventListener("change", updateConversionRate);
+        });
     </script>
 
     <script>
@@ -362,7 +327,6 @@
 
             endDateInput.addEventListener("change", calculateDaysAndNights);
         });
+
     </script>
-
-
 </x-app-layout>

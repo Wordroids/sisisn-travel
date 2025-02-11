@@ -14,6 +14,7 @@ use App\Http\Controllers\TravelRouteController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VehicleTypeController;
 use App\Models\Hotel;
+use App\Http\Controllers\MarkUpValueController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -78,16 +79,24 @@ Route::middleware('auth')->group(function () {
     //Quotations Routes
     Route::get('/quotations/create/step-01', [QuotationController::class, 'step_one'])->name('quotations.step_one');
     Route::post('/quotations/step-01/store', [QuotationController::class, 'store_step_one'])->name('quotations.store_step_one');
+    Route::get('/quotations/{quotation}/edit-step-one', [QuotationController::class, 'editStepOne'])->name('quotations.edit_step_one');
+    Route::put('/quotations/{quotation}/update-step-one', [QuotationController::class, 'updateStepOne'])->name('quotations.update_step_one');
 
     Route::get('/quotations/create/{id}/step2', [QuotationController::class, 'step_two'])->name('quotations.step2');
     Route::post('/quotations/{id}/step2/store', [QuotationController::class, 'store_step_two'])->name('quotations.step2.store');
+    Route::get('/quotations/{quotation}/edit-step-two', [QuotationController::class, 'editStepTwo'])->name('quotations.edit_step_two');
+    Route::put('/quotations/{quotation}/update-step-two', [QuotationController::class, 'updateStepTwo'])->name('quotations.update_step_two');
 
     Route::get('/quotations/create/{id}/step3', [QuotationController::class, 'step_three'])->name('quotations.step3');
     Route::post('/quotations/{id}/step3/store', [QuotationController::class, 'store_step_three'])->name('quotations.step3.store');
+    Route::get('/quotations/{quotation}/edit-step-three', [QuotationController::class, 'editStepThree'])->name('quotations.edit_step_three');
+    Route::put('/quotations/{quotation}/update-step-three', [QuotationController::class, 'updateStepThree'])->name('quotations.update_step_three');
 
     Route::get('/quotations/create/{id}/step4', [QuotationController::class, 'step_four'])->name('quotations.step4');
     Route::post('/quotations/{id}/step4/store', [QuotationController::class, 'store_step_four'])->name('quotations.step4.store');
-
+    Route::get('/quotations/{quotation}/edit-step-four', [QuotationController::class, 'editStepFour'])->name('quotations.edit_step_four');
+    Route::put('/quotations/{quotation}/update-step-four', [QuotationController::class, 'updateStepFour'])->name('quotations.update_step_four');
+    
     Route::get('/quotations', [QuotationController::class, 'index'])->name('quotations.index');
     Route::get('/quotations/{id}', [QuotationController::class, 'show'])->name('quotations.show');
 
@@ -96,6 +105,8 @@ Route::middleware('auth')->group(function () {
 
 
     Route::resource('vehicle_types', VehicleTypeController::class);
+
+    Route::resource('markup', MarkUpValueController::class);
 
     Route::post('/quotations/update-status/{id}', [QuotationController::class, 'updateStatus'])->name('quotations.updateStatus');
 
