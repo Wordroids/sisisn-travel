@@ -94,6 +94,56 @@ class QuotationController extends Controller
         return redirect()->route('quotations.step2', $quotation->id)->with('success', 'Step 1 saved! Proceed to Pax Slab details.');
     }
 
+    public function editStepOne($id)
+{
+    $quotation = Quotation::findOrFail($id);
+    $markets = Market::all();
+    $customers = Customers::all();
+    $currencies = Currency::all();
+    $paxSlabs = PaxSlab::ordered()->get();
+
+    return view('pages.quotations.edit_pages.step-01-edit', compact(
+        'quotation',
+        'markets',
+        'customers',
+        'currencies',
+        'paxSlabs'
+    ));
+}
+
+public function updateStepOne(Request $request, $id)
+{
+    $quotation = Quotation::findOrFail($id);
+
+    $request->validate([
+        'market_id' => 'required|exists:markets,id',
+        'customer_id' => 'nullable|exists:customers,id',
+        'start_date' => 'required|date',
+        'end_date' => 'required|date|after_or_equal:start_date',
+        'no_of_days' => 'required|integer',
+        'no_of_nights' => 'required|integer',
+        'currency_id' => 'required|exists:currencies,id',
+        'conversion_rate' => 'required|numeric',
+        'markup_per_pax' => 'required|numeric',
+        'pax_slab_id' => 'required|exists:pax_slabs,id',
+    ]);
+
+    $quotation->update([
+        'market_id' => $request->market_id,
+        'customer_id' => $request->customer_id,
+        'start_date' => $request->start_date,
+        'end_date' => $request->end_date,
+        'duration' => $request->no_of_days,
+        'currency' => Currency::find($request->currency_id)->code,
+        'conversion_rate' => $request->conversion_rate,
+        'markup_per_person' => $request->markup_per_pax,
+        'pax_slab_id' => $request->pax_slab_id,
+    ]);
+
+    return redirect()->route('quotations.step2', $quotation->id)
+        ->with('success', 'Quotation details updated successfully.');
+}
+
     public function step_two($id)
     {
         $quotation = Quotation::findOrFail($id);
