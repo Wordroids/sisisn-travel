@@ -35,7 +35,7 @@ class QuotationController extends Controller
 
     public function show($id)
     {
-        $quotation = Quotation::with(['market', 'customer', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType' , ])->findOrFail($id);
+        $quotation = Quotation::with(['market', 'customer', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType'])->findOrFail($id);
 
         return view('pages.quotations.show', compact('quotation'));
     }
@@ -95,54 +95,47 @@ class QuotationController extends Controller
     }
 
     public function editStepOne($id)
-{
-    $quotation = Quotation::findOrFail($id);
-    $markets = Market::all();
-    $customers = Customers::all();
-    $currencies = Currency::all();
-    $paxSlabs = PaxSlab::ordered()->get();
+    {
+        $quotation = Quotation::findOrFail($id);
+        $markets = Market::all();
+        $customers = Customers::all();
+        $currencies = Currency::all();
+        $paxSlabs = PaxSlab::ordered()->get();
 
-    return view('pages.quotations.edit_pages.step-01-edit', compact(
-        'quotation',
-        'markets',
-        'customers',
-        'currencies',
-        'paxSlabs'
-    ));
-}
+        return view('pages.quotations.edit_pages.step-01-edit', compact('quotation', 'markets', 'customers', 'currencies', 'paxSlabs'));
+    }
 
-public function updateStepOne(Request $request, $id)
-{
-    $quotation = Quotation::findOrFail($id);
+    public function updateStepOne(Request $request, $id)
+    {
+        $quotation = Quotation::findOrFail($id);
 
-    $request->validate([
-        'market_id' => 'required|exists:markets,id',
-        'customer_id' => 'nullable|exists:customers,id',
-        'start_date' => 'required|date',
-        'end_date' => 'required|date|after_or_equal:start_date',
-        'no_of_days' => 'required|integer',
-        'no_of_nights' => 'required|integer',
-        'currency_id' => 'required|exists:currencies,id',
-        'conversion_rate' => 'required|numeric',
-        'markup_per_pax' => 'required|numeric',
-        'pax_slab_id' => 'required|exists:pax_slabs,id',
-    ]);
+        $request->validate([
+            'market_id' => 'required|exists:markets,id',
+            'customer_id' => 'nullable|exists:customers,id',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'no_of_days' => 'required|integer',
+            'no_of_nights' => 'required|integer',
+            'currency_id' => 'required|exists:currencies,id',
+            'conversion_rate' => 'required|numeric',
+            'markup_per_pax' => 'required|numeric',
+            'pax_slab_id' => 'required|exists:pax_slabs,id',
+        ]);
 
-    $quotation->update([
-        'market_id' => $request->market_id,
-        'customer_id' => $request->customer_id,
-        'start_date' => $request->start_date,
-        'end_date' => $request->end_date,
-        'duration' => $request->no_of_days,
-        'currency' => Currency::find($request->currency_id)->code,
-        'conversion_rate' => $request->conversion_rate,
-        'markup_per_person' => $request->markup_per_pax,
-        'pax_slab_id' => $request->pax_slab_id,
-    ]);
+        $quotation->update([
+            'market_id' => $request->market_id,
+            'customer_id' => $request->customer_id,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'duration' => $request->no_of_days,
+            'currency' => Currency::find($request->currency_id)->code,
+            'conversion_rate' => $request->conversion_rate,
+            'markup_per_person' => $request->markup_per_pax,
+            'pax_slab_id' => $request->pax_slab_id,
+        ]);
 
-    return redirect()->route('quotations.step2', $quotation->id)
-        ->with('success', 'Quotation details updated successfully.');
-}
+        return redirect()->route('quotations.step2', $quotation->id)->with('success', 'Quotation details updated successfully.');
+    }
 
     public function step_two($id)
     {
@@ -188,6 +181,49 @@ public function updateStepOne(Request $request, $id)
             );
         }
         return redirect()->route('quotations.step3', $quotation->id)->with('success', 'Pax Slab details saved.');
+    }
+
+    public function editStepTwo($id)
+    {
+        $quotation = Quotation::with('paxSlabs')->findOrFail($id);
+
+        // Fetch all Pax Slabs in order
+        $selectedPaxSlab = PaxSlab::findOrFail($quotation->pax_slab_id);
+
+        // Fetch all previous slabs (including selected one) based on order
+        $paxSlabs = PaxSlab::where('order', '<=', $selectedPaxSlab->order)->orderBy('order')->get();
+
+        $vehicleTypes = VehicleType::all();
+
+        return view('pages.quotations.edit_pages.step-02-edit', compact('quotation', 'paxSlabs', 'vehicleTypes'));
+    }
+
+    public function updateStepTwo(Request $request, $id)
+    {
+        $quotation = Quotation::findOrFail($id);
+
+        $request->validate([
+            'pax_slab' => 'required|array',
+            'pax_slab.*.exact_pax' => 'required|integer|min:1',
+            'pax_slab.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
+            'pax_slab.*.vehicle_payout_rate' => 'required|numeric|min:0',
+        ]);
+
+        foreach ($request->pax_slab as $paxSlabId => $slab) {
+            QuotationPaxSlab::updateOrCreate(
+                [
+                    'quotation_id' => $quotation->id,
+                    'pax_slab_id' => $paxSlabId,
+                ],
+                [
+                    'exact_pax' => $slab['exact_pax'],
+                    'vehicle_type_id' => $slab['vehicle_type_id'],
+                    'vehicle_payout_rate' => $slab['vehicle_payout_rate'],
+                ],
+            );
+        }
+
+        return redirect()->route('quotations.step3', $quotation->id)->with('success', 'Pax Slab details updated successfully.');
     }
 
     public function step_three($id)

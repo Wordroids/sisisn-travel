@@ -160,11 +160,8 @@
 
                 <div class="flex justify-end space-x-2">
                     <button type="submit" class="items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 test:focus:ring-primary-900 hover:bg-primary-800">
-                        Update Quote
+                        Update & Next Quote
                     </button>
-                    <a href="{{ route('quotations.step2', $quotation->id) }}" class="inline-flex items-center px-4 py-2 mt-4 sm:mt-6 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-                        Next Step
-                    </a>
                 </div>
             </form>
         </div>

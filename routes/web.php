@@ -83,6 +83,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/quotations/create/{id}/step2', [QuotationController::class, 'step_two'])->name('quotations.step2');
     Route::post('/quotations/{id}/step2/store', [QuotationController::class, 'store_step_two'])->name('quotations.step2.store');
+    Route::get('/quotations/{quotation}/edit-step-two', [QuotationController::class, 'editStepTwo'])->name('quotations.edit_step_two');
+    Route::put('/quotations/{quotation}/update-step-two', [QuotationController::class, 'updateStepTwo'])->name('quotations.update_step_two');
 
     Route::get('/quotations/create/{id}/step3', [QuotationController::class, 'step_three'])->name('quotations.step3');
     Route::post('/quotations/{id}/step3/store', [QuotationController::class, 'store_step_three'])->name('quotations.step3.store');
