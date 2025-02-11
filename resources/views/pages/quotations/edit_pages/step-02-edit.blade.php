@@ -96,11 +96,10 @@
             </div>
 
             <div class="flex justify-between mt-6">
-                <a href="{{ route('quotations.edit_step_one', $quotation->id) }}" 
-                    class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
+                <a href="{{ $navigation['back'] }}" class="bg-gray-500 text-white py-2 px-4 rounded-md">
                     Back
                 </a>
-                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md">
                     Update & Next
                 </button>
             </div>

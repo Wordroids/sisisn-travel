@@ -158,9 +158,10 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end space-x-2">
-                    <button type="submit" class="items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 test:focus:ring-primary-900 hover:bg-primary-800">
-                        Update & Next Quote
+                <div class="flex justify-between mt-6">
+                    
+                    <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md">
+                        Update & Next
                     </button>
                 </div>
             </form>

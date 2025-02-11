@@ -22,6 +22,41 @@ use App\Models\QuotationAccommodationRoomDetails;
 
 class QuotationController extends Controller
 {
+    private function getNavigation($currentStep, $quotationId = null, $isEditing = false) 
+{
+    $steps = [
+        'step1' => [
+            'back' => route('quotations.index'),
+            'next' => $quotationId ? route('quotations.step2', ['id' => $quotationId]) : '#',
+            'title' => 'Basic Information',
+            'number' => 1,
+            'submit_text' => $isEditing ? 'Update & Next' : 'Start Quote'
+        ],
+        'step2' => [
+            'back' => $isEditing ? route('quotations.edit_step_one', $quotationId) : route('quotations.step_one'),
+            'next' => $quotationId ? route('quotations.step3', ['id' => $quotationId]) : '#',
+            'title' => 'Pax Slab Details',
+            'number' => 2,
+            'submit_text' => $isEditing ? 'Update & Next' : 'Save & Next'
+        ],
+        'step3' => [
+            'back' => $quotationId ? ($isEditing ? route('quotations.edit_step_two', $quotationId) : route('quotations.step2', ['id' => $quotationId])) : '#',
+            'next' => $quotationId ? route('quotations.step4', ['id' => $quotationId]) : '#',
+            'title' => 'Accommodation Details',
+            'number' => 3,
+            'submit_text' => $isEditing ? 'Update & Next' : 'Save & Next'
+        ],
+        'step4' => [
+            'back' => $quotationId ? ($isEditing ? route('quotations.edit_step_three', $quotationId) : route('quotations.step3', ['id' => $quotationId])) : '#',
+            'next' => route('quotations.index'),
+            'title' => 'Travel Plans',
+            'number' => 4,
+            'submit_text' => $isEditing ? 'Update & Complete' : 'Save & Complete'
+        ]
+    ];
+
+    return $steps[$currentStep] ?? [];
+}
     /**
      * Display a listing of the resource.
      */
@@ -54,7 +89,9 @@ class QuotationController extends Controller
         $quoteReference = 'QT/SP/' . (Quotation::max('id') + 1001);
         $bookingReference = 'ST/SP/' . (Quotation::max('id') + 1001);
 
-        return view('pages.quotations.step-01')->with(['markets' => $markets, 'customers' => $customers, 'currencies' => $currencies, 'quoteReference' => $quoteReference, 'bookingReference' => $bookingReference, 'paxSlabs' => $paxSlabs]);
+        $navigation = $this->getNavigation('step1', null, false);
+
+        return view('pages.quotations.step-01')->with(['markets' => $markets, 'customers' => $customers, 'currencies' => $currencies, 'quoteReference' => $quoteReference, 'bookingReference' => $bookingReference, 'paxSlabs' => $paxSlabs, 'navigation' => $navigation]);
     }
 
     public function store_step_one(Request $request)
@@ -102,7 +139,9 @@ class QuotationController extends Controller
         $currencies = Currency::all();
         $paxSlabs = PaxSlab::ordered()->get();
 
-        return view('pages.quotations.edit_pages.step-01-edit', compact('quotation', 'markets', 'customers', 'currencies', 'paxSlabs'));
+        $navigation = $this->getNavigation('step1', $id, true);
+
+        return view('pages.quotations.edit_pages.step-01-edit', compact('quotation', 'markets', 'customers', 'currencies', 'paxSlabs', 'navigation'));
     }
 
     public function updateStepOne(Request $request, $id)
@@ -134,7 +173,9 @@ class QuotationController extends Controller
             'pax_slab_id' => $request->pax_slab_id,
         ]);
 
-        return redirect()->route('quotations.step2', $quotation->id)->with('success', 'Quotation details updated successfully.');
+
+
+        return redirect()->route('quotations.edit_step_two', $id)->with('success', 'Quotation details updated successfully.');
     }
 
     public function step_two($id)
@@ -151,7 +192,9 @@ class QuotationController extends Controller
 
         $vehicleTypes = VehicleType::all();
 
-        return view('pages.quotations.step-02', compact('quotation', 'paxSlabs', 'vehicleTypes'));
+        $navigation = $this->getNavigation('step2', $id, false);
+
+        return view('pages.quotations.step-02', compact('quotation', 'paxSlabs', 'vehicleTypes', 'navigation'));
     }
 
     public function store_step_two(Request $request, $id)
@@ -195,7 +238,9 @@ class QuotationController extends Controller
 
         $vehicleTypes = VehicleType::all();
 
-        return view('pages.quotations.edit_pages.step-02-edit', compact('quotation', 'paxSlabs', 'vehicleTypes'));
+        $navigation = $this->getNavigation('step2', $id, true);
+
+        return view('pages.quotations.edit_pages.step-02-edit', compact('quotation', 'paxSlabs', 'vehicleTypes', 'navigation'));
     }
 
     public function updateStepTwo(Request $request, $id)
@@ -223,7 +268,7 @@ class QuotationController extends Controller
             );
         }
 
-        return redirect()->route('quotations.step3', $quotation->id)->with('success', 'Pax Slab details updated successfully.');
+        return redirect()->route('quotations.edit_step_three', $id)->with('success', 'Pax Slab details updated successfully.');
     }
 
     public function step_three($id)
@@ -235,7 +280,9 @@ class QuotationController extends Controller
         $mealPlans = MealPlan::all();
         $roomCategories = RoomCategory::all();
 
-        return view('pages.quotations.step-03', compact('quotation', 'hotels', 'mealPlans', 'roomCategories'));
+        $navigation = $this->getNavigation('step3', $id, false);
+
+        return view('pages.quotations.step-03', compact('quotation', 'hotels', 'mealPlans', 'roomCategories', 'navigation'));
     }
 
     public function store_step_three(Request $request, $id)
@@ -293,71 +340,67 @@ class QuotationController extends Controller
     }
 
     public function editStepThree($id)
-{
-    $quotation = Quotation::with(['accommodations.roomDetails'])->findOrFail($id);
-    
-    $hotels = Hotel::all();
-    $mealPlans = MealPlan::all();
-    $roomCategories = RoomCategory::all();
+    {
+        $quotation = Quotation::with(['accommodations.roomDetails'])->findOrFail($id);
 
-    return view('pages.quotations.edit_pages.step-03-edit', compact(
-        'quotation',
-        'hotels',
-        'mealPlans',
-        'roomCategories'
-    ));
-}
+        $hotels = Hotel::all();
+        $mealPlans = MealPlan::all();
+        $roomCategories = RoomCategory::all();
 
-public function updateStepThree(Request $request, $id)
-{
-    $quotation = Quotation::findOrFail($id);
+        $navigation = $this->getNavigation('step3', $id, true);
 
-    $request->validate([
-        'accommodations' => 'required|array',
-        'accommodations.*.hotel_id' => 'required|exists:hotels,id',
-        'accommodations.*.start_date' => 'required|date',
-        'accommodations.*.end_date' => 'required|date|after_or_equal:accommodations.*.start_date',
-        'accommodations.*.meal_plan_id' => 'required|exists:meal_plans,id',
-        'accommodations.*.room_category_id' => 'required|exists:room_categories,id',
-        'accommodations.*.room_types' => 'required|array',
-        'accommodations.*.room_types.*.per_night_cost' => 'required|numeric|min:0',
-        'accommodations.*.room_types.*.nights' => 'nullable|integer|min:0',
-        'accommodations.*.room_types.*.total_cost' => 'nullable|numeric|min:0',
-    ]);
-
-    // Delete existing accommodations
-    $quotation->accommodations()->delete();
-
-    // Create new accommodations
-    foreach ($request->accommodations as $accommodation) {
-        $totalNights = collect($accommodation['room_types'])->sum('nights');
-
-        $quotationAccommodation = QuotationAccommodation::create([
-            'quotation_id' => $quotation->id,
-            'hotel_id' => $accommodation['hotel_id'],
-            'start_date' => $accommodation['start_date'],
-            'end_date' => $accommodation['end_date'],
-            'nights' => $totalNights,
-            'meal_plan_id' => $accommodation['meal_plan_id'],
-            'room_category_id' => $accommodation['room_category_id'],
-        ]);
-
-        foreach ($accommodation['room_types'] as $type => $details) {
-            if (!empty($details['nights']) && $details['nights'] > 0) {
-                QuotationAccommodationRoomDetails::create([
-                    'quotation_accommodation_id' => $quotationAccommodation->id,
-                    'room_type' => $type,
-                    'per_night_cost' => $details['per_night_cost'],
-                    'nights' => $details['nights'],
-                    'total_cost' => $details['total_cost'],
-                ]);
-            }
-        }
+        return view('pages.quotations.edit_pages.step-03-edit', compact('quotation', 'hotels', 'mealPlans', 'roomCategories', 'navigation'));
     }
 
-    return redirect()->route('quotations.step4', $quotation->id)
-        ->with('success', 'Accommodation details updated successfully.');
-}
+    public function updateStepThree(Request $request, $id)
+    {
+        $quotation = Quotation::findOrFail($id);
+
+        $request->validate([
+            'accommodations' => 'required|array',
+            'accommodations.*.hotel_id' => 'required|exists:hotels,id',
+            'accommodations.*.start_date' => 'required|date',
+            'accommodations.*.end_date' => 'required|date|after_or_equal:accommodations.*.start_date',
+            'accommodations.*.meal_plan_id' => 'required|exists:meal_plans,id',
+            'accommodations.*.room_category_id' => 'required|exists:room_categories,id',
+            'accommodations.*.room_types' => 'required|array',
+            'accommodations.*.room_types.*.per_night_cost' => 'required|numeric|min:0',
+            'accommodations.*.room_types.*.nights' => 'nullable|integer|min:0',
+            'accommodations.*.room_types.*.total_cost' => 'nullable|numeric|min:0',
+        ]);
+
+        // Delete existing accommodations
+        $quotation->accommodations()->delete();
+
+        // Create new accommodations
+        foreach ($request->accommodations as $accommodation) {
+            $totalNights = collect($accommodation['room_types'])->sum('nights');
+
+            $quotationAccommodation = QuotationAccommodation::create([
+                'quotation_id' => $quotation->id,
+                'hotel_id' => $accommodation['hotel_id'],
+                'start_date' => $accommodation['start_date'],
+                'end_date' => $accommodation['end_date'],
+                'nights' => $totalNights,
+                'meal_plan_id' => $accommodation['meal_plan_id'],
+                'room_category_id' => $accommodation['room_category_id'],
+            ]);
+
+            foreach ($accommodation['room_types'] as $type => $details) {
+                if (!empty($details['nights']) && $details['nights'] > 0) {
+                    QuotationAccommodationRoomDetails::create([
+                        'quotation_accommodation_id' => $quotationAccommodation->id,
+                        'room_type' => $type,
+                        'per_night_cost' => $details['per_night_cost'],
+                        'nights' => $details['nights'],
+                        'total_cost' => $details['total_cost'],
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->route('quotations.edit_step_four', $id)->with('success', 'Accommodation details updated successfully.');
+    }
 
     public function step_four($id)
     {
@@ -369,7 +412,9 @@ public function updateStepThree(Request $request, $id)
         // Define vehicle types and their default rates
         $vehicleTypes = VehicleType::all();
 
-        return view('pages.quotations.step4', compact('quotation', 'routes', 'vehicleTypes'));
+        $navigation = $this->getNavigation('step4', $id, false);
+
+        return view('pages.quotations.step4', compact('quotation', 'routes', 'vehicleTypes', 'navigation'));
     }
 
     public function store_step_four(Request $request, $id)
@@ -405,49 +450,46 @@ public function updateStepThree(Request $request, $id)
     }
 
     public function editStepFour($id)
-{
-    $quotation = Quotation::with('travelPlans')->findOrFail($id);
-    $routes = TravelRoute::all();
-    $vehicleTypes = VehicleType::all();
+    {
+        $quotation = Quotation::with('travelPlans')->findOrFail($id);
+        $routes = TravelRoute::all();
+        $vehicleTypes = VehicleType::all();
 
-    return view('pages.quotations.edit_pages.step-04-edit', compact(
-        'quotation',
-        'routes',
-        'vehicleTypes'
-    ));
-}
+        $navigation = $this->getNavigation('step4', $id, true);
 
-public function updateStepFour(Request $request, $id)
-{
-    $quotation = Quotation::findOrFail($id);
-
-    $request->validate([
-        'travel' => 'required|array',
-        'travel.*.start_date' => 'required|date',
-        'travel.*.end_date' => 'required|date|after_or_equal:travel.*.start_date',
-        'travel.*.route_id' => 'required|exists:travel_routes,id',
-        'travel.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
-        'travel.*.mileage' => 'required|numeric',
-    ]);
-
-    // Delete existing travel plans
-    $quotation->travelPlans()->delete();
-
-    // Create new travel plans
-    foreach ($request->travel as $travel) {
-        QuotationTravelPlan::create([
-            'quotation_id' => $quotation->id,
-            'start_date' => $travel['start_date'],
-            'end_date' => $travel['end_date'],
-            'route_id' => $travel['route_id'],
-            'vehicle_type_id' => $travel['vehicle_type_id'],
-            'mileage' => $travel['mileage'],
-        ]);
+        return view('pages.quotations.edit_pages.step-04-edit', compact('quotation', 'routes', 'vehicleTypes', 'navigation'));
     }
 
-    return redirect()->route('quotations.index')
-        ->with('success', 'Travel plans updated successfully.');
-}
+    public function updateStepFour(Request $request, $id)
+    {
+        $quotation = Quotation::findOrFail($id);
+
+        $request->validate([
+            'travel' => 'required|array',
+            'travel.*.start_date' => 'required|date',
+            'travel.*.end_date' => 'required|date|after_or_equal:travel.*.start_date',
+            'travel.*.route_id' => 'required|exists:travel_routes,id',
+            'travel.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
+            'travel.*.mileage' => 'required|numeric',
+        ]);
+
+        // Delete existing travel plans
+        $quotation->travelPlans()->delete();
+
+        // Create new travel plans
+        foreach ($request->travel as $travel) {
+            QuotationTravelPlan::create([
+                'quotation_id' => $quotation->id,
+                'start_date' => $travel['start_date'],
+                'end_date' => $travel['end_date'],
+                'route_id' => $travel['route_id'],
+                'vehicle_type_id' => $travel['vehicle_type_id'],
+                'mileage' => $travel['mileage'],
+            ]);
+        }
+
+        return redirect()->route('quotations.index')->with('success', 'Travel plans updated successfully.');
+    }
 
     public function updateStatus(Request $request, $id)
     {

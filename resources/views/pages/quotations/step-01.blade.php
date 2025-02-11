@@ -179,10 +179,19 @@
                     </div>
                 </div>
 
-                <div class="text-right">
-                    <button type="submit"
-                        class="items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 test:focus:ring-primary-900 hover:bg-primary-800">
-                        Start Quote
+                <div class="flex justify-between mt-6">
+                    @if(isset($navigation['back']))
+                        <a href="{{ $navigation['back'] }}" 
+                           class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+                            Back
+                        </a>
+                    @else
+                        <div></div> {{-- Empty div to maintain spacing --}}
+                    @endif
+                
+                    <button type="submit" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        {{ $navigation['submit_text'] ?? 'Start Quote' }}
                     </button>
                 </div>
 

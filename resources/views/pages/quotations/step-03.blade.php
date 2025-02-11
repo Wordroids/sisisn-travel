@@ -68,11 +68,17 @@
                 Add Another Hotel
             </button>
 
-            <div class="flex justify-between mt-8">
-                <a href="{{ route('quotations.edit_step_two', $quotation->id) }}"
-                    class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">Back</a>
-                <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
-                    Save & Continue
+            <div class="flex justify-between mt-6">
+                @if(isset($navigation['back']))
+                    <a href="{{ $navigation['back'] }}" class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
+                        Back
+                    </a>
+                @else
+                    <div></div> {{-- Empty div to maintain spacing --}}
+                @endif
+            
+                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                    Save & Next
                 </button>
             </div>
         </form>

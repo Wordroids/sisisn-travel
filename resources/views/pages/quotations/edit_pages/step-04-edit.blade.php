@@ -131,12 +131,11 @@
             </button>
 
             <div class="flex justify-between mt-6">
-                <a href="{{ route('quotations.edit_step_three', $quotation->id) }}"
-                    class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
+                <a href="{{ $navigation['back'] }}" class="bg-gray-500 text-white py-2 px-4 rounded-md">
                     Back
                 </a>
-                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-                    Update & Next
+                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md">
+                    Update & Complete
                 </button>
             </div>
         </form>
@@ -148,11 +147,17 @@
             const quotationStartDate = "{{ $quotation->start_date }}";
             const quotationEndDate = "{{ $quotation->end_date }}";
 
-            // Initialize existing entries
-            document.querySelectorAll('.travel-entry').forEach(entry => {
-                setMinDates(entry);
-                initializeRouteSelect(entry);
-            });
+            // Initialize existing entries or create new one if empty
+            const existingEntries = document.querySelectorAll('.travel-entry');
+            if (existingEntries.length > 0) {
+                existingEntries.forEach(entry => {
+                    setMinDates(entry);
+                    initializeRouteSelect(entry);
+                });
+            } else {
+                // Add initial empty travel plan if none exists
+                addNewTravelPlan();
+            }
 
             function setMinDates(container) {
                 const startDateInput = container.querySelector('input[name*="start_date"]');
@@ -183,14 +188,12 @@
                 const qStartDate = new Date(quotationStartDate);
                 const qEndDate = new Date(quotationEndDate);
 
-                // Validate against quotation date range
                 if (selectedDate < qStartDate || selectedDate > qEndDate) {
                     alert('Travel dates must be within the quotation date range');
                     input.value = '';
                     return;
                 }
 
-                // Validate end date is after start date
                 if (input === endDateInput && startDateInput.value &&
                     selectedDate < new Date(startDateInput.value)) {
                     alert('End date must be after start date');
@@ -198,7 +201,6 @@
                     return;
                 }
 
-                // Check for overlap with other travel plans
                 if (startDateInput.value && endDateInput.value) {
                     if (checkDateOverlap(
                             startDateInput.value,
@@ -212,7 +214,6 @@
                 }
             }
 
-            // Add this new function to check for date overlaps
             function checkDateOverlap(startDate, endDate, currentEntry) {
                 const allEntries = document.querySelectorAll('.travel-entry');
                 const start = new Date(startDate);
@@ -229,7 +230,6 @@
                     const otherStart = new Date(otherStartInput.value);
                     const otherEnd = new Date(otherEndInput.value);
 
-                    // Check for any overlap
                     if ((start <= otherEnd && start >= otherStart) ||
                         (end <= otherEnd && end >= otherStart) ||
                         (start <= otherStart && end >= otherEnd)) {
@@ -249,25 +249,78 @@
                 });
             }
 
-            document.getElementById('add-travel').addEventListener('click', function() {
-                const template = document.querySelector('.travel-entry').cloneNode(true);
+            function addNewTravelPlan() {
+                const template = `
+            <div class="travel-entry border p-4 rounded-lg mb-4 bg-gray-100 relative">
+                <button type="button" class="remove-travel absolute top-2 right-2 text-red-500 hover:text-red-700">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                <div class="grid grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Date Range</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="date" name="travel[${travelIndex}][start_date]" 
+                                class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <input type="date" name="travel[${travelIndex}][end_date]" 
+                                class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Route</label>
+                        <select name="travel[${travelIndex}][route_id]" class="route-select block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Select Route</option>
+                            ${generateRouteOptions()}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Vehicle Type</label>
+                        <select name="travel[${travelIndex}][vehicle_type_id]" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Select Vehicle</option>
+                            ${generateVehicleOptions()}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Mileage</label>
+                        <input type="number" name="travel[${travelIndex}][mileage]" class="mileage-input block w-full border-gray-300 rounded-md shadow-sm" readonly>
+                    </div>
+                </div>
+            </div>
+        `;
 
-                // Update indices and clear values
-                template.querySelectorAll('input, select').forEach(input => {
-                    input.name = input.name.replace(/\[\d+\]/, `[${travelIndex}]`);
-                    input.value = '';
-                    if (input.tagName === 'SELECT') {
-                        input.selectedIndex = 0;
-                    }
-                });
+                const travelSection = document.getElementById('travel-plan-section');
+                travelSection.insertAdjacentHTML('beforeend', template);
 
-                document.getElementById('travel-plan-section').appendChild(template);
-                setMinDates(template);
-                initializeRouteSelect(template);
+                const newEntry = travelSection.lastElementChild;
+                setMinDates(newEntry);
+                initializeRouteSelect(newEntry);
                 travelIndex++;
-            });
+            }
 
-            // Remove travel plan handler
+            function generateRouteOptions() {
+                return `
+            @foreach ($routes as $route)
+                <option value="{{ $route->id }}" data-mileage="{{ $route->mileage }}">
+                    {{ $route->name }}
+                </option>
+            @endforeach
+        `;
+            }
+
+            function generateVehicleOptions() {
+                return `
+            @foreach ($vehicleTypes as $vehicleType)
+                <option value="{{ $vehicleType->id }}">
+                    {{ $vehicleType->name }}
+                </option>
+            @endforeach
+        `;
+            }
+
+            // Add event listeners
+            document.getElementById('add-travel').addEventListener('click', addNewTravelPlan);
+
             document.addEventListener('click', function(e) {
                 if (e.target.closest('.remove-travel')) {
                     const travelEntry = e.target.closest('.travel-entry');
@@ -280,86 +333,74 @@
             });
 
             document.getElementById('travelPlanForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // Prevent default form submission
-        
-        const travelEntries = document.querySelectorAll('.travel-entry');
-        let dates = [];
+                e.preventDefault();
+                const travelEntries = document.querySelectorAll('.travel-entry');
+                let dates = [];
 
-        // Collect all travel dates
-        for (let entry of travelEntries) {
-            const startInput = entry.querySelector('input[name*="start_date"]');
-            const endInput = entry.querySelector('input[name*="end_date"]');
+                for (let entry of travelEntries) {
+                    const startInput = entry.querySelector('input[name*="start_date"]');
+                    const endInput = entry.querySelector('input[name*="end_date"]');
 
-            if (!startInput.value || !endInput.value) {
-                alert('Please fill in all date fields');
-                return false;
-            }
+                    if (!startInput.value || !endInput.value) {
+                        alert('Please fill in all date fields');
+                        return false;
+                    }
 
-            dates.push({
-                start: new Date(startInput.value),
-                end: new Date(endInput.value)
-            });
-        }
+                    dates.push({
+                        start: new Date(startInput.value),
+                        end: new Date(endInput.value)
+                    });
+                }
 
-        // Sort dates by start date
-        dates.sort((a, b) => a.start - b.start);
+                dates.sort((a, b) => a.start - b.start);
 
-        const qStart = new Date(quotationStartDate);
-        const qEnd = new Date(quotationEndDate);
+                const qStart = new Date(quotationStartDate);
+                const qEnd = new Date(quotationEndDate);
+                qStart.setHours(0, 0, 0, 0);
+                qEnd.setHours(0, 0, 0, 0);
 
-        // Remove time component from dates for comparison
-        qStart.setHours(0, 0, 0, 0);
-        qEnd.setHours(0, 0, 0, 0);
-
-        // Check if first travel plan starts exactly on quotation start date
-        const firstStart = new Date(dates[0].start);
-        firstStart.setHours(0, 0, 0, 0);
-        if (firstStart.getTime() !== qStart.getTime()) {
-            alert(`First travel plan must start on quotation start date (${quotationStartDate})`);
-            return false;
-        }
-
-        // Check if last travel plan ends exactly on quotation end date
-        const lastEnd = new Date(dates[dates.length - 1].end);
-        lastEnd.setHours(0, 0, 0, 0);
-        if (lastEnd.getTime() !== qEnd.getTime()) {
-            alert(`Last travel plan must end on quotation end date (${quotationEndDate})`);
-            return false;
-        }
-
-        // Check for gaps and overlaps
-        for (let i = 0; i < dates.length - 1; i++) {
-            const currentEnd = new Date(dates[i].end);
-            const nextStart = new Date(dates[i + 1].start);
-            currentEnd.setHours(0, 0, 0, 0);
-            nextStart.setHours(0, 0, 0, 0);
-
-            // Calculate the next day after current end
-            const expectedNextDay = new Date(currentEnd);
-            expectedNextDay.setDate(expectedNextDay.getDate() + 1);
-
-            // Check for gaps
-            if (nextStart.getTime() !== expectedNextDay.getTime()) {
-                const gap = Math.floor((nextStart - expectedNextDay) / (1000 * 60 * 60 * 24));
-                if (gap > 0) {
-                    alert(`Found a gap of ${gap} day(s) between ${currentEnd.toLocaleDateString()} and ${nextStart.toLocaleDateString()}`);
+                const firstStart = new Date(dates[0].start);
+                firstStart.setHours(0, 0, 0, 0);
+                if (firstStart.getTime() !== qStart.getTime()) {
+                    alert(`First travel plan must start on quotation start date (${quotationStartDate})`);
                     return false;
                 }
-            }
 
-            // Check for overlaps
-            if (currentEnd >= nextStart) {
-                alert(`Travel plans cannot overlap. Found overlap between ${dates[i].start.toLocaleDateString()} - ${dates[i].end.toLocaleDateString()} and ${dates[i + 1].start.toLocaleDateString()} - ${dates[i + 1].end.toLocaleDateString()}`);
-                return false;
-            }
-        }
+                const lastEnd = new Date(dates[dates.length - 1].end);
+                lastEnd.setHours(0, 0, 0, 0);
+                if (lastEnd.getTime() !== qEnd.getTime()) {
+                    alert(`Last travel plan must end on quotation end date (${quotationEndDate})`);
+                    return false;
+                }
 
-        // If all validations pass, submit the form
-        this.submit();
-    });
+                for (let i = 0; i < dates.length - 1; i++) {
+                    const currentEnd = new Date(dates[i].end);
+                    const nextStart = new Date(dates[i + 1].start);
+                    currentEnd.setHours(0, 0, 0, 0);
+                    nextStart.setHours(0, 0, 0, 0);
 
-            
+                    const expectedNextDay = new Date(currentEnd);
+                    expectedNextDay.setDate(expectedNextDay.getDate() + 1);
+
+                    if (nextStart.getTime() !== expectedNextDay.getTime()) {
+                        const gap = Math.floor((nextStart - expectedNextDay) / (1000 * 60 * 60 * 24));
+                        if (gap > 0) {
+                            alert(
+                                `Found a gap of ${gap} day(s) between ${currentEnd.toLocaleDateString()} and ${nextStart.toLocaleDateString()}`);
+                            return false;
+                        }
+                    }
+
+                    if (currentEnd >= nextStart) {
+                        alert(
+                            `Travel plans cannot overlap. Found overlap between ${dates[i].start.toLocaleDateString()} - ${dates[i].end.toLocaleDateString()} and ${dates[i + 1].start.toLocaleDateString()} - ${dates[i + 1].end.toLocaleDateString()}`);
+                        return false;
+                    }
+                }
+
+                this.submit();
+            });
         });
-
     </script>
+
 </x-app-layout>
