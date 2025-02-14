@@ -101,7 +101,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/quotations/{id}', [QuotationController::class, 'show'])->name('quotations.show');
 
     
-
+    Route::delete('/travel-routes/delete-image/{id}', [TravelRouteController::class, 'deleteImage'])->name('travel_routes.delete-image');
 
 
     Route::resource('vehicle_types', VehicleTypeController::class);

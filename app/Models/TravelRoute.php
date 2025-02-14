@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Assets;
 
 class TravelRoute extends Model
 {
@@ -15,4 +16,9 @@ class TravelRoute extends Model
         'description',
         'mileage', // New mileage field
     ];
+
+    public function assets()
+    {
+        return $this->morphMany(Assets::class, 'assetable');
+    }
 }
