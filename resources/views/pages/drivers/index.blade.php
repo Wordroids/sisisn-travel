@@ -42,7 +42,7 @@
                                 <td class="px-4 py-2">{{ $driver->contact_no }}</td>
                                 <td class="px-4 py-2">{{ $driver->address }}</td>
                                 <td class="px-4 py-2">{{ $driver->email }}</td>
-                                <td class="px-4 py-2">Rs. {{ number_format($driver->per_day_charge, 2) }}</td>
+                                <td class="px-4 py-2">{{ number_format($driver->per_day_charge, 2) }}</td>
                                 <td class="px-4 py-2 text-right">
                                     <a href="{{ route('drivers.edit', $driver) }}" class="text-yellow-600 hover:underline mr-2">Edit</a>
                                     <form action="{{ route('drivers.destroy', $driver) }}" method="POST" class="inline-block">
