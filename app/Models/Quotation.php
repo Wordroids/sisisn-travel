@@ -23,6 +23,8 @@ class Quotation extends Model
         'markup_per_person',     // System-defined markup per person
         'status',                // ['draft', 'pending', 'approved', 'rejected']
         'pax_slab_id',           // Links to selected Pax Slab
+        'driver_id',             // Links to selected Driver
+        'guide_id',              // Links to selected Guide
     ];
 
     // ✅ Relationship with Market
@@ -57,6 +59,16 @@ class Quotation extends Model
     public function markupvalue()
     {
         return $this->belongsTo(MarkUpValue::class);
+    }
+
+    public function driver()
+    {
+        return $this->belongsTo(Driver::class);
+    }
+
+    public function guide()
+    {
+        return $this->belongsTo(Guide::class);
     }
 
     
