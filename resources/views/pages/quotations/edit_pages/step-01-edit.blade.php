@@ -296,11 +296,11 @@
             const nightsInput = document.querySelector("input[name='no_of_nights']");
 
             // Get today's date in YYYY-MM-DD format
-            const today = new Date().toISOString().split('T')[0];
+            //const today = new Date().toISOString().split('T')[0];
 
             // Set minimum date for both inputs
-            startDateInput.min = today;
-            endDateInput.min = today;
+           // startDateInput.min = today;
+            //endDateInput.min = today;
 
             function calculateDaysAndNights() {
                 let startDate = new Date(startDateInput.value);
