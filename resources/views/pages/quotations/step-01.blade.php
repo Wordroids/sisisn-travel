@@ -135,11 +135,10 @@
 
                     <div class="mb-4">
                         <label class="block mb-2 text-sm font-medium text-gray-900">Currency</label>
-                        <select name="currency_id" id="currency_id" 
+                        <select name="currency_id" id="currency_id"
                             class="block w-full border-gray-300 rounded-md shadow-sm" required>
                             @foreach ($currencies as $currency)
-                                <option value="{{ $currency->id }}" 
-                                    data-rate="{{ $currency->conversion_rate }}"
+                                <option value="{{ $currency->id }}" data-rate="{{ $currency->conversion_rate }}"
                                     {{ strtolower($currency->code) === 'usd' ? 'selected' : '' }}>
                                     {{ $currency->code }}
                                 </option>
@@ -158,8 +157,8 @@
                                     readonly>
                             </div>
                         </div>
-                        
-                        
+
+
                     </div>
 
 
@@ -171,7 +170,7 @@
                         <label for="markup_id" class="block mb-2 text-sm font-medium text-gray-900 test:text-white">
                             Markup Value Per Pax
                         </label>
-                        <select name="markup_per_pax" id="markup_id" 
+                        <select name="markup_per_pax" id="markup_id"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 test:bg-gray-700 test:border-gray-600 test:placeholder-gray-400 test:text-white test:focus:ring-primary-500 test:focus:border-primary-500"
                             required>
                             <option value="">Select Markup</option>
@@ -192,7 +191,18 @@
                             @endforeach
                         </select>
                     </div>
+
+                    <div class="mb-4">
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Driver</label>
+                        <select name="driver_id" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Select Driver</option>
+                            @foreach ($drivers as $driver)
+                                <option value="{{ $driver->id }}">{{ $driver->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
+
 
                 <div class="flex justify-between mt-6">
                     @if (isset($navigation['back']))
@@ -263,21 +273,21 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-    const currencySelect = document.getElementById('currency_id');
-    const conversionRateInput = document.getElementById('conversion_rate');
+            const currencySelect = document.getElementById('currency_id');
+            const conversionRateInput = document.getElementById('conversion_rate');
 
-    function updateConversionRate() {
-        const selectedOption = currencySelect.options[currencySelect.selectedIndex];
-        const rate = selectedOption.getAttribute('data-rate');
-        conversionRateInput.value = rate || "";
-    }
+            function updateConversionRate() {
+                const selectedOption = currencySelect.options[currencySelect.selectedIndex];
+                const rate = selectedOption.getAttribute('data-rate');
+                conversionRateInput.value = rate || "";
+            }
 
-    // Set initial USD rate
-    updateConversionRate();
+            // Set initial USD rate
+            updateConversionRate();
 
-    // Update rate when currency changes
-    currencySelect.addEventListener('change', updateConversionRate);
-});
+            // Update rate when currency changes
+            currencySelect.addEventListener('change', updateConversionRate);
+        });
     </script>
 
     <script>

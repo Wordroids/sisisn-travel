@@ -18,6 +18,7 @@ use App\Models\RoomCategory;
 use App\Models\TravelRoute;
 use App\Models\VehicleType;
 use App\Models\MarkUpValue;
+use App\Models\Driver;
 use Illuminate\Http\Request;
 use App\Models\QuotationAccommodationRoomDetails;
 
@@ -63,7 +64,7 @@ class QuotationController extends Controller
      */
     public function index()
     {
-        $quotations = Quotation::with(['market', 'customer'])
+        $quotations = Quotation::with(['market', 'customer' ,'driver'])
             ->latest()
             ->paginate(10);
         return view('pages.quotations.index', compact('quotations'));
@@ -71,7 +72,7 @@ class QuotationController extends Controller
 
     public function show($id)
     {
-        $quotation = Quotation::with(['market', 'customer', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType'])->findOrFail($id);
+        $quotation = Quotation::with(['market', 'customer', 'driver', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType'])->findOrFail($id);
 
         return view('pages.quotations.show', compact('quotation'));
     }
@@ -86,6 +87,7 @@ class QuotationController extends Controller
         $currencies = Currency::all();
         $paxSlabs = PaxSlab::ordered()->get(); // Fetch ordered Pax Slabs
         $markups = MarkUpValue::all();
+        $drivers = Driver::all();
         
 
         // Generate Quote & Booking Reference
@@ -94,14 +96,14 @@ class QuotationController extends Controller
 
         $navigation = $this->getNavigation('step1', null, false);
 
-        return view('pages.quotations.step-01')->with(['markets' => $markets, 'customers' => $customers, 'currencies' => $currencies, 'quoteReference' => $quoteReference, 'bookingReference' => $bookingReference, 'paxSlabs' => $paxSlabs, 'navigation' => $navigation , 'markups' => $markups]);
+        return view('pages.quotations.step-01')->with(['markets' => $markets, 'customers' => $customers, 'currencies' => $currencies, 'quoteReference' => $quoteReference, 'bookingReference' => $bookingReference, 'paxSlabs' => $paxSlabs, 'drivers' => $drivers, 'navigation' => $navigation , 'markups' => $markups]);
     }
 
     public function store_step_one(Request $request)
     {
         $request->validate([
             'market_id' => 'required|exists:markets,id',
-            'customer_id' => 'nullable|exists:customers,id',
+            'customer_id' => 'nullable|exists:customers,id',           
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'no_of_days' => 'required|integer',
@@ -110,6 +112,7 @@ class QuotationController extends Controller
             'conversion_rate' => 'required|numeric',
             'markup_per_pax' => 'required|numeric',
             'pax_slab_id' => 'required|exists:pax_slabs,id',
+            'driver_id' => 'required|exists:drivers,id',
         ]);
 
         // Generate Quote & Booking Reference
@@ -129,6 +132,7 @@ class QuotationController extends Controller
             'conversion_rate' => $request->conversion_rate,
             'markup_per_person' => $request->markup_per_pax,
             'pax_slab_id' => $request->pax_slab_id,
+            'driver_id' => $request->driver_id,
         ]);
 
         return redirect()->route('quotations.step2', $quotation->id)->with('success', 'Step 1 saved! Proceed to Pax Slab details.');
@@ -142,10 +146,11 @@ class QuotationController extends Controller
         $currencies = Currency::all();
         $paxSlabs = PaxSlab::ordered()->get();
         $markups = MarkUpValue::all();
+        $drivers = Driver::all();
 
         $navigation = $this->getNavigation('step1', $id, true);
 
-        return view('pages.quotations.edit_pages.step-01-edit', compact('quotation', 'markets', 'customers', 'currencies', 'paxSlabs', 'navigation', 'markups'));
+        return view('pages.quotations.edit_pages.step-01-edit', compact('quotation', 'markets', 'customers', 'currencies', 'paxSlabs', 'navigation', 'markups', 'drivers'));
     }
 
     public function updateStepOne(Request $request, $id)
@@ -164,6 +169,7 @@ class QuotationController extends Controller
             'conversion_rate' => 'required|numeric',
             'markup_per_pax' => 'required|numeric',
             'pax_slab_id' => 'required|exists:pax_slabs,id',
+            'driver_id' => 'required|exists:drivers,id',
         ]);
 
         $quotation->update([
@@ -176,6 +182,7 @@ class QuotationController extends Controller
             'conversion_rate' => $request->conversion_rate,
             'markup_per_person' => $request->markup_per_pax,
             'pax_slab_id' => $request->pax_slab_id,
+            'driver_id' => $request->driver_id,
         ]);
 
         return redirect()->route('quotations.edit_step_two', $id)->with('success', 'Quotation details updated successfully.');
