@@ -201,6 +201,16 @@
                             @endforeach
                         </select>
                     </div>
+
+                    <div class="mb-4">
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Guide</label>
+                        <select name="guide_id" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Select Guide</option>
+                            @foreach ($guides as $guide)
+                                <option value="{{ $guide->id }}">{{ $guide->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
 

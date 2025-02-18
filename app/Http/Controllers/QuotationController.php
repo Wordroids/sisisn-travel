@@ -19,6 +19,7 @@ use App\Models\TravelRoute;
 use App\Models\VehicleType;
 use App\Models\MarkUpValue;
 use App\Models\Driver;
+use App\Models\Guide;
 use Illuminate\Http\Request;
 use App\Models\QuotationAccommodationRoomDetails;
 
@@ -88,7 +89,7 @@ class QuotationController extends Controller
         $paxSlabs = PaxSlab::ordered()->get(); // Fetch ordered Pax Slabs
         $markups = MarkUpValue::all();
         $drivers = Driver::all();
-        
+        $guides = Guide::all();
 
         // Generate Quote & Booking Reference
         $quoteReference = 'QT/SP/' . (Quotation::max('id') + 1001);
@@ -96,7 +97,7 @@ class QuotationController extends Controller
 
         $navigation = $this->getNavigation('step1', null, false);
 
-        return view('pages.quotations.step-01')->with(['markets' => $markets, 'customers' => $customers, 'currencies' => $currencies, 'quoteReference' => $quoteReference, 'bookingReference' => $bookingReference, 'paxSlabs' => $paxSlabs, 'drivers' => $drivers, 'navigation' => $navigation , 'markups' => $markups]);
+        return view('pages.quotations.step-01')->with(['markets' => $markets, 'customers' => $customers, 'currencies' => $currencies, 'quoteReference' => $quoteReference, 'bookingReference' => $bookingReference, 'paxSlabs' => $paxSlabs, 'drivers' => $drivers, 'guides' => $guides, 'navigation' => $navigation , 'markups' => $markups]);
     }
 
     public function store_step_one(Request $request)
@@ -113,6 +114,8 @@ class QuotationController extends Controller
             'markup_per_pax' => 'required|numeric',
             'pax_slab_id' => 'required|exists:pax_slabs,id',
             'driver_id' => 'required|exists:drivers,id',
+            'guide_id' => 'nullable|exists:guides,id',
+            
         ]);
 
         // Generate Quote & Booking Reference
@@ -133,6 +136,7 @@ class QuotationController extends Controller
             'markup_per_person' => $request->markup_per_pax,
             'pax_slab_id' => $request->pax_slab_id,
             'driver_id' => $request->driver_id,
+            'guide_id' => $request->guide_id,
         ]);
 
         return redirect()->route('quotations.step2', $quotation->id)->with('success', 'Step 1 saved! Proceed to Pax Slab details.');
@@ -147,10 +151,11 @@ class QuotationController extends Controller
         $paxSlabs = PaxSlab::ordered()->get();
         $markups = MarkUpValue::all();
         $drivers = Driver::all();
+        $guides = Guide::all();
 
         $navigation = $this->getNavigation('step1', $id, true);
 
-        return view('pages.quotations.edit_pages.step-01-edit', compact('quotation', 'markets', 'customers', 'currencies', 'paxSlabs', 'navigation', 'markups', 'drivers'));
+        return view('pages.quotations.edit_pages.step-01-edit', compact('quotation', 'markets', 'customers', 'currencies', 'paxSlabs', 'navigation', 'markups', 'drivers', 'guides'));
     }
 
     public function updateStepOne(Request $request, $id)
@@ -170,6 +175,7 @@ class QuotationController extends Controller
             'markup_per_pax' => 'required|numeric',
             'pax_slab_id' => 'required|exists:pax_slabs,id',
             'driver_id' => 'required|exists:drivers,id',
+            'guide_id' => 'nullable|exists:guides,id',
         ]);
 
         $quotation->update([
@@ -183,6 +189,7 @@ class QuotationController extends Controller
             'markup_per_person' => $request->markup_per_pax,
             'pax_slab_id' => $request->pax_slab_id,
             'driver_id' => $request->driver_id,
+            'guide_id' => $request->guide_id,
         ]);
 
         return redirect()->route('quotations.edit_step_two', $id)->with('success', 'Quotation details updated successfully.');
