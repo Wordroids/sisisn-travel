@@ -19,12 +19,19 @@
                 <p><strong class="text-gray-600">Markup Per Person:</strong> <span
                         class="text-gray-800">{{ $quotation->markup_per_person }}</span></p>
                 <p><strong class="text-gray-600">Driver Name:</strong> <span
-                        class="text-gray-800">{{ $quotation->driver->name ?? 'N/A' }}</span> 
-                        &nbsp;&nbsp;&nbsp;&nbsp;    
-                        <strong class="text-gray-600">Driver Per Day Charge:</strong> <span
+                        class="text-gray-800">{{ $quotation->driver->name ?? 'N/A' }}</span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <strong class="text-gray-600">Driver Per Day Charge:</strong> <span
                         class="text-gray-800">{{ $quotation->driver->per_day_charge ?? 'N/A' }}</span>
-                    </p>
-                
+                </p>
+                <p><strong class="text-gray-600">Guide Name:</strong> <span
+                        class="text-gray-800">{{ $quotation->guide->name ?? 'N/A' }}</span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <strong class="text-gray-600">Guide Per Day Charge:</strong> <span
+                        class="text-gray-800">{{ $quotation->guide->per_day_charge ?? 'N/A' }}</span>
+                </p>
+
+
             </div>
         </div>
 
