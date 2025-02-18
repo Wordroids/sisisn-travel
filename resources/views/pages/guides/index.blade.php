@@ -42,7 +42,7 @@
                                 <td class="px-4 py-2">{{ $guide->contact_no }}</td>
                                 <td class="px-4 py-2">{{ $guide->address }}</td>
                                 <td class="px-4 py-2">{{ $guide->email }}</td>
-                                <td class="px-4 py-2">Rs. {{ number_format($guide->per_day_charge, 2) }}</td>
+                                <td class="px-4 py-2">{{ number_format($guide->per_day_charge, 2) }}</td>
                                 <td class="px-4 py-2 text-right">
                                     <a href="{{ route('guides.edit', $guide) }}" class="text-yellow-600 hover:underline mr-2">Edit</a>
                                     <form action="{{ route('guides.destroy', $guide) }}" method="POST" class="inline-block">
