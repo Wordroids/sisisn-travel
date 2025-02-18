@@ -13,6 +13,7 @@ use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\TravelRouteController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VehicleTypeController;
+use App\Http\Controllers\DriverController;
 use App\Models\Hotel;
 use App\Http\Controllers\MarkUpValueController;
 use Illuminate\Support\Facades\Route;
@@ -75,6 +76,9 @@ Route::middleware('auth')->group(function () {
     // Pax Slabs Routes
     Route::resource('pax_slabs', PaxSlabController::class);
     Route::post('/pax_slabs/reorder', [PaxSlabController::class, 'reorder'])->name('pax_slabs.reorder');
+
+    // Driver Routes
+    Route::resource('drivers', DriverController::class);
 
     //Quotations Routes
     Route::get('/quotations/create/step-01', [QuotationController::class, 'step_one'])->name('quotations.step_one');
