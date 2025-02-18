@@ -14,6 +14,7 @@ use App\Http\Controllers\TravelRouteController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VehicleTypeController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\GuidesController;
 use App\Models\Hotel;
 use App\Http\Controllers\MarkUpValueController;
 use Illuminate\Support\Facades\Route;
@@ -79,6 +80,9 @@ Route::middleware('auth')->group(function () {
 
     // Driver Routes
     Route::resource('drivers', DriverController::class);
+
+    // Guide Routes
+    Route::resource('guides', GuidesController::class);
 
     //Quotations Routes
     Route::get('/quotations/create/step-01', [QuotationController::class, 'step_one'])->name('quotations.step_one');
