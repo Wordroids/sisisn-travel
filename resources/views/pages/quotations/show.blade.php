@@ -18,6 +18,13 @@
                         class="text-red-500 font-semibold">{{ $quotation->conversion_rate }}</span>)</p>
                 <p><strong class="text-gray-600">Markup Per Person:</strong> <span
                         class="text-gray-800">{{ $quotation->markup_per_person }}</span></p>
+                <p><strong class="text-gray-600">Driver Name:</strong> <span
+                        class="text-gray-800">{{ $quotation->driver->name ?? 'N/A' }}</span> 
+                        &nbsp;&nbsp;&nbsp;&nbsp;    
+                        <strong class="text-gray-600">Driver Per Day Charge:</strong> <span
+                        class="text-gray-800">{{ $quotation->driver->per_day_charge ?? 'N/A' }}</span>
+                    </p>
+                
             </div>
         </div>
 
@@ -64,6 +71,7 @@
                             <p><span class="text-gray-600">Meal Plan:</span> {{ $accommodation->mealPlan->name }}</p>
                             <p><span class="text-gray-600">Room Category:</span>
                                 {{ $accommodation->roomCategory->name }}</p>
+
                         </div>
                     </div>
 
