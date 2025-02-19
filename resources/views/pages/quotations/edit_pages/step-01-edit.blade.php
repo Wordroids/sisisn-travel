@@ -172,6 +172,30 @@
                             @endforeach
                         </select>
                     </div>
+
+                    <div class="mb-4">
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Driver</label>
+                        <select name="driver_id" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Select Driver</option>
+                            @foreach ($drivers as $driver)
+                                <option value="{{ $driver->id }}" {{ $quotation->driver_id == $driver->id ? 'selected' : '' }}>
+                                    {{ $driver->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Guide</label>
+                        <select name="guide_id" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Select Guide</option>
+                            @foreach ($guides as $guide)
+                                <option value="{{ $guide->id }}" {{ $quotation->guide_id == $guide->id ? 'selected' : '' }}>
+                                    {{ $guide->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
                 <div class="flex justify-between mt-6">
@@ -296,11 +320,11 @@
             const nightsInput = document.querySelector("input[name='no_of_nights']");
 
             // Get today's date in YYYY-MM-DD format
-            const today = new Date().toISOString().split('T')[0];
+            //const today = new Date().toISOString().split('T')[0];
 
             // Set minimum date for both inputs
-            startDateInput.min = today;
-            endDateInput.min = today;
+           // startDateInput.min = today;
+            //endDateInput.min = today;
 
             function calculateDaysAndNights() {
                 let startDate = new Date(startDateInput.value);
