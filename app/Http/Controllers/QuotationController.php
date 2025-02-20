@@ -22,6 +22,7 @@ use App\Models\Driver;
 use App\Models\Guide;
 use Illuminate\Http\Request;
 use App\Models\QuotationAccommodationRoomDetails;
+use App\Models\QuotationSiteSeeing;
 
 class QuotationController extends Controller
 {
@@ -51,9 +52,16 @@ class QuotationController extends Controller
             ],
             'step4' => [
                 'back' => $quotationId ? ($isEditing ? route('quotations.edit_step_three', $quotationId) : route('quotations.step3', ['id' => $quotationId])) : '#',
-                'next' => route('quotations.index'),
+                'next' => $quotationId ? route('quotations.step5', ['id' => $quotationId]) : '#',
                 'title' => 'Travel Plans',
                 'number' => 4,
+                'submit_text' => $isEditing ? 'Update & Next' : 'Save & Next',
+            ],
+            'step5' => [
+                'back' => $quotationId ? ($isEditing ? route('quotations.edit_step_four', $quotationId) : route('quotations.step4', ['id' => $quotationId])) : '#',
+                'next' => route('quotations.index'),
+                'title' => 'Site Seeing',
+                'number' => 5,
                 'submit_text' => $isEditing ? 'Update & Complete' : 'Save & Complete',
             ],
         ];
@@ -65,7 +73,7 @@ class QuotationController extends Controller
      */
     public function index()
     {
-        $quotations = Quotation::with(['market', 'customer' ,'driver'])
+        $quotations = Quotation::with(['market', 'customer', 'driver'])
             ->latest()
             ->paginate(10);
         return view('pages.quotations.index', compact('quotations'));
@@ -73,7 +81,7 @@ class QuotationController extends Controller
 
     public function show($id)
     {
-        $quotation = Quotation::with(['market', 'customer', 'driver', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType'])->findOrFail($id);
+        $quotation = Quotation::with(['market', 'customer', 'driver', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType' , 'siteSeeings'])->findOrFail($id);
 
         return view('pages.quotations.show', compact('quotation'));
     }
@@ -97,14 +105,14 @@ class QuotationController extends Controller
 
         $navigation = $this->getNavigation('step1', null, false);
 
-        return view('pages.quotations.step-01')->with(['markets' => $markets, 'customers' => $customers, 'currencies' => $currencies, 'quoteReference' => $quoteReference, 'bookingReference' => $bookingReference, 'paxSlabs' => $paxSlabs, 'drivers' => $drivers, 'guides' => $guides, 'navigation' => $navigation , 'markups' => $markups]);
+        return view('pages.quotations.step-01')->with(['markets' => $markets, 'customers' => $customers, 'currencies' => $currencies, 'quoteReference' => $quoteReference, 'bookingReference' => $bookingReference, 'paxSlabs' => $paxSlabs, 'drivers' => $drivers, 'guides' => $guides, 'navigation' => $navigation, 'markups' => $markups]);
     }
 
     public function store_step_one(Request $request)
     {
         $request->validate([
             'market_id' => 'required|exists:markets,id',
-            'customer_id' => 'nullable|exists:customers,id',           
+            'customer_id' => 'nullable|exists:customers,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'no_of_days' => 'required|integer',
@@ -115,7 +123,6 @@ class QuotationController extends Controller
             'pax_slab_id' => 'required|exists:pax_slabs,id',
             'driver_id' => 'required|exists:drivers,id',
             'guide_id' => 'nullable|exists:guides,id',
-            
         ]);
 
         // Generate Quote & Booking Reference
@@ -458,12 +465,10 @@ class QuotationController extends Controller
             ]);
         }
 
-        //Change the Quotation status to 'pending'
-        $quotation->status = 'pending';
         $quotation->save();
 
-        // Redirect to Quotation List page after final step
-        return redirect()->route('quotations.index')->with('success', 'Quotation process completed successfully.');
+        // Redirect to Quotation Step Four page after final step
+        return redirect()->route('quotations.step5', $quotation->id)->with('success', 'Travel plan details saved successfully.');
     }
 
     public function editStepFour($id)
@@ -505,11 +510,93 @@ class QuotationController extends Controller
             ]);
         }
 
-        //Change the Quotation status to 'pending'
+        $quotation->save();
+
+        return redirect()->route('quotations.edit_step_five', $id)->with('success', 'Travel plans updated successfully.');
+    }
+
+    public function step_five($id)
+    {
+        $quotation = Quotation::findOrFail($id);
+
+        return view('pages.quotations.step-05', compact('quotation'));
+    }
+
+    public function store_step_five(Request $request, $id)
+    {
+        $quotation = Quotation::findOrFail($id);
+
+        // Validate the request data
+        $request->validate([
+            'sites' => 'required|array',
+            'sites.*.name' => 'required|string|max:255',
+            'sites.*.unit_price' => 'required|numeric|min:0',
+            'sites.*.quantity' => 'required|integer|min:1',
+            'sites.*.price_per_adult' => 'required|numeric|min:0',
+        ]);
+
+        // Delete existing site seeings if any
+        $quotation->siteSeeings()->delete();
+
+        // Store new site seeing entries
+        foreach ($request->sites as $site) {
+            QuotationSiteSeeing::create([
+                'quotation_id' => $quotation->id,
+                'name' => $site['name'],
+                'unit_price' => $site['unit_price'],
+                'quantity' => $site['quantity'],
+                'price_per_adult' => $site['price_per_adult'],
+            ]);
+        }
+
+        // Update quotation status to pending
         $quotation->status = 'pending';
         $quotation->save();
 
-        return redirect()->route('quotations.index')->with('success', 'Travel plans updated successfully.');
+        return redirect()->route('quotations.index')->with('success', 'Site seeing details saved successfully.');
+    }
+
+    public function editStepFive($id)
+    {
+        $quotation = Quotation::with('siteSeeings')->findOrFail($id);
+
+        $navigation = $this->getNavigation('step5', $id, true);
+
+        return view('pages.quotations.edit_pages.step-05-edit', compact('quotation', 'navigation'));
+    }
+
+    public function updateStepFive(Request $request, $id)
+    {
+        //dd($request->all());
+        $quotation = Quotation::findOrFail($id);
+
+        // Validate the request data
+        $request->validate([
+            'sites' => 'required|array',
+            'sites.*.name' => 'required|string|max:255',
+            'sites.*.unit_price' => 'required|numeric|min:0',
+            'sites.*.quantity' => 'required|integer|min:1',
+            'sites.*.price_per_adult' => 'required|numeric|min:0',
+        ]);
+
+        // Delete existing site seeings
+        $quotation->siteSeeings()->delete();
+
+        // Store updated site seeing entries
+        foreach ($request->sites as $site) {
+            QuotationSiteSeeing::create([
+                'quotation_id' => $quotation->id,
+                'name' => $site['name'],
+                'unit_price' => $site['unit_price'],
+                'quantity' => $site['quantity'],
+                'price_per_adult' => $site['price_per_adult'],
+            ]);
+        }
+
+        $quotation->status = 'pending';
+        $quotation->save();
+
+        return redirect()->route('quotations.index')->with('success', 'Site seeing details updated successfully.');
     }
 
     public function updateStatus(Request $request, $id)

@@ -71,5 +71,9 @@ class Quotation extends Model
         return $this->belongsTo(Guide::class);
     }
 
+    public function siteSeeings()
+    {
+        return $this->hasMany(QuotationSiteSeeing::class);
+    }
     
 }
