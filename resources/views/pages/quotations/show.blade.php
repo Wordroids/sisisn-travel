@@ -142,6 +142,49 @@
             </div>
         </div>
 
+        <!-- Site Seeing Details -->
+        <div class="bg-white p-6 rounded-lg shadow-sm mt-6">
+            <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">Site Seeing Details</h3>
+            <div class="overflow-x-auto mt-4">
+                <table class="w-full text-sm text-left text-gray-700 border rounded-lg shadow">
+                    <thead class="bg-gray-200 text-gray-700">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Site Name</th>
+                            <th class="px-4 py-3 text-center">Unit Price</th>
+                            <th class="px-4 py-3 text-center">Quantity</th>
+                            <th class="px-4 py-3 text-center">Price Per Adult</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        @forelse($quotation->siteSeeings as $site)
+                            <tr class="bg-gray-50 hover:bg-gray-100 transition">
+                                <td class="px-4 py-3">{{ $site->name }}</td>
+                                <td class="px-4 py-3 text-center">{{ number_format($site->unit_price, 2) }}</td>
+                                <td class="px-4 py-3 text-center">{{ $site->quantity }}</td>
+                                <td class="px-4 py-3 text-center font-semibold text-green-600">
+                                    {{ number_format($site->price_per_adult, 2) }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-3 text-center text-gray-500">
+                                    No site seeing details available
+                                </td>
+                            </tr>
+                        @endforelse
+                        @if ($quotation->siteSeeings->count() > 0)
+                            <tr class="bg-gray-100">
+                                <td colspan="3" class="px-4 py-3 text-right font-semibold">Total:</td>
+                                <td class="px-4 py-3 text-center font-bold text-green-600">
+                                    {{ number_format($quotation->siteSeeings->sum('price_per_adult'), 2) }}
+                                </td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Action Buttons -->
         <div class="flex justify-between mt-6">
             <a href="{{ route('quotations.index') }}"

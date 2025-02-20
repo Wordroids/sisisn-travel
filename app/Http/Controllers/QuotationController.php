@@ -81,7 +81,7 @@ class QuotationController extends Controller
 
     public function show($id)
     {
-        $quotation = Quotation::with(['market', 'customer', 'driver', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType'])->findOrFail($id);
+        $quotation = Quotation::with(['market', 'customer', 'driver', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType' , 'siteSeeings'])->findOrFail($id);
 
         return view('pages.quotations.show', compact('quotation'));
     }
