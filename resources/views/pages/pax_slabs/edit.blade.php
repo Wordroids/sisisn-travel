@@ -9,7 +9,7 @@
             <label class="block text-sm font-medium text-gray-700">Name</label>
             <input type="text" name="name" value="{{ $paxSlab->name }}" class="block w-full border-gray-300 rounded-md shadow-sm p-2" required>
 
-            <label class="block text-sm font-medium text-gray-700 mt-4">Min Pax</label>
+            <label class="block text-sm font-medium text-gray-700 mt-4">No of pax for quoting</label>
             <input type="number" name="min_pax" value="{{ $paxSlab->min_pax }}" class="block w-full border-gray-300 rounded-md shadow-sm p-2" required>
 
             <label class="block text-sm font-medium text-gray-700 mt-4">Max Pax</label>
