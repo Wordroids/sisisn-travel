@@ -185,6 +185,77 @@
             </div>
         </div>
 
+        <!-- Quote Simulation -->
+<div class="bg-white p-6 rounded-lg shadow-sm mt-6">
+    <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">Quote Simulation - Per Person / Double Sharing Basis</h3>
+    <div class="overflow-x-auto mt-4">
+        <table class="w-full text-sm text-left text-gray-700 border rounded-lg shadow">
+            <thead class="bg-gray-200 text-gray-700">
+                <tr>
+                    <th class="px-4 py-3 text-left">Pax Range</th>
+                    <th class="px-4 py-3 text-center">Accommodation 1/2 DBL</th>
+                    <th class="px-4 py-3 text-center">Transport</th>
+                    <th class="px-4 py-3 text-center">Chauffuer / Cleaner</th>
+                    <th class="px-4 py-3 text-center">Guide</th>
+                    <th class="px-4 py-3 text-center">Sites</th>
+                    <th class="px-4 py-3 text-center">Jeep Charges</th>
+                    <th class="px-4 py-3 text-center">Extras</th>
+                    <th class="px-4 py-3 text-center">Total (US$)</th>
+                    <th class="px-4 py-3 text-center">Total Ex. VAT (US$)</th>
+                    <th class="px-4 py-3 text-center">Mark Up (US$)</th>
+                    <th class="px-4 py-3 text-center">Nett</th>
+                    <th class="px-4 py-3 text-center">Round Up</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y">
+                @foreach ($quotation->paxSlabs as $paxSlab)
+                    <tr class="bg-gray-50 hover:bg-gray-100 transition">
+                        <td class="px-4 py-3">{{ $paxSlab->paxSlab->name }}</td>
+                        <td class="px-4 py-3 text-center">
+                            {{ number_format($quotation->accommodations->sum(function($acc) {
+                                return $acc->roomDetails->where('room_type', 'double')->sum('total_cost');
+                            }) / 2, 2) }}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            {{ number_format($paxSlab->vehicle_payout_rate * $quotation->travelPlans->sum('mileage'), 2) }}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            {{ number_format(($quotation->driver->per_day_charge ?? 0) * $quotation->duration, 2) }}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            {{ number_format(($quotation->guide->per_day_charge ?? 0) * $quotation->duration, 2) }}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            {{ number_format($quotation->siteSeeings->sum('price_per_adult'), 2) }}
+                        </td>
+                        <td class="px-4 py-3 text-center">0.00</td>
+                        <td class="px-4 py-3 text-center">0.00</td>
+                        @php
+                            $total = ($quotation->accommodations->sum(function($acc) {
+                                return $acc->roomDetails->where('room_type', 'double')->sum('total_cost');
+                            }) / 2) +
+                            ($paxSlab->vehicle_payout_rate * $quotation->travelPlans->sum('mileage')) +
+                            (($quotation->driver->per_day_charge ?? 0) * $quotation->duration) +
+                            (($quotation->guide->per_day_charge ?? 0) * $quotation->duration) +
+                            $quotation->siteSeeings->sum('price_per_adult');
+                            
+                            $totalExVat = $total / 1.15; // Assuming 15% VAT
+                            $markup = $quotation->markup_per_person;
+                            $nett = $totalExVat + $markup;
+                            $roundUp = ceil($nett);
+                        @endphp
+                        <td class="px-4 py-3 text-center font-semibold">{{ number_format($total, 2) }}</td>
+                        <td class="px-4 py-3 text-center">{{ number_format($totalExVat, 2) }}</td>
+                        <td class="px-4 py-3 text-center text-blue-600">{{ number_format($markup, 2) }}</td>
+                        <td class="px-4 py-3 text-center font-semibold text-green-600">{{ number_format($nett, 2) }}</td>
+                        <td class="px-4 py-3 text-center font-bold text-red-600">{{ number_format($roundUp, 2) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+
         <!-- Action Buttons -->
         <div class="flex justify-between mt-6">
             <a href="{{ route('quotations.index') }}"
