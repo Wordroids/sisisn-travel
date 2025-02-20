@@ -8,7 +8,7 @@
             <thead class="bg-gray-200">
                 <tr>
                     <th class="border px-4 py-2">Name</th>
-                    <th class="border px-4 py-2">Min Pax</th>
+                    <th class="border px-4 py-2">No Of Pax For Quoting</th>
                     <th class="border px-4 py-2">Max Pax</th>
                     <th class="border px-4 py-2">Order</th>
                     <th class="border px-4 py-2">Actions</th>
