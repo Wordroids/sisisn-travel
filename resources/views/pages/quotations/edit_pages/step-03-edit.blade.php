@@ -302,7 +302,7 @@
                     </div>
                     <div class="grid grid-cols-3 gap-3">
                         <div>
-                            <label class="block text-xs text-gray-500">Per Night</label>
+                            <label class="block text-xs text-gray-500">Per Night ( USD )</label>
                             <input type="number" 
                                 name="accommodations[${cardIndex}][room_types][${type}][per_night_cost]" 
                                 value="${roomDetails ? roomDetails.per_night_cost : ''}"
@@ -341,7 +341,7 @@
         </div>
         <div class="grid grid-cols-3 gap-3">
             <div>
-                <label class="block text-xs text-gray-500">Per Night</label>
+                <label class="block text-xs text-gray-500">Per Night ( LKR )</label>
                 <input type="number" 
                     name="accommodations[${cardIndex}][additional_rooms][${type}][per_night_cost]" 
                     value="${roomDetails ? roomDetails.per_night_cost : ''}"

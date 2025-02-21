@@ -355,7 +355,50 @@
             </div>
         </div>
 
-
+        <!-- Quotation Extras -->
+        <div class="bg-white p-6 rounded-lg shadow-sm mt-6">
+            <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">Quotation Extras</h3>
+            <div class="overflow-x-auto mt-4">
+                <table class="w-full text-sm text-left text-gray-700 border rounded-lg shadow">
+                    <thead class="bg-gray-200 text-gray-700">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Date</th>
+                            <th class="px-4 py-3 text-left">Description</th>
+                            <th class="px-4 py-3 text-center">Unit Price (USD)</th>
+                            <th class="px-4 py-3 text-center">Quantity Per Pax</th>
+                            <th class="px-4 py-3 text-center">Total Price (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        @forelse($quotation->extras as $extra)
+                            <tr class="bg-gray-50 hover:bg-gray-100 transition">
+                                <td class="px-4 py-3">{{ $extra->date->format('Y-m-d') }}</td>
+                                <td class="px-4 py-3">{{ $extra->description }}</td>
+                                <td class="px-4 py-3 text-center">{{ number_format($extra->unit_price, 2) }}</td>
+                                <td class="px-4 py-3 text-center">{{ $extra->quantity_per_pax }}</td>
+                                <td class="px-4 py-3 text-center font-semibold text-green-600">
+                                    {{ number_format($extra->total_price, 2) }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-4 py-3 text-center text-gray-500">
+                                    No extras available
+                                </td>
+                            </tr>
+                        @endforelse
+                        @if($quotation->extras->count() > 0)
+                            <tr class="bg-gray-100">
+                                <td colspan="4" class="px-4 py-3 text-right font-semibold">Total:</td>
+                                <td class="px-4 py-3 text-center font-bold text-green-600">
+                                    {{ number_format($quotation->extras->sum('total_price'), 2) }}
+                                </td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
         <!-- Quote Simulation -->
         <div class="bg-white p-6 rounded-lg shadow-sm mt-6">
@@ -409,6 +452,9 @@
                         // Site seeing calculations
                         $sitesTotal = $quotation->siteSeeings->sum('price_per_adult');
 
+                        //Extras calculations
+                        $extrasTotal = $quotation->extras->sum('total_price');
+
                         // Build simulation rows
                         $simulationRows = [];
                         foreach ($quotation->paxSlabs as $paxSlab) {
@@ -431,7 +477,7 @@
                                 ),
                                 'sites' => number_format($sitesTotal, 2),
                                 'jeep_charges' => '-',
-                                'extras' => '-',
+                                'extras' => number_format($extrasTotal / $minPax , 2),
                             ];
 
                             // Calculate financials
@@ -440,6 +486,7 @@
                                     ($paxSlab->vehicle_payout_rate * $totalMileage) / $minPax / $conversionRate +
                                     ($duration * $driverDailyCharge + $driverAccommodation) / $conversionRate / $minPax +
                                     ($duration * $guideDailyCharge + $guideAccommodation) / $conversionRate / $minPax) +
+                                    ($extrasTotal / $minPax) +
                                 $sitesTotal;
 
                             $totalExVat = $total / 1.18;
