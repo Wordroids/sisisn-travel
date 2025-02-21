@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreQuotationRequest;
 use App\Http\Requests\UpdateQuotationRequest;
+use App\Models\AdditionalRooms;
 use App\Models\Currency;
 use App\Models\Customers;
 use App\Models\Hotel;
@@ -23,6 +24,7 @@ use App\Models\Guide;
 use Illuminate\Http\Request;
 use App\Models\QuotationAccommodationRoomDetails;
 use App\Models\QuotationSiteSeeing;
+use App\Models\QuotationExtra;
 
 class QuotationController extends Controller
 {
@@ -81,7 +83,7 @@ class QuotationController extends Controller
 
     public function show($id)
     {
-        $quotation = Quotation::with(['market', 'customer', 'driver', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType' , 'siteSeeings'])->findOrFail($id);
+        $quotation = Quotation::with(['market', 'customer', 'driver', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType' , 'siteSeeings','extras'])->findOrFail($id);
 
         return view('pages.quotations.show', compact('quotation'));
     }
@@ -328,8 +330,17 @@ class QuotationController extends Controller
             'accommodations.*.room_types.*.per_night_cost' => 'required|numeric|min:0',
             'accommodations.*.room_types.*.nights' => 'nullable|integer|min:0',
             'accommodations.*.room_types.*.total_cost' => 'nullable|numeric|min:0',
+            'accommodations.*.additional_rooms' => 'required|array',
+            'accommodations.*.additional_rooms.driver.per_night_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.driver.nights' => 'required|integer|min:0',
+            'accommodations.*.additional_rooms.driver.total_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.driver.provided_by_hotel' => 'nullable|boolean',
+            'accommodations.*.additional_rooms.guide.per_night_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.guide.nights' => 'required|integer|min:0',
+            'accommodations.*.additional_rooms.guide.total_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.guide.provided_by_hotel' => 'nullable|boolean',
         ]);
-
+        
         foreach ($request->accommodations as $accommodation) {
             // Calculate total nights from all room types
             $totalNights = collect($accommodation['room_types'])->sum('nights');
@@ -358,6 +369,21 @@ class QuotationController extends Controller
                     ]);
                 }
             }
+
+            // Store room details for additional rooms (driver, guide)
+            foreach ($accommodation['additional_rooms'] as $type => $details) {
+                // Only create records if nights is greater than 0
+                if (!empty($details['nights']) && $details['nights'] > 0) {
+                    AdditionalRooms::create([
+                        'quotation_accommodation_id' => $quotationAccommodation->id,
+                        'room_type' => $type,
+                        'per_night_cost' => $details['per_night_cost'],
+                        'nights' => $details['nights'],
+                        'total_cost' => $details['total_cost'],
+                        'provided_by_hotel' => $details['provided_by_hotel'] ?? false,
+                    ]);
+                }
+            }
         }
 
         return redirect()->route('quotations.step4', $quotation->id)->with('success', 'Accommodation details saved successfully.');
@@ -365,7 +391,8 @@ class QuotationController extends Controller
 
     public function editStepThree($id)
     {
-        $quotation = Quotation::with(['accommodations.roomDetails'])->findOrFail($id);
+        $quotation = Quotation::with(['accommodations.roomDetails', 'accommodations.additionalRooms'])
+        ->findOrFail($id);
 
         $hotels = Hotel::all();
         $mealPlans = MealPlan::all();
@@ -378,6 +405,7 @@ class QuotationController extends Controller
 
     public function updateStepThree(Request $request, $id)
     {
+        //dd($request->all());
         $quotation = Quotation::findOrFail($id);
 
         $request->validate([
@@ -391,6 +419,15 @@ class QuotationController extends Controller
             'accommodations.*.room_types.*.per_night_cost' => 'required|numeric|min:0',
             'accommodations.*.room_types.*.nights' => 'nullable|integer|min:0',
             'accommodations.*.room_types.*.total_cost' => 'nullable|numeric|min:0',
+            'accommodations.*.additional_rooms' => 'required|array',
+            'accommodations.*.additional_rooms.driver.per_night_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.driver.nights' => 'required|integer|min:0',
+            'accommodations.*.additional_rooms.driver.total_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.driver.provided_by_hotel' => 'nullable|boolean',
+            'accommodations.*.additional_rooms.guide.per_night_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.guide.nights' => 'required|integer|min:0',
+            'accommodations.*.additional_rooms.guide.total_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.guide.provided_by_hotel' => 'nullable|boolean',
         ]);
 
         // Delete existing accommodations
@@ -418,6 +455,21 @@ class QuotationController extends Controller
                         'per_night_cost' => $details['per_night_cost'],
                         'nights' => $details['nights'],
                         'total_cost' => $details['total_cost'],
+                    ]);
+                }
+            }
+
+             // Store room details for additional rooms (driver, guide)
+             foreach ($accommodation['additional_rooms'] as $type => $details) {
+                // Only create records if nights is greater than 0
+                if (!empty($details['nights']) && $details['nights'] > 0) {
+                    AdditionalRooms::create([
+                        'quotation_accommodation_id' => $quotationAccommodation->id,
+                        'room_type' => $type,
+                        'per_night_cost' => $details['per_night_cost'],
+                        'nights' => $details['nights'],
+                        'total_cost' => $details['total_cost'],
+                        'provided_by_hotel' => $details['provided_by_hotel'] ?? false,
                     ]);
                 }
             }
@@ -524,6 +576,7 @@ class QuotationController extends Controller
 
     public function store_step_five(Request $request, $id)
     {
+        //dd($request->all());
         $quotation = Quotation::findOrFail($id);
 
         // Validate the request data
@@ -533,10 +586,20 @@ class QuotationController extends Controller
             'sites.*.unit_price' => 'required|numeric|min:0',
             'sites.*.quantity' => 'required|integer|min:1',
             'sites.*.price_per_adult' => 'required|numeric|min:0',
+
+            'extras' => 'required|array',
+            'extras.*.date' => 'required|date',
+            'extras.*.description' => 'required|string|max:255',
+            'extras.*.unit_price' => 'required|numeric|min:0',
+            'extras.*.quantity_per_pax' => 'required|integer|min:1',
+            'extras.*.total_price' => 'required|numeric|min:0',
         ]);
 
         // Delete existing site seeings if any
         $quotation->siteSeeings()->delete();
+
+        // Delete existing extras
+        $quotation->extras()->delete();
 
         // Store new site seeing entries
         foreach ($request->sites as $site) {
@@ -546,6 +609,18 @@ class QuotationController extends Controller
                 'unit_price' => $site['unit_price'],
                 'quantity' => $site['quantity'],
                 'price_per_adult' => $site['price_per_adult'],
+            ]);
+        }
+
+        // Store new extras entries
+        foreach ($request->extras as $extra) {
+            QuotationExtra::create([
+                'quotation_id' => $quotation->id,
+                'date' => $extra['date'],
+                'description' => $extra['description'],
+                'unit_price' => $extra['unit_price'],
+                'quantity_per_pax' => $extra['quantity_per_pax'],
+                'total_price' => $extra['total_price'],
             ]);
         }
 
@@ -577,10 +652,20 @@ class QuotationController extends Controller
             'sites.*.unit_price' => 'required|numeric|min:0',
             'sites.*.quantity' => 'required|integer|min:1',
             'sites.*.price_per_adult' => 'required|numeric|min:0',
+
+            'extras' => 'required|array',
+            'extras.*.date' => 'required|date',
+            'extras.*.description' => 'required|string|max:255',
+            'extras.*.unit_price' => 'required|numeric|min:0',
+            'extras.*.quantity_per_pax' => 'required|integer|min:1',
+            'extras.*.total_price' => 'required|numeric|min:0',
         ]);
 
         // Delete existing site seeings
         $quotation->siteSeeings()->delete();
+
+        // Delete existing extras
+        $quotation->extras()->delete();
 
         // Store updated site seeing entries
         foreach ($request->sites as $site) {
@@ -590,6 +675,18 @@ class QuotationController extends Controller
                 'unit_price' => $site['unit_price'],
                 'quantity' => $site['quantity'],
                 'price_per_adult' => $site['price_per_adult'],
+            ]);
+        }
+
+         // Store updated extras entries
+        foreach ($request->extras as $extra) {
+            QuotationExtra::create([
+                'quotation_id' => $quotation->id,
+                'date' => $extra['date'],
+                'description' => $extra['description'],
+                'unit_price' => $extra['unit_price'],
+                'quantity_per_pax' => $extra['quantity_per_pax'],
+                'total_price' => $extra['total_price'],
             ]);
         }
 

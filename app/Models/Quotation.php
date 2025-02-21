@@ -75,5 +75,10 @@ class Quotation extends Model
     {
         return $this->hasMany(QuotationSiteSeeing::class);
     }
+
+    public function extras()
+    {
+        return $this->hasMany(QuotationExtra::class);
+    }
     
 }
