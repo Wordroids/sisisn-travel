@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreQuotationRequest;
 use App\Http\Requests\UpdateQuotationRequest;
+use App\Models\AdditionalRooms;
 use App\Models\Currency;
 use App\Models\Customers;
 use App\Models\Hotel;
@@ -328,8 +329,17 @@ class QuotationController extends Controller
             'accommodations.*.room_types.*.per_night_cost' => 'required|numeric|min:0',
             'accommodations.*.room_types.*.nights' => 'nullable|integer|min:0',
             'accommodations.*.room_types.*.total_cost' => 'nullable|numeric|min:0',
+            'accommodations.*.additional_rooms' => 'required|array',
+            'accommodations.*.additional_rooms.driver.per_night_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.driver.nights' => 'required|integer|min:0',
+            'accommodations.*.additional_rooms.driver.total_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.driver.provided_by_hotel' => 'nullable|boolean',
+            'accommodations.*.additional_rooms.guide.per_night_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.guide.nights' => 'required|integer|min:0',
+            'accommodations.*.additional_rooms.guide.total_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.guide.provided_by_hotel' => 'nullable|boolean',
         ]);
-
+        
         foreach ($request->accommodations as $accommodation) {
             // Calculate total nights from all room types
             $totalNights = collect($accommodation['room_types'])->sum('nights');
@@ -355,6 +365,21 @@ class QuotationController extends Controller
                         'per_night_cost' => $details['per_night_cost'],
                         'nights' => $details['nights'],
                         'total_cost' => $details['total_cost'],
+                    ]);
+                }
+            }
+
+            // Store room details for additional rooms (driver, guide)
+            foreach ($accommodation['additional_rooms'] as $type => $details) {
+                // Only create records if nights is greater than 0
+                if (!empty($details['nights']) && $details['nights'] > 0) {
+                    AdditionalRooms::create([
+                        'quotation_accommodation_id' => $quotationAccommodation->id,
+                        'room_type' => $type,
+                        'per_night_cost' => $details['per_night_cost'],
+                        'nights' => $details['nights'],
+                        'total_cost' => $details['total_cost'],
+                        'provided_by_hotel' => $details['provided_by_hotel'] ?? false,
                     ]);
                 }
             }

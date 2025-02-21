@@ -1,6 +1,10 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
 
+        @php
+            print_r($errors->all() ?? [])
+        @endphp
+
         <!-- Progress Bar  -->
         <div>
             <ol
@@ -231,6 +235,76 @@
                                                 <label class="block text-xs text-gray-500">Total</label>
                                                 <input type="text" name="accommodations[${cardIndex}][room_types][triple][total_cost]" 
                                                     class="block w-full bg-gray-50 border-gray-300 rounded-md shadow-sm total-cost text-center" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Driver's Room -->
+                                    <div class="bg-white p-4 rounded-md shadow-sm">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="font-medium text-gray-700">Driver's Accommodation</span>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-3">
+                                            <div>
+                                                <label class="block text-xs text-gray-500">Per Night</label>
+                                                <input type="number" name="accommodations[${cardIndex}][additional_rooms][driver][per_night_cost]" 
+                                                     class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs text-gray-500">Nights</label>
+                                                <input type="number" name="accommodations[${cardIndex}][additional_rooms][driver][nights]" 
+                                                    class="block w-full border-gray-300 rounded-md shadow-sm total-nights text-center" min="0">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs text-gray-500">Total</label>
+                                                <input type="text" name="accommodations[${cardIndex}][additional_rooms][driver][total_cost]" 
+                                                    class="block w-full bg-gray-50 border-gray-300 rounded-md shadow-sm total-cost text-center" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-4 mt-4 items-center">
+                                            <label class="font-medium text-gray-700 text-sm">Provided by hotel?</label>
+                                            <div class="flex items-center">
+                                                <input type="radio" id="${cardIndex}_driver_provided_by_hotel_yes" name="accommodations[${cardIndex}][additional_rooms][driver][provided_by_hotel]" value="1" class="mr-2">
+                                                <label for="${cardIndex}_driver_provided_by_hotel_yes" class="text-sm">Yes</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="radio" id="${cardIndex}_driver_provided_by_hotel_no" name="accommodations[${cardIndex}][additional_rooms][driver][provided_by_hotel]" value="0" class="mr-2">
+                                                <label for="${cardIndex}_driver_provided_by_hotel_no" class="text-sm">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Guide's Room -->
+                                    <div class="bg-white p-4 rounded-md shadow-sm">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="font-medium text-gray-700">Guide's Accommodation</span>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-3">
+                                            <div>
+                                                <label class="block text-xs text-gray-500">Per Night</label>
+                                                <input type="number" name="accommodations[${cardIndex}][additional_rooms][guide][per_night_cost]" 
+                                                     class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs text-gray-500">Nights</label>
+                                                <input type="number" name="accommodations[${cardIndex}][additional_rooms][guide][nights]" 
+                                                    class="block w-full border-gray-300 rounded-md shadow-sm total-nights text-center" min="0">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs text-gray-500">Total</label>
+                                                <input type="text" name="accommodations[${cardIndex}][additional_rooms][guide][total_cost]" 
+                                                    class="block w-full bg-gray-50 border-gray-300 rounded-md shadow-sm total-cost text-center" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-4 mt-4 items-center">
+                                            <label class="font-medium text-gray-700 text-sm">Provided by hotel?</label>
+                                            <div class="flex items-center">
+                                                <input type="radio" id="${cardIndex}_guide_provided_by_hotel_yes" name="accommodations[${cardIndex}][additional_rooms][guide][provided_by_hotel]" value="1" class="mr-2">
+                                                <label for="${cardIndex}_guide_provided_by_hotel_yes" class="text-sm">Yes</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="radio" id="${cardIndex}_guide_provided_by_hotel_no" name="accommodations[${cardIndex}][additional_rooms][guide][provided_by_hotel]" value="0" class="mr-2">
+                                                <label for="${cardIndex}_guide_provided_by_hotel_no" class="text-sm">No</label>
                                             </div>
                                         </div>
                                     </div>
