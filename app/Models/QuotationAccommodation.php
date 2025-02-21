@@ -47,4 +47,9 @@ class QuotationAccommodation extends Model
     {
         return $this->hasMany(QuotationAccommodationRoomDetails::class, 'quotation_accommodation_id');
     }
+
+    public function additionalRooms()
+    {
+        return $this->hasMany(AdditionalRooms::class, 'quotation_accommodation_id');
+    }
 }
