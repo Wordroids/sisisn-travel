@@ -28,7 +28,7 @@
                         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                             <tr>
                                 <th class="px-4 py-3">MarkUp Name</th>
-                                <th class="px-4 py-3">MarkUp Value</th>
+                                <th class="px-4 py-3">MarkUp Value ( $ USD )</th>
                                 <th class="px-4 py-3">Actions</th>
                             </tr>
                         </thead>

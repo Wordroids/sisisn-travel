@@ -2,7 +2,7 @@
     <div class="max-w-7xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
 
         @php
-            print_r($errors->all() ?? [])
+            //print_r($errors->all() ?? [])
         @endphp
 
         <!-- Progress Bar  -->
@@ -10,20 +10,28 @@
             <ol
                 class="flex items-center w-full text-sm font-medium text-center text-gray-500 test:text-gray-400 sm:text-base">
                 <!-- Step 1: Reference Info -->
-                <li class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
-                    <a href="{{ route('quotations.edit_step_one', $quotation->id) }}" class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-blue-200 test:after:text-blue-500">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                <li
+                    class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
+                    <a href="{{ route('quotations.edit_step_one', $quotation->id) }}"
+                        class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-blue-200 test:after:text-blue-500">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                         </svg>
                         Reference <span class="hidden sm:inline-flex sm:ms-2">Info</span>
                     </a>
                 </li>
-        
+
                 <!-- Step 2: Pax Slab -->
-                <li class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
-                    <a href="{{ route('quotations.edit_step_two', $quotation->id) }}" class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-blue-200 test:after:text-blue-500">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                <li
+                    class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
+                    <a href="{{ route('quotations.edit_step_two', $quotation->id) }}"
+                        class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-blue-200 test:after:text-blue-500">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                         </svg>
                         Pax <span class="hidden sm:inline-flex sm:ms-2">Slab</span>
                     </a>
@@ -52,7 +60,7 @@
                 </li>
                 <li class="flex items-center">
                     <span class="me-2">5</span>
-                    Site <span class="hidden sm:inline-flex sm:ms-2"> Details </span>
+                    Site <span class="hidden sm:inline-flex ">|Extra</span>
                 </li>
             </ol>
         </div>
@@ -110,23 +118,23 @@
                 const quotationEndDate = "{{ $quotation->end_date }}".split(' ')[0]; // Extract date part only
 
                 let cardHtml = `
-                    <div class="bg-gray-50 rounded-lg p-6 relative accommodation-card">
-                        <button type="button" class="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 remove-card">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
+                                <div class="bg-gray-50 rounded-lg p-6 relative accommodation-card">
+                                    <button type="button" class="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 remove-card">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
 
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <!-- Left Column -->
-                            <div class="space-y-4">
-                                <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Hotel</label>
-                        <select name="accommodations[${cardIndex}][hotel_id]" class="hotel-select block w-full border-gray-300 rounded-md shadow-sm" required>
-                            <option value="">Select Hotel</option>
-                            ${hotelSelectOptions}
-                        </select>
-                    </div>
+                                    <div class="grid md:grid-cols-2 gap-6">
+                                        <!-- Left Column -->
+                                        <div class="space-y-4">
+                                            <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Hotel</label>
+                                    <select name="accommodations[${cardIndex}][hotel_id]" class="hotel-select block w-full border-gray-300 rounded-md shadow-sm" required>
+                                        <option value="">Select Hotel</option>
+                                        ${hotelSelectOptions}
+                                    </select>
+                                </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Check-in / Check-out</label>
@@ -173,7 +181,7 @@
                                         </div>
                                         <div class="grid grid-cols-3 gap-3">
                                             <div>
-                                                <label class="block text-xs text-gray-500">Per Night</label>
+                                                <label class="block text-xs text-gray-500">Per Night ( USD )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][room_types][single][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
                                             </div>
@@ -198,7 +206,7 @@
                                         </div>
                                         <div class="grid grid-cols-3 gap-3">
                                             <div>
-                                                <label class="block text-xs text-gray-500">Per Night</label>
+                                                <label class="block text-xs text-gray-500">Per Night ( USD )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][room_types][double][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
                                             </div>
@@ -222,7 +230,7 @@
                                         </div>
                                         <div class="grid grid-cols-3 gap-3">
                                             <div>
-                                                <label class="block text-xs text-gray-500">Per Night</label>
+                                                <label class="block text-xs text-gray-500">Per Night ( USD )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][room_types][triple][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
                                             </div>
@@ -246,7 +254,7 @@
                                         </div>
                                         <div class="grid grid-cols-3 gap-3">
                                             <div>
-                                                <label class="block text-xs text-gray-500">Per Night</label>
+                                                <label class="block text-xs text-gray-500">Per Night ( LKR )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][additional_rooms][driver][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
                                             </div>
@@ -281,7 +289,7 @@
                                         </div>
                                         <div class="grid grid-cols-3 gap-3">
                                             <div>
-                                                <label class="block text-xs text-gray-500">Per Night</label>
+                                                <label class="block text-xs text-gray-500">Per Night ( LKR )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][additional_rooms][guide][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
                                             </div>
@@ -399,50 +407,49 @@
 
     <script>
         document.addEventListener("change", function(e) {
-        if (e.target.classList.contains("checkin-date") || e.target.classList.contains("checkout-date")) {
-            const card = e.target.closest('.accommodation-card');
-            const checkInInput = card.querySelector('.checkin-date');
-            const checkOutInput = card.querySelector('.checkout-date');
+            if (e.target.classList.contains("checkin-date") || e.target.classList.contains("checkout-date")) {
+                const card = e.target.closest('.accommodation-card');
+                const checkInInput = card.querySelector('.checkin-date');
+                const checkOutInput = card.querySelector('.checkout-date');
 
-            // When check-in date changes, update check-out min date
-            if (e.target.classList.contains("checkin-date")) {
-                checkOutInput.min = checkInInput.value;
-            }
-
-            // When check-out date changes, update check-in max date
-            if (e.target.classList.contains("checkout-date")) {
-                checkInInput.max = checkOutInput.value;
-            }
-
-            if (checkInInput.value && checkOutInput.value) {
-                const nights = calculateNights(checkInInput.value, checkOutInput.value);
-                if (nights <= 0) {
-                    alert('Check-out date must be after check-in date');
-                    e.target.value = '';
-                    return;
+                // When check-in date changes, update check-out min date
+                if (e.target.classList.contains("checkin-date")) {
+                    checkOutInput.min = checkInInput.value;
                 }
 
-                // Validate against quotation date range
-                const checkIn = new Date(checkInInput.value);
-                const checkOut = new Date(checkOutInput.value);
-                const quotationStart = new Date(quotationStartDate);
-                const quotationEnd = new Date(quotationEndDate);
-
-                if (checkIn < quotationStart || checkOut > quotationEnd) {
-                    alert('Accommodation dates must be within the quotation date range');
-                    e.target.value = '';
-                    return;
+                // When check-out date changes, update check-in max date
+                if (e.target.classList.contains("checkout-date")) {
+                    checkInInput.max = checkOutInput.value;
                 }
 
-                // Update night inputs
-                const nightInputs = card.querySelectorAll('.total-nights');
-                nightInputs.forEach(input => {
-                    input.value = nights;
-                    input.dispatchEvent(new Event('input'));
-                });
+                if (checkInInput.value && checkOutInput.value) {
+                    const nights = calculateNights(checkInInput.value, checkOutInput.value);
+                    if (nights <= 0) {
+                        alert('Check-out date must be after check-in date');
+                        e.target.value = '';
+                        return;
+                    }
+
+                    // Validate against quotation date range
+                    const checkIn = new Date(checkInInput.value);
+                    const checkOut = new Date(checkOutInput.value);
+                    const quotationStart = new Date(quotationStartDate);
+                    const quotationEnd = new Date(quotationEndDate);
+
+                    if (checkIn < quotationStart || checkOut > quotationEnd) {
+                        alert('Accommodation dates must be within the quotation date range');
+                        e.target.value = '';
+                        return;
+                    }
+
+                    // Update night inputs
+                    const nightInputs = card.querySelectorAll('.total-nights');
+                    nightInputs.forEach(input => {
+                        input.value = nights;
+                        input.dispatchEvent(new Event('input'));
+                    });
+                }
             }
-        }
         });
-        
     </script>
 </x-app-layout>

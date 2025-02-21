@@ -31,7 +31,7 @@
                                 <th class="px-4 py-3">Contact No</th>
                                 <th class="px-4 py-3">Address</th>
                                 <th class="px-4 py-3">Email</th>
-                                <th class="px-4 py-3">Per Day Charge</th>
+                                <th class="px-4 py-3">Per Day Charge ( LKR )</th>
                                 <th class="px-4 py-3">Actions</th>
                             </tr>
                         </thead>

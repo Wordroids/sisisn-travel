@@ -48,9 +48,9 @@
                 </li>
                 <li class="flex items-center">
                     <span class="me-2">5</span>
-                    Site <span class="hidden sm:inline-flex sm:ms-2"> Details </span>
+                    Site <span class="hidden sm:inline-flex ">|Extra</span>
                 </li>
-                
+
             </ol>
         </div>
 
