@@ -171,6 +171,12 @@
                                 ${createRoomTypeHtml('double', cardIndex, existingData)}
                                 <!-- Triple Room -->
                                 ${createRoomTypeHtml('triple', cardIndex, existingData)}
+
+                                <!-- Driver's Room -->
+                                ${createAdditionalRoomHtml('driver', cardIndex, existingData)}
+
+                                <!-- Guide's Room -->
+                                ${createAdditionalRoomHtml('guide', cardIndex, existingData)}
                             </div>
                         </div>
                     </div>
@@ -186,17 +192,54 @@
 
                 // Set selected values if existingData is provided
                 if (existingData) {
-                    const tomSelect = hotelSelect.tomselect;
-                    tomSelect.setValue(existingData.hotel_id);
+        const card = document.querySelectorAll('.accommodation-card')[cardIndex];
+        
+        // Set basic accommodation data
+        const hotelSelect = card.querySelector(`select[name="accommodations[${cardIndex}][hotel_id]"]`);
+        const tomSelect = hotelSelect.tomselect;
+        tomSelect.setValue(existingData.hotel_id);
+        
+        card.querySelector(`input[name="accommodations[${cardIndex}][start_date]"]`).value = existingData.start_date;
+        card.querySelector(`input[name="accommodations[${cardIndex}][end_date]"]`).value = existingData.end_date;
+        card.querySelector(`select[name="accommodations[${cardIndex}][meal_plan_id]"]`).value = existingData.meal_plan_id;
+        card.querySelector(`select[name="accommodations[${cardIndex}][room_category_id]"]`).value = existingData.room_category_id;
 
-                    const card = document.querySelectorAll('.accommodation-card')[cardIndex];
-                    card.querySelector(`select[name="accommodations[${cardIndex}][hotel_id]"]`).value = existingData
-                        .hotel_id;
-                    card.querySelector(`select[name="accommodations[${cardIndex}][meal_plan_id]"]`).value =
-                        existingData.meal_plan_id;
-                    card.querySelector(`select[name="accommodations[${cardIndex}][room_category_id]"]`).value =
-                        existingData.room_category_id;
+        // Set room details
+        if (existingData.room_details) {
+            existingData.room_details.forEach(room => {
+                const roomType = room.room_type;
+                const perNightInput = card.querySelector(`input[name="accommodations[${cardIndex}][room_types][${roomType}][per_night_cost]"]`);
+                const nightsInput = card.querySelector(`input[name="accommodations[${cardIndex}][room_types][${roomType}][nights]"]`);
+                const totalInput = card.querySelector(`input[name="accommodations[${cardIndex}][room_types][${roomType}][total_cost]"]`);
+
+                if (perNightInput && nightsInput && totalInput) {
+                    perNightInput.value = room.per_night_cost;
+                    nightsInput.value = room.nights;
+                    totalInput.value = room.total_cost;
                 }
+            });
+        }
+
+        // Set additional rooms data
+        if (existingData.additional_rooms) {
+            existingData.additional_rooms.forEach(room => {
+                const roomType = room.room_type; // 'driver' or 'guide'
+                const container = card.querySelector(`[name="accommodations[${cardIndex}][additional_rooms][${roomType}][per_night_cost]"]`).closest('.bg-white');
+                
+                container.querySelector(`[name="accommodations[${cardIndex}][additional_rooms][${roomType}][per_night_cost]"]`).value = room.per_night_cost;
+                container.querySelector(`[name="accommodations[${cardIndex}][additional_rooms][${roomType}][nights]"]`).value = room.nights;
+                container.querySelector(`[name="accommodations[${cardIndex}][additional_rooms][${roomType}][total_cost]"]`).value = room.total_cost;
+                
+                // Set radio button for provided_by_hotel
+                const providedByHotelValue = room.provided_by_hotel ? "1" : "0";
+                const radioButton = container.querySelector(`input[type="radio"][value="${providedByHotelValue}"]`);
+                if (radioButton) {
+                    radioButton.checked = true;
+                }
+            });
+        }
+    }
+
 
                 // Initialize event listeners for the new card
                 initializeCardEvents(cardIndex);
@@ -252,6 +295,64 @@
                 </div>
             `;
             }
+
+            function createAdditionalRoomHtml(type, cardIndex, existingData) {
+    const roomDetails = existingData ? existingData.additional_rooms?.find(room => room.room_type === type) : null;
+    const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
+
+    return `
+    <div class="bg-white p-4 rounded-md shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+            <span class="font-medium text-gray-700">${capitalizedType}'s Accommodation</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+            <div>
+                <label class="block text-xs text-gray-500">Per Night</label>
+                <input type="number" 
+                    name="accommodations[${cardIndex}][additional_rooms][${type}][per_night_cost]" 
+                    value="${roomDetails ? roomDetails.per_night_cost : ''}"
+                    class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500">Nights</label>
+                <input type="number" 
+                    name="accommodations[${cardIndex}][additional_rooms][${type}][nights]" 
+                    value="${roomDetails ? roomDetails.nights : ''}"
+                    class="block w-full border-gray-300 rounded-md shadow-sm total-nights text-center" 
+                    min="0">
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500">Total</label>
+                <input type="text" 
+                    name="accommodations[${cardIndex}][additional_rooms][${type}][total_cost]" 
+                    value="${roomDetails ? roomDetails.total_cost : ''}"
+                    class="block w-full bg-gray-50 border-gray-300 rounded-md shadow-sm total-cost text-center" 
+                    readonly>
+            </div>
+        </div>
+        <div class="flex gap-4 mt-4 items-center">
+            <label class="font-medium text-gray-700 text-sm">Provided by hotel?</label>
+            <div class="flex items-center">
+                <input type="radio" 
+                    id="${cardIndex}_${type}_provided_by_hotel_yes" 
+                    name="accommodations[${cardIndex}][additional_rooms][${type}][provided_by_hotel]" 
+                    value="1" 
+                    ${roomDetails && roomDetails.provided_by_hotel ? 'checked' : ''}
+                    class="mr-2">
+                <label for="${cardIndex}_${type}_provided_by_hotel_yes" class="text-sm">Yes</label>
+            </div>
+            <div class="flex items-center">
+                <input type="radio" 
+                    id="${cardIndex}_${type}_provided_by_hotel_no" 
+                    name="accommodations[${cardIndex}][additional_rooms][${type}][provided_by_hotel]" 
+                    value="0" 
+                    ${roomDetails && !roomDetails.provided_by_hotel ? 'checked' : ''}
+                    class="mr-2">
+                <label for="${cardIndex}_${type}_provided_by_hotel_no" class="text-sm">No</label>
+            </div>
+        </div>
+    </div>`;
+}
 
             // Add hotel button event listener
             document.getElementById("add-hotel").addEventListener("click", () => addAccommodationCard());

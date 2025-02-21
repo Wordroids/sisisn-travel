@@ -13,7 +13,7 @@
         </div>
 
         <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700">Markup Amount</label>
+            <label class="block text-sm font-medium text-gray-700">Markup Amount ( $ USD )</label>
             <input type="number" name="amount" step="0.01" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                    value="{{ old('amount', $markup->amount ?? '') }}" required>
             @error('amount') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror

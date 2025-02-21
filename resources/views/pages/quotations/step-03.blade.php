@@ -2,7 +2,7 @@
     <div class="max-w-7xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
 
         @php
-            print_r($errors->all() ?? [])
+            //print_r($errors->all() ?? [])
         @endphp
 
         <!-- Progress Bar  -->
@@ -110,23 +110,23 @@
                 const quotationEndDate = "{{ $quotation->end_date }}".split(' ')[0]; // Extract date part only
 
                 let cardHtml = `
-                    <div class="bg-gray-50 rounded-lg p-6 relative accommodation-card">
-                        <button type="button" class="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 remove-card">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
+                                <div class="bg-gray-50 rounded-lg p-6 relative accommodation-card">
+                                    <button type="button" class="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 remove-card">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
 
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <!-- Left Column -->
-                            <div class="space-y-4">
-                                <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Hotel</label>
-                        <select name="accommodations[${cardIndex}][hotel_id]" class="hotel-select block w-full border-gray-300 rounded-md shadow-sm" required>
-                            <option value="">Select Hotel</option>
-                            ${hotelSelectOptions}
-                        </select>
-                    </div>
+                                    <div class="grid md:grid-cols-2 gap-6">
+                                        <!-- Left Column -->
+                                        <div class="space-y-4">
+                                            <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Hotel</label>
+                                    <select name="accommodations[${cardIndex}][hotel_id]" class="hotel-select block w-full border-gray-300 rounded-md shadow-sm" required>
+                                        <option value="">Select Hotel</option>
+                                        ${hotelSelectOptions}
+                                    </select>
+                                </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Check-in / Check-out</label>
@@ -173,7 +173,7 @@
                                         </div>
                                         <div class="grid grid-cols-3 gap-3">
                                             <div>
-                                                <label class="block text-xs text-gray-500">Per Night</label>
+                                                <label class="block text-xs text-gray-500">Per Night ( USD )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][room_types][single][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
                                             </div>
@@ -198,7 +198,7 @@
                                         </div>
                                         <div class="grid grid-cols-3 gap-3">
                                             <div>
-                                                <label class="block text-xs text-gray-500">Per Night</label>
+                                                <label class="block text-xs text-gray-500">Per Night ( USD )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][room_types][double][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
                                             </div>
@@ -222,7 +222,7 @@
                                         </div>
                                         <div class="grid grid-cols-3 gap-3">
                                             <div>
-                                                <label class="block text-xs text-gray-500">Per Night</label>
+                                                <label class="block text-xs text-gray-500">Per Night ( USD )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][room_types][triple][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
                                             </div>
@@ -246,7 +246,7 @@
                                         </div>
                                         <div class="grid grid-cols-3 gap-3">
                                             <div>
-                                                <label class="block text-xs text-gray-500">Per Night</label>
+                                                <label class="block text-xs text-gray-500">Per Night ( LKR )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][additional_rooms][driver][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
                                             </div>
@@ -281,7 +281,7 @@
                                         </div>
                                         <div class="grid grid-cols-3 gap-3">
                                             <div>
-                                                <label class="block text-xs text-gray-500">Per Night</label>
+                                                <label class="block text-xs text-gray-500">Per Night ( LKR )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][additional_rooms][guide][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
                                             </div>
