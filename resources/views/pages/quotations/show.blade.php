@@ -105,7 +105,36 @@
                                         </td>
                                     </tr>
                                 @endforeach
+                            </tbody>
+                        </table>
+                    </div>
 
+                    <!-- Driver & Guide Accommodation -->
+                    <div class="overflow-x-auto">
+                        <h4 class="font-semibold text-gray-800 py-4">{{ $accommodation->hotel->name }} - Driver & Guide Accommodation</h4>
+                        <table class="w-full text-sm text-left text-gray-700 border rounded-lg shadow">
+                            <thead class="bg-gray-200 text-gray-700">
+                                <tr>
+                                    <th class="px-4 py-2 text-left">Driver/Guide</th>
+                                    <th class="px-4 py-2 text-center">Per Night Cost</th>
+                                    <th class="px-4 py-2 text-center">Nights</th>
+                                    <th class="px-4 py-2 text-center">Provided By Hotel</th>
+                                    <th class="px-4 py-2 text-center">Total Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y">
+                                @foreach ($accommodation->additionalRooms as $detail)
+                                    <tr class="hover:bg-gray-100 transition">
+                                        <td class="px-4 py-2">{{ ucfirst($detail->room_type) }}</td>
+                                        <td class="px-4 py-2 text-center">
+                                            {{ number_format($detail->per_night_cost, 2) }}</td>
+                                        <td class="px-4 py-2 text-center">{{ $detail->nights }}</td>
+                                        <td class="px-4 py-2 text-center">{{ $detail->provided_by_hotel ? 'Yes' : 'No' }}</td>
+                                        <td class="px-4 py-2 text-center font-semibold text-green-600">
+                                            {{ number_format($detail->total_cost, 2) }}
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
