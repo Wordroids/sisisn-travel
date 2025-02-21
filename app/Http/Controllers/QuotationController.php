@@ -24,6 +24,7 @@ use App\Models\Guide;
 use Illuminate\Http\Request;
 use App\Models\QuotationAccommodationRoomDetails;
 use App\Models\QuotationSiteSeeing;
+use App\Models\QuotationExtra;
 
 class QuotationController extends Controller
 {
@@ -575,6 +576,7 @@ class QuotationController extends Controller
 
     public function store_step_five(Request $request, $id)
     {
+        //dd($request->all());
         $quotation = Quotation::findOrFail($id);
 
         // Validate the request data
@@ -584,10 +586,20 @@ class QuotationController extends Controller
             'sites.*.unit_price' => 'required|numeric|min:0',
             'sites.*.quantity' => 'required|integer|min:1',
             'sites.*.price_per_adult' => 'required|numeric|min:0',
+
+            'extras' => 'required|array',
+            'extras.*.date' => 'required|date',
+            'extras.*.description' => 'required|string|max:255',
+            'extras.*.unit_price' => 'required|numeric|min:0',
+            'extras.*.quantity_per_pax' => 'required|integer|min:1',
+            'extras.*.total_price' => 'required|numeric|min:0',
         ]);
 
         // Delete existing site seeings if any
         $quotation->siteSeeings()->delete();
+
+        // Delete existing extras
+        $quotation->extras()->delete();
 
         // Store new site seeing entries
         foreach ($request->sites as $site) {
@@ -597,6 +609,18 @@ class QuotationController extends Controller
                 'unit_price' => $site['unit_price'],
                 'quantity' => $site['quantity'],
                 'price_per_adult' => $site['price_per_adult'],
+            ]);
+        }
+
+        // Store new extras entries
+        foreach ($request->extras as $extra) {
+            QuotationExtra::create([
+                'quotation_id' => $quotation->id,
+                'date' => $extra['date'],
+                'description' => $extra['description'],
+                'unit_price' => $extra['unit_price'],
+                'quantity_per_pax' => $extra['quantity_per_pax'],
+                'total_price' => $extra['total_price'],
             ]);
         }
 
@@ -628,10 +652,20 @@ class QuotationController extends Controller
             'sites.*.unit_price' => 'required|numeric|min:0',
             'sites.*.quantity' => 'required|integer|min:1',
             'sites.*.price_per_adult' => 'required|numeric|min:0',
+
+            'extras' => 'required|array',
+            'extras.*.date' => 'required|date',
+            'extras.*.description' => 'required|string|max:255',
+            'extras.*.unit_price' => 'required|numeric|min:0',
+            'extras.*.quantity_per_pax' => 'required|integer|min:1',
+            'extras.*.total_price' => 'required|numeric|min:0',
         ]);
 
         // Delete existing site seeings
         $quotation->siteSeeings()->delete();
+
+        // Delete existing extras
+        $quotation->extras()->delete();
 
         // Store updated site seeing entries
         foreach ($request->sites as $site) {
@@ -641,6 +675,18 @@ class QuotationController extends Controller
                 'unit_price' => $site['unit_price'],
                 'quantity' => $site['quantity'],
                 'price_per_adult' => $site['price_per_adult'],
+            ]);
+        }
+
+         // Store updated extras entries
+        foreach ($request->extras as $extra) {
+            QuotationExtra::create([
+                'quotation_id' => $quotation->id,
+                'date' => $extra['date'],
+                'description' => $extra['description'],
+                'unit_price' => $extra['unit_price'],
+                'quantity_per_pax' => $extra['quantity_per_pax'],
+                'total_price' => $extra['total_price'],
             ]);
         }
 

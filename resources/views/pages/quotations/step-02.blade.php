@@ -6,10 +6,14 @@
             <ol
                 class="flex items-center w-full text-sm font-medium text-center text-gray-500 test:text-gray-400 sm:text-base">
                 <!-- Step 1: Reference Info -->
-                <li class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
-                    <a href="{{ route('quotations.edit_step_one', $quotation->id) }}" class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-blue-200 test:after:text-blue-500">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                <li
+                    class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
+                    <a href="{{ route('quotations.edit_step_one', $quotation->id) }}"
+                        class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-blue-200 test:after:text-blue-500">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                         </svg>
                         Reference <span class="hidden sm:inline-flex sm:ms-2">Info</span>
                     </a>
@@ -47,7 +51,7 @@
                 </li>
                 <li class="flex items-center">
                     <span class="me-2">5</span>
-                    Site <span class="hidden sm:inline-flex sm:ms-2"> Details </span>
+                    Site <span class="hidden sm:inline-flex ">|Extra</span>
                 </li>
             </ol>
         </div>
@@ -101,17 +105,17 @@
             </div>
 
             <div class="flex justify-between mt-6">
-                @if(isset($navigation['back']))
-                    <a href="{{ $navigation['back'] }}" 
-                       class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+                @if (isset($navigation['back']))
+                    <a href="{{ $navigation['back'] }}"
+                        class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
                         Back
                     </a>
                 @else
                     <div></div> {{-- Empty div to maintain spacing --}}
                 @endif
-            
-                <button type="submit" 
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+
+                <button type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
                     {{ $navigation['submit_text'] ?? 'Start Quote' }}
                 </button>
             </div>

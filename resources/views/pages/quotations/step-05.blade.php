@@ -68,7 +68,7 @@
                             <path
                                 d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                         </svg>
-                        Site <span class="hidden sm:inline-flex sm:ms-2">Details</span>
+                        Site <span class="hidden sm:inline-flex ">|Extra</span>
                     </span>
                 </li>
             </ol>
@@ -127,6 +127,66 @@
                 class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">
                 + Add Another Site
             </button>
+
+            <div class="mt-8">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Quotation Extras</h3>
+                <div id="extras-section">
+                    <div class="extra-entry border p-4 rounded-lg mb-4 bg-gray-100 relative">
+                        <button type="button"
+                            class="remove-extra absolute top-2 right-2 text-red-500 hover:text-red-700">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                        <div class="grid grid-cols-5 gap-4">
+                            <!-- Date -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Date</label>
+                                <input type="date" name="extras[0][date]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm"
+                                    min="{{ $quotation->start_date }}" max="{{ $quotation->end_date }}">
+                            </div>
+
+                            <!-- Description -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Description</label>
+                                <input type="text" name="extras[0][description]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm">
+                            </div>
+
+                            <!-- Unit Price -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Unit Price (USD)</label>
+                                <input type="number" name="extras[0][unit_price]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm" step="0.01"
+                                    min="0">
+                            </div>
+
+                            <!-- Quantity Per Pax -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Quantity Per Pax</label>
+                                <input type="number" name="extras[0][quantity_per_pax]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm" min="1">
+                            </div>
+
+                            <!-- Total Price -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Total Price (USD)</label>
+                                <input type="number" name="extras[0][total_price]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm" step="0.01"
+                                    min="0" disabled>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Another Extra Button -->
+                <button type="button" id="add-extra"
+                    class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">
+                    + Add Another Extra
+                </button>
+            </div>
 
             <div class="flex justify-between mt-6">
                 @if (isset($navigation['back']))
@@ -220,7 +280,7 @@
                     const unitPriceInput = entry.querySelector('input[name*="unit_price"]');
                     const quantityInput = entry.querySelector('input[name*="quantity"]');
                     const perAdultPriceInput = entry.querySelector(
-                    'input[name*="price_per_adult"]');
+                        'input[name*="price_per_adult"]');
 
                     // Enable disabled fields before submit to include their values
                     quantityInput.disabled = false;
@@ -260,6 +320,101 @@
                         perAdultPriceInput.disabled = true;
                     });
                 }
+            });
+        });
+    </script>
+    <script>
+        // Get quotation dates from PHP variables
+        const quotationStartDate = "{{ $quotation->start_date }}".split(' ')[0]; // Extract date part only
+        const quotationEndDate = "{{ $quotation->end_date }}".split(' ')[0]; // Extract date part only
+
+        // Function to set date restrictions on extra entries
+        function setDateRestrictions(extraEntry) {
+            const dateInput = extraEntry.querySelector('input[name*="date"]');
+            if (dateInput) {
+                dateInput.min = quotationStartDate;
+                dateInput.max = quotationEndDate;
+
+                // Add event listener to validate date
+                dateInput.addEventListener('change', function(e) {
+                    const selectedDate = new Date(this.value);
+                    const startDate = new Date(quotationStartDate);
+                    const endDate = new Date(quotationEndDate);
+
+                    if (selectedDate < startDate || selectedDate > endDate) {
+                        alert('Date must be within the quotation duration');
+                        this.value = '';
+                    }
+                });
+            }
+        }
+
+        // Extras handling
+        let extraIndex = 1;
+
+        // Function to calculate total price for extras
+        function calculateTotalPrice(extraEntry) {
+            const unitPrice = parseFloat(extraEntry.querySelector('input[name*="unit_price"]').value) || 0;
+            const quantityPerPax = parseFloat(extraEntry.querySelector('input[name*="quantity_per_pax"]').value) || 1;
+            const totalPriceInput = extraEntry.querySelector('input[name*="total_price"]');
+
+            const totalPrice = unitPrice * quantityPerPax;
+            totalPriceInput.value = totalPrice.toFixed(2);
+        }
+
+        // Add event listeners for price calculations
+        function addExtraPriceListeners(extraEntry) {
+            const unitPriceInput = extraEntry.querySelector('input[name*="unit_price"]');
+            const quantityInput = extraEntry.querySelector('input[name*="quantity_per_pax"]');
+
+            [unitPriceInput, quantityInput].forEach(input => {
+                input.addEventListener('input', () => calculateTotalPrice(extraEntry));
+            });
+        }
+
+        // Add initial listener to first extra entry
+        addExtraPriceListeners(document.querySelector('.extra-entry'));
+
+        // Add new extra entry
+        document.querySelector("#add-extra").addEventListener("click", function() {
+            let newExtra = document.querySelector(".extra-entry").cloneNode(true);
+
+            // Clear values and update indexes
+            newExtra.querySelectorAll("input").forEach(input => {
+                input.name = input.name.replace(/\[\d+\]/, "[" + extraIndex + "]");
+                if (input.name.includes('quantity_per_pax')) {
+                    input.value = "1";
+                } else {
+                    input.value = "";
+                }
+            });
+
+            // Add price listeners to new entry
+            addExtraPriceListeners(newExtra);
+
+            // Append new entry
+            document.querySelector("#extras-section").appendChild(newExtra);
+            extraIndex++;
+        });
+
+        // Remove extra entry
+        document.addEventListener("click", function(e) {
+            if (e.target.closest('.remove-extra')) {
+                const extraEntry = e.target.closest('.extra-entry');
+                if (document.querySelectorAll('.extra-entry').length > 1) {
+                    extraEntry.remove();
+                } else {
+                    alert('At least one extra is required.');
+                }
+            }
+        });
+
+        // Add extras validation to form submit
+        document.getElementById('sitesForm').addEventListener('submit', function(e) {
+            const extraEntries = document.querySelectorAll('.extra-entry');
+            extraEntries.forEach(entry => {
+                const totalPriceInput = entry.querySelector('input[name*="total_price"]');
+                totalPriceInput.disabled = false;
             });
         });
     </script>

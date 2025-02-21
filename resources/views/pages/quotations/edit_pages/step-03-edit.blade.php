@@ -4,33 +4,47 @@
         <div>
             <ol
                 class="flex items-center w-full text-sm font-medium text-center text-gray-500 test:text-gray-400 sm:text-base">
-                <li class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
-                    <a href="{{ route('quotations.edit_step_one', $quotation->id) }}" class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-blue-200 test:after:text-blue-500">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                <li
+                    class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
+                    <a href="{{ route('quotations.edit_step_one', $quotation->id) }}"
+                        class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-blue-200 test:after:text-blue-500">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                         </svg>
                         Reference <span class="hidden sm:inline-flex sm:ms-2">Info</span>
                     </a>
                 </li>
-                <li class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
-                    <a href="{{ route('quotations.edit_step_two', $quotation->id) }}" class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                <li
+                    class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
+                    <a href="{{ route('quotations.edit_step_two', $quotation->id) }}"
+                        class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                         </svg>
                         Pax <span class="hidden sm:inline-flex sm:ms-2">Slab</span>
                     </a>
                 </li>
-                <li class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
-                    <a href="{{ route('quotations.edit_step_three', $quotation->id) }}" class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                <li
+                    class="flex md:w-full items-center text-blue-600 test:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-500 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
+                    <a href="{{ route('quotations.edit_step_three', $quotation->id) }}"
+                        class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                         </svg>
                         Accommodation
                     </a>
                 </li>
                 <!-- Step 4 -->
-                <li class="flex md:w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
-                    <a href="{{ route('quotations.edit_step_four', $quotation->id) }}" class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
+                <li
+                    class="flex md:w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 test:after:border-gray-700">
+                    <a href="{{ route('quotations.edit_step_four', $quotation->id) }}"
+                        class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 test:after:text-gray-500">
                         <span class="me-2">4</span>
                         Travel <span class="hidden sm:inline-flex sm:ms-2">Plan</span>
                     </a>
@@ -40,7 +54,7 @@
                 <li class="flex items-center">
                     <a href="{{ route('quotations.edit_step_five', $quotation->id) }}" class="flex items-center">
                         <span class="me-2">5</span>
-                        Sites <span class="hidden sm:inline-flex sm:ms-2">Details</span>
+                        Site <span class="hidden sm:inline-flex ">|Extra</span>
                     </a>
                 </li>
             </ol>
@@ -192,53 +206,72 @@
 
                 // Set selected values if existingData is provided
                 if (existingData) {
-        const card = document.querySelectorAll('.accommodation-card')[cardIndex];
-        
-        // Set basic accommodation data
-        const hotelSelect = card.querySelector(`select[name="accommodations[${cardIndex}][hotel_id]"]`);
-        const tomSelect = hotelSelect.tomselect;
-        tomSelect.setValue(existingData.hotel_id);
-        
-        card.querySelector(`input[name="accommodations[${cardIndex}][start_date]"]`).value = existingData.start_date;
-        card.querySelector(`input[name="accommodations[${cardIndex}][end_date]"]`).value = existingData.end_date;
-        card.querySelector(`select[name="accommodations[${cardIndex}][meal_plan_id]"]`).value = existingData.meal_plan_id;
-        card.querySelector(`select[name="accommodations[${cardIndex}][room_category_id]"]`).value = existingData.room_category_id;
+                    const card = document.querySelectorAll('.accommodation-card')[cardIndex];
 
-        // Set room details
-        if (existingData.room_details) {
-            existingData.room_details.forEach(room => {
-                const roomType = room.room_type;
-                const perNightInput = card.querySelector(`input[name="accommodations[${cardIndex}][room_types][${roomType}][per_night_cost]"]`);
-                const nightsInput = card.querySelector(`input[name="accommodations[${cardIndex}][room_types][${roomType}][nights]"]`);
-                const totalInput = card.querySelector(`input[name="accommodations[${cardIndex}][room_types][${roomType}][total_cost]"]`);
+                    // Set basic accommodation data
+                    const hotelSelect = card.querySelector(`select[name="accommodations[${cardIndex}][hotel_id]"]`);
+                    const tomSelect = hotelSelect.tomselect;
+                    tomSelect.setValue(existingData.hotel_id);
 
-                if (perNightInput && nightsInput && totalInput) {
-                    perNightInput.value = room.per_night_cost;
-                    nightsInput.value = room.nights;
-                    totalInput.value = room.total_cost;
+                    card.querySelector(`input[name="accommodations[${cardIndex}][start_date]"]`).value =
+                        existingData.start_date;
+                    card.querySelector(`input[name="accommodations[${cardIndex}][end_date]"]`).value = existingData
+                        .end_date;
+                    card.querySelector(`select[name="accommodations[${cardIndex}][meal_plan_id]"]`).value =
+                        existingData.meal_plan_id;
+                    card.querySelector(`select[name="accommodations[${cardIndex}][room_category_id]"]`).value =
+                        existingData.room_category_id;
+
+                    // Set room details
+                    if (existingData.room_details) {
+                        existingData.room_details.forEach(room => {
+                            const roomType = room.room_type;
+                            const perNightInput = card.querySelector(
+                                `input[name="accommodations[${cardIndex}][room_types][${roomType}][per_night_cost]"]`
+                                );
+                            const nightsInput = card.querySelector(
+                                `input[name="accommodations[${cardIndex}][room_types][${roomType}][nights]"]`
+                                );
+                            const totalInput = card.querySelector(
+                                `input[name="accommodations[${cardIndex}][room_types][${roomType}][total_cost]"]`
+                                );
+
+                            if (perNightInput && nightsInput && totalInput) {
+                                perNightInput.value = room.per_night_cost;
+                                nightsInput.value = room.nights;
+                                totalInput.value = room.total_cost;
+                            }
+                        });
+                    }
+
+                    // Set additional rooms data
+                    if (existingData.additional_rooms) {
+                        existingData.additional_rooms.forEach(room => {
+                            const roomType = room.room_type; // 'driver' or 'guide'
+                            const container = card.querySelector(
+                                `[name="accommodations[${cardIndex}][additional_rooms][${roomType}][per_night_cost]"]`
+                                ).closest('.bg-white');
+
+                            container.querySelector(
+                                `[name="accommodations[${cardIndex}][additional_rooms][${roomType}][per_night_cost]"]`
+                                ).value = room.per_night_cost;
+                            container.querySelector(
+                                `[name="accommodations[${cardIndex}][additional_rooms][${roomType}][nights]"]`
+                                ).value = room.nights;
+                            container.querySelector(
+                                `[name="accommodations[${cardIndex}][additional_rooms][${roomType}][total_cost]"]`
+                                ).value = room.total_cost;
+
+                            // Set radio button for provided_by_hotel
+                            const providedByHotelValue = room.provided_by_hotel ? "1" : "0";
+                            const radioButton = container.querySelector(
+                                `input[type="radio"][value="${providedByHotelValue}"]`);
+                            if (radioButton) {
+                                radioButton.checked = true;
+                            }
+                        });
+                    }
                 }
-            });
-        }
-
-        // Set additional rooms data
-        if (existingData.additional_rooms) {
-            existingData.additional_rooms.forEach(room => {
-                const roomType = room.room_type; // 'driver' or 'guide'
-                const container = card.querySelector(`[name="accommodations[${cardIndex}][additional_rooms][${roomType}][per_night_cost]"]`).closest('.bg-white');
-                
-                container.querySelector(`[name="accommodations[${cardIndex}][additional_rooms][${roomType}][per_night_cost]"]`).value = room.per_night_cost;
-                container.querySelector(`[name="accommodations[${cardIndex}][additional_rooms][${roomType}][nights]"]`).value = room.nights;
-                container.querySelector(`[name="accommodations[${cardIndex}][additional_rooms][${roomType}][total_cost]"]`).value = room.total_cost;
-                
-                // Set radio button for provided_by_hotel
-                const providedByHotelValue = room.provided_by_hotel ? "1" : "0";
-                const radioButton = container.querySelector(`input[type="radio"][value="${providedByHotelValue}"]`);
-                if (radioButton) {
-                    radioButton.checked = true;
-                }
-            });
-        }
-    }
 
 
                 // Initialize event listeners for the new card
@@ -297,10 +330,11 @@
             }
 
             function createAdditionalRoomHtml(type, cardIndex, existingData) {
-    const roomDetails = existingData ? existingData.additional_rooms?.find(room => room.room_type === type) : null;
-    const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
+                const roomDetails = existingData ? existingData.additional_rooms?.find(room => room.room_type ===
+                    type) : null;
+                const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
 
-    return `
+                return `
     <div class="bg-white p-4 rounded-md shadow-sm">
         <div class="flex items-center justify-between mb-2">
             <span class="font-medium text-gray-700">${capitalizedType}'s Accommodation</span>
@@ -352,7 +386,7 @@
             </div>
         </div>
     </div>`;
-}
+            }
 
             // Add hotel button event listener
             document.getElementById("add-hotel").addEventListener("click", () => addAccommodationCard());
