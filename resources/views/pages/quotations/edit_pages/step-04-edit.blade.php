@@ -142,6 +142,71 @@
                 + Add Another Travel Plan
             </button>
 
+            <div class="max-w-7xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+                <div class="mt-8">
+                    <div class="flex items-center mb-4">
+                        <h3 class="text-lg font-semibold">Jeep Charges</h3>
+                        <label class="relative inline-flex items-center cursor-pointer ml-4">
+                            <input type="checkbox" id="enableJeepCharges" name="enable_jeep_charges" value="1" 
+                            {{ $quotation->jeepCharges->count() > 0 ? 'checked' : '' }} class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                            <span class="ml-3 text-sm font-medium text-gray-900">Enable Jeep Charges</span>
+                        </label>
+                    </div>
+            
+                    <div id="jeepChargesSection" class="{{ $quotation->jeepCharges->count() > 0 ? '' : 'hidden' }}">
+                        <div class="bg-gray-100 p-4 rounded-lg">
+                            <table class="w-full text-sm text-left text-gray-500">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-2">Pax Range</th>
+                                        <th class="px-4 py-2">Unit Price (US$)</th>
+                                        <th class="px-4 py-2">Quantity</th>
+                                        <th class="px-4 py-2">Total Price (US$)</th>
+                                        <th class="px-4 py-2">Per Person (US$)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($quotation->paxSlabs as $paxSlab)
+                                        @php
+                                            $jeepCharge = $quotation->jeepCharges->where('pax_range', $paxSlab->paxSlab->name)->first();
+                                        @endphp
+                                        <tr>
+                                            <td class="px-4 py-2">
+                                                <input type="text" name="jeep_charges[{{ $loop->index }}][pax_range]"
+                                                    value="{{ $paxSlab->paxSlab->name }}"
+                                                    class="block w-full border-gray-300 rounded-md shadow-sm" readonly>
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <input type="number" step="0.01" name="jeep_charges[{{ $loop->index }}][unit_price]"
+                                                    value="{{ $jeepCharge->unit_price ?? '' }}"
+                                                    class="jeep-unit-price block w-full border-gray-300 rounded-md shadow-sm">
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <input type="number" name="jeep_charges[{{ $loop->index }}][quantity]"
+                                                    value="{{ $jeepCharge->quantity ?? '' }}"
+                                                    class="jeep-quantity block w-full border-gray-300 rounded-md shadow-sm">
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <input type="number" step="0.01" name="jeep_charges[{{ $loop->index }}][total_price]"
+                                                    value="{{ $jeepCharge->total_price ?? '' }}"
+                                                    class="jeep-total-price block w-full border-gray-300 rounded-md shadow-sm" readonly>
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <input type="number" step="0.01" name="jeep_charges[{{ $loop->index }}][per_person]"
+                                                    value="{{ $jeepCharge->per_person ?? '' }}"
+                                                    class="jeep-per-person block w-full border-gray-300 rounded-md shadow-sm"
+                                                    data-min-pax="{{ $paxSlab->paxSlab->min_pax }}" readonly>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="flex justify-between mt-6">
                 <a href="{{ $navigation['back'] }}" class="bg-gray-500 text-white py-2 px-4 rounded-md">
                     Back
@@ -349,6 +414,8 @@
                 const travelEntries = document.querySelectorAll('.travel-entry');
                 let dates = [];
 
+                
+
                 for (let entry of travelEntries) {
                     const startInput = entry.querySelector('input[name*="start_date"]');
                     const endInput = entry.querySelector('input[name*="end_date"]');
@@ -416,5 +483,67 @@
             });
         });
     </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    const enableJeepCharges = document.getElementById('enableJeepCharges');
+    const jeepChargesSection = document.getElementById('jeepChargesSection');
+    const travelPlanForm = document.getElementById('travelPlanForm');
+
+    if (enableJeepCharges && jeepChargesSection) {
+        // Create hidden input for enable_jeep_charges if it doesn't exist
+        let hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'enable_jeep_charges';
+        hiddenInput.value = enableJeepCharges.checked ? '1' : '0';
+        travelPlanForm.appendChild(hiddenInput);
+
+        // Set initial state
+        jeepChargesSection.classList.toggle('hidden', !enableJeepCharges.checked);
+
+        // Toggle visibility and update hidden input on checkbox change
+        enableJeepCharges.addEventListener('change', function() {
+            jeepChargesSection.classList.toggle('hidden', !this.checked);
+            hiddenInput.value = this.checked ? '1' : '0';
+
+            // Clear inputs when disabled
+            if (!this.checked) {
+                jeepChargesSection.querySelectorAll('input:not([readonly])').forEach(input => {
+                    if (!input.name.includes('pax_range')) {
+                        input.value = '';
+                    }
+                });
+            }
+        });
+
+        // Set up calculations for each row
+        const jeepRows = jeepChargesSection.querySelectorAll('tbody tr');
+        jeepRows.forEach(row => {
+            const unitPriceInput = row.querySelector('.jeep-unit-price');
+            const quantityInput = row.querySelector('.jeep-quantity');
+            const totalPriceInput = row.querySelector('.jeep-total-price');
+            const perPersonInput = row.querySelector('.jeep-per-person');
+
+            function calculateTotals() {
+                if (!enableJeepCharges.checked) return;
+                
+                const unitPrice = parseFloat(unitPriceInput.value) || 0;
+                const quantity = parseInt(quantityInput.value) || 0;
+                const minPax = parseInt(perPersonInput.dataset.minPax) || 1;
+
+                const totalPrice = unitPrice * quantity;
+                totalPriceInput.value = totalPrice.toFixed(2);
+
+                const perPerson = totalPrice / minPax;
+                perPersonInput.value = perPerson.toFixed(2);
+            }
+
+            unitPriceInput?.addEventListener('input', calculateTotals);
+            quantityInput?.addEventListener('input', calculateTotals);
+        });
+    }
+});
+ </script>
+
 
 </x-app-layout>

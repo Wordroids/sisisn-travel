@@ -25,6 +25,7 @@ use Illuminate\Http\Request;
 use App\Models\QuotationAccommodationRoomDetails;
 use App\Models\QuotationSiteSeeing;
 use App\Models\QuotationExtra;
+use App\Models\QuotationJeepCharge;
 
 class QuotationController extends Controller
 {
@@ -83,7 +84,7 @@ class QuotationController extends Controller
 
     public function show($id)
     {
-        $quotation = Quotation::with(['market', 'customer', 'driver', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType' , 'siteSeeings','extras'])->findOrFail($id);
+        $quotation = Quotation::with(['market', 'customer', 'driver', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType', 'siteSeeings', 'extras'])->findOrFail($id);
 
         return view('pages.quotations.show', compact('quotation'));
     }
@@ -340,7 +341,7 @@ class QuotationController extends Controller
             'accommodations.*.additional_rooms.guide.total_cost' => 'required|numeric|min:0',
             'accommodations.*.additional_rooms.guide.provided_by_hotel' => 'nullable|boolean',
         ]);
-        
+
         foreach ($request->accommodations as $accommodation) {
             // Calculate total nights from all room types
             $totalNights = collect($accommodation['room_types'])->sum('nights');
@@ -391,8 +392,7 @@ class QuotationController extends Controller
 
     public function editStepThree($id)
     {
-        $quotation = Quotation::with(['accommodations.roomDetails', 'accommodations.additionalRooms'])
-        ->findOrFail($id);
+        $quotation = Quotation::with(['accommodations.roomDetails', 'accommodations.additionalRooms'])->findOrFail($id);
 
         $hotels = Hotel::all();
         $mealPlans = MealPlan::all();
@@ -459,8 +459,8 @@ class QuotationController extends Controller
                 }
             }
 
-             // Store room details for additional rooms (driver, guide)
-             foreach ($accommodation['additional_rooms'] as $type => $details) {
+            // Store room details for additional rooms (driver, guide)
+            foreach ($accommodation['additional_rooms'] as $type => $details) {
                 // Only create records if nights is greater than 0
                 if (!empty($details['nights']) && $details['nights'] > 0) {
                     AdditionalRooms::create([
@@ -504,6 +504,14 @@ class QuotationController extends Controller
             'travel.*.route_id' => 'required|exists:travel_routes,id',
             'travel.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
             'travel.*.mileage' => 'required|numeric',
+
+            // Add validation for jeep charges
+            'jeep_charges' => 'nullable|array',
+            'jeep_charges.*.pax_range' => 'required_with:enable_jeep_charges',
+            'jeep_charges.*.unit_price' => 'required_with:enable_jeep_charges|numeric|min:0',
+            'jeep_charges.*.quantity' => 'required_with:enable_jeep_charges|integer|min:0',
+            'jeep_charges.*.total_price' => 'required_with:enable_jeep_charges|numeric|min:0',
+            'jeep_charges.*.per_person' => 'required_with:enable_jeep_charges|numeric|min:0',
         ]);
 
         foreach ($request->travel as $travel) {
@@ -515,6 +523,24 @@ class QuotationController extends Controller
                 'vehicle_type_id' => $travel['vehicle_type_id'],
                 'mileage' => $travel['mileage'],
             ]);
+        }
+
+        // Store jeep charges if enabled
+        if ($request->has('enable_jeep_charges') && $request->has('jeep_charges')) {
+            // Delete existing jeep charges first
+            $quotation->jeepCharges()->delete();
+
+            // Store new jeep charges
+            foreach ($request->jeep_charges as $charge) {
+                QuotationJeepCharge::create([
+                    'quotation_id' => $quotation->id,
+                    'pax_range' => $charge['pax_range'],
+                    'unit_price' => $charge['unit_price'],
+                    'quantity' => $charge['quantity'],
+                    'total_price' => $charge['total_price'],
+                    'per_person' => $charge['per_person'],
+                ]);
+            }
         }
 
         $quotation->save();
@@ -545,6 +571,7 @@ class QuotationController extends Controller
             'travel.*.route_id' => 'required|exists:travel_routes,id',
             'travel.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
             'travel.*.mileage' => 'required|numeric',
+            'enable_jeep_charges' => 'required|in:0,1',
         ]);
 
         // Delete existing travel plans
@@ -562,7 +589,24 @@ class QuotationController extends Controller
             ]);
         }
 
-        $quotation->save();
+        // Always delete existing jeep charges first
+        $quotation->jeepCharges()->delete();
+
+        // Only create new jeep charges if enabled and data exists
+        if ($request->enable_jeep_charges === '1' && $request->has('jeep_charges')) {
+            foreach ($request->jeep_charges as $charge) {
+                if (!empty($charge['unit_price']) && !empty($charge['quantity'])) {
+                    QuotationJeepCharge::create([
+                        'quotation_id' => $quotation->id,
+                        'pax_range' => $charge['pax_range'],
+                        'unit_price' => $charge['unit_price'],
+                        'quantity' => $charge['quantity'],
+                        'total_price' => $charge['total_price'],
+                        'per_person' => $charge['per_person'],
+                    ]);
+                }
+            }
+        }
 
         return redirect()->route('quotations.edit_step_five', $id)->with('success', 'Travel plans updated successfully.');
     }
@@ -576,7 +620,6 @@ class QuotationController extends Controller
 
     public function store_step_five(Request $request, $id)
     {
-        //dd($request->all());
         $quotation = Quotation::findOrFail($id);
 
         // Validate the request data
@@ -587,6 +630,12 @@ class QuotationController extends Controller
             'sites.*.quantity' => 'required|integer|min:1',
             'sites.*.price_per_adult' => 'required|numeric|min:0',
 
+            'site_extras' => 'required|array',
+            'site_extras.*.name' => 'required|string|max:255',
+            'site_extras.*.unit_price' => 'required|numeric|min:0',
+            'site_extras.*.quantity' => 'required|integer|min:1',
+            'site_extras.*.price_per_adult' => 'required|numeric|min:0',
+
             'extras' => 'required|array',
             'extras.*.date' => 'required|date',
             'extras.*.description' => 'required|string|max:255',
@@ -595,20 +644,30 @@ class QuotationController extends Controller
             'extras.*.total_price' => 'required|numeric|min:0',
         ]);
 
-        // Delete existing site seeings if any
+        // Delete existing records
         $quotation->siteSeeings()->delete();
 
-        // Delete existing extras
-        $quotation->extras()->delete();
-
-        // Store new site seeing entries
+        // Store sites
         foreach ($request->sites as $site) {
             QuotationSiteSeeing::create([
                 'quotation_id' => $quotation->id,
                 'name' => $site['name'],
+                'type' => 'site',
                 'unit_price' => $site['unit_price'],
                 'quantity' => $site['quantity'],
                 'price_per_adult' => $site['price_per_adult'],
+            ]);
+        }
+
+        // Store site extras
+        foreach ($request->site_extras as $extra) {
+            QuotationSiteSeeing::create([
+                'quotation_id' => $quotation->id,
+                'name' => $extra['name'],
+                'type' => 'extra',
+                'unit_price' => $extra['unit_price'],
+                'quantity' => $extra['quantity'],
+                'price_per_adult' => $extra['price_per_adult'],
             ]);
         }
 
@@ -624,7 +683,7 @@ class QuotationController extends Controller
             ]);
         }
 
-        // Update quotation status to pending
+        // Update quotation status
         $quotation->status = 'pending';
         $quotation->save();
 
@@ -653,6 +712,12 @@ class QuotationController extends Controller
             'sites.*.quantity' => 'required|integer|min:1',
             'sites.*.price_per_adult' => 'required|numeric|min:0',
 
+            'site_extras' => 'required|array',
+            'site_extras.*.name' => 'required|string|max:255',
+            'site_extras.*.unit_price' => 'required|numeric|min:0',
+            'site_extras.*.quantity' => 'required|integer|min:1',
+            'site_extras.*.price_per_adult' => 'required|numeric|min:0',
+
             'extras' => 'required|array',
             'extras.*.date' => 'required|date',
             'extras.*.description' => 'required|string|max:255',
@@ -672,13 +737,26 @@ class QuotationController extends Controller
             QuotationSiteSeeing::create([
                 'quotation_id' => $quotation->id,
                 'name' => $site['name'],
+                'type' => 'site',
                 'unit_price' => $site['unit_price'],
                 'quantity' => $site['quantity'],
                 'price_per_adult' => $site['price_per_adult'],
             ]);
         }
 
-         // Store updated extras entries
+        // Store updated site extras entries
+        foreach ($request->site_extras as $extra) {
+            QuotationSiteSeeing::create([
+                'quotation_id' => $quotation->id,
+                'name' => $extra['name'],
+                'type' => 'extra',
+                'unit_price' => $extra['unit_price'],
+                'quantity' => $extra['quantity'],
+                'price_per_adult' => $extra['price_per_adult'],
+            ]);
+        }
+
+        // Store updated extras entries
         foreach ($request->extras as $extra) {
             QuotationExtra::create([
                 'quotation_id' => $quotation->id,
