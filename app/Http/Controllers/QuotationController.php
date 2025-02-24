@@ -620,7 +620,6 @@ class QuotationController extends Controller
 
     public function store_step_five(Request $request, $id)
     {
-        //dd($request->all());
         $quotation = Quotation::findOrFail($id);
 
         // Validate the request data
@@ -631,6 +630,12 @@ class QuotationController extends Controller
             'sites.*.quantity' => 'required|integer|min:1',
             'sites.*.price_per_adult' => 'required|numeric|min:0',
 
+            'site_extras' => 'required|array',
+            'site_extras.*.name' => 'required|string|max:255',
+            'site_extras.*.unit_price' => 'required|numeric|min:0',
+            'site_extras.*.quantity' => 'required|integer|min:1',
+            'site_extras.*.price_per_adult' => 'required|numeric|min:0',
+
             'extras' => 'required|array',
             'extras.*.date' => 'required|date',
             'extras.*.description' => 'required|string|max:255',
@@ -639,20 +644,30 @@ class QuotationController extends Controller
             'extras.*.total_price' => 'required|numeric|min:0',
         ]);
 
-        // Delete existing site seeings if any
+        // Delete existing records
         $quotation->siteSeeings()->delete();
 
-        // Delete existing extras
-        $quotation->extras()->delete();
-
-        // Store new site seeing entries
+        // Store sites
         foreach ($request->sites as $site) {
             QuotationSiteSeeing::create([
                 'quotation_id' => $quotation->id,
                 'name' => $site['name'],
+                'type' => 'site',
                 'unit_price' => $site['unit_price'],
                 'quantity' => $site['quantity'],
                 'price_per_adult' => $site['price_per_adult'],
+            ]);
+        }
+
+        // Store site extras
+        foreach ($request->site_extras as $extra) {
+            QuotationSiteSeeing::create([
+                'quotation_id' => $quotation->id,
+                'name' => $extra['name'],
+                'type' => 'extra',
+                'unit_price' => $extra['unit_price'],
+                'quantity' => $extra['quantity'],
+                'price_per_adult' => $extra['price_per_adult'],
             ]);
         }
 
@@ -668,7 +683,7 @@ class QuotationController extends Controller
             ]);
         }
 
-        // Update quotation status to pending
+        // Update quotation status
         $quotation->status = 'pending';
         $quotation->save();
 
@@ -697,6 +712,12 @@ class QuotationController extends Controller
             'sites.*.quantity' => 'required|integer|min:1',
             'sites.*.price_per_adult' => 'required|numeric|min:0',
 
+            'site_extras' => 'required|array',
+            'site_extras.*.name' => 'required|string|max:255',
+            'site_extras.*.unit_price' => 'required|numeric|min:0',
+            'site_extras.*.quantity' => 'required|integer|min:1',
+            'site_extras.*.price_per_adult' => 'required|numeric|min:0',
+
             'extras' => 'required|array',
             'extras.*.date' => 'required|date',
             'extras.*.description' => 'required|string|max:255',
@@ -716,9 +737,22 @@ class QuotationController extends Controller
             QuotationSiteSeeing::create([
                 'quotation_id' => $quotation->id,
                 'name' => $site['name'],
+                'type' => 'site',
                 'unit_price' => $site['unit_price'],
                 'quantity' => $site['quantity'],
                 'price_per_adult' => $site['price_per_adult'],
+            ]);
+        }
+
+        // Store updated site extras entries
+        foreach ($request->site_extras as $extra) {
+            QuotationSiteSeeing::create([
+                'quotation_id' => $quotation->id,
+                'name' => $extra['name'],
+                'type' => 'extra',
+                'unit_price' => $extra['unit_price'],
+                'quantity' => $extra['quantity'],
+                'price_per_adult' => $extra['price_per_adult'],
             ]);
         }
 

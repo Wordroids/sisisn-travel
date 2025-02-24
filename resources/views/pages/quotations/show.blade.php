@@ -314,9 +314,10 @@
 
         <!-- Site Seeing Details -->
         <div class="bg-white p-6 rounded-lg shadow-sm mt-6">
+            <!-- Sites Section -->
             <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">Site Seeing Details</h3>
             <div class="overflow-x-auto mt-4">
-                <table class="w-full text-sm text-left text-gray-700 border rounded-lg shadow">
+                <table class="w-full text-sm text-left text-gray-700 border rounded-lg shadow mb-6">
                     <thead class="bg-gray-200 text-gray-700">
                         <tr>
                             <th class="px-4 py-3 text-left">Site Name</th>
@@ -326,7 +327,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y">
-                        @forelse($quotation->siteSeeings as $site)
+                        @forelse($quotation->siteSeeings->where('type', 'site') as $site)
                             <tr class="bg-gray-50 hover:bg-gray-100 transition">
                                 <td class="px-4 py-3">{{ $site->name }}</td>
                                 <td class="px-4 py-3 text-center">{{ number_format($site->unit_price, 2) }}</td>
@@ -338,20 +339,69 @@
                         @empty
                             <tr>
                                 <td colspan="4" class="px-4 py-3 text-center text-gray-500">
-                                    No site seeing details available
+                                    No sites available
                                 </td>
                             </tr>
                         @endforelse
-                        @if ($quotation->siteSeeings->count() > 0)
+                        @if ($quotation->siteSeeings->where('type', 'site')->count() > 0)
                             <tr class="bg-gray-100">
-                                <td colspan="3" class="px-4 py-3 text-right font-semibold">Total:</td>
+                                <td colspan="3" class="px-4 py-3 text-right font-semibold">Total Sites:</td>
                                 <td class="px-4 py-3 text-center font-bold text-green-600">
-                                    {{ number_format($quotation->siteSeeings->sum('price_per_adult'), 2) }}
+                                    {{ number_format($quotation->siteSeeings->where('type', 'site')->sum('price_per_adult'), 2) }}
                                 </td>
                             </tr>
                         @endif
                     </tbody>
                 </table>
+
+                <!-- Site Extras Section -->
+                <h4 class="text-lg font-semibold text-gray-700 border-b pb-2 mt-6">Site Extras</h4>
+                <table class="w-full text-sm text-left text-gray-700 border rounded-lg shadow mt-4">
+                    <thead class="bg-gray-200 text-gray-700">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Extra Name</th>
+                            <th class="px-4 py-3 text-center">Unit Price ( USD )</th>
+                            <th class="px-4 py-3 text-center">Quantity</th>
+                            <th class="px-4 py-3 text-center">Price Per Adult ( USD )</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        @forelse($quotation->siteSeeings->where('type', 'extra') as $extra)
+                            <tr class="bg-gray-50 hover:bg-gray-100 transition">
+                                <td class="px-4 py-3">{{ $extra->name }}</td>
+                                <td class="px-4 py-3 text-center">{{ number_format($extra->unit_price, 2) }}</td>
+                                <td class="px-4 py-3 text-center">{{ $extra->quantity }}</td>
+                                <td class="px-4 py-3 text-center font-semibold text-green-600">
+                                    {{ number_format($extra->price_per_adult, 2) }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-3 text-center text-gray-500">
+                                    No site extras available
+                                </td>
+                            </tr>
+                        @endforelse
+                        @if ($quotation->siteSeeings->where('type', 'extra')->count() > 0)
+                            <tr class="bg-gray-100">
+                                <td colspan="3" class="px-4 py-3 text-right font-semibold">Total Extras:</td>
+                                <td class="px-4 py-3 text-center font-bold text-green-600">
+                                    {{ number_format($quotation->siteSeeings->where('type', 'extra')->sum('price_per_adult'), 2) }}
+                                </td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+
+                <!-- Combined Total -->
+                @if ($quotation->siteSeeings->count() > 0)
+                    <div class="mt-4 text-right">
+                        <span class="text-lg font-bold">Grand Total: </span>
+                        <span class="text-lg font-bold text-green-600">
+                            {{ number_format($quotation->siteSeeings->sum('price_per_adult'), 2) }} USD
+                        </span>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -497,9 +547,7 @@
                             $minPax = $paxSlab->paxSlab->min_pax;
 
                             // Get jeep charge for current pax range
-                            $jeepCharge = $quotation->jeepCharges
-                                ->where('pax_range', $paxSlab->paxSlab->name)
-                                ->first();
+                            $jeepCharge = $quotation->jeepCharges->where('pax_range', $paxSlab->paxSlab->name)->first();
 
                             $row = [
                                 'pax_range' => $paxSlab->paxSlab->name,

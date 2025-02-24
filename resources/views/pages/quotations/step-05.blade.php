@@ -79,54 +79,91 @@
         <form method="POST" action="{{ route('quotations.step5.store', $quotation->id) }}" id="sitesForm">
             @csrf
 
-            <div id="sites-section">
-                <div class="site-entry border p-4 rounded-lg mb-4 bg-gray-100 relative">
-                    <button type="button" class="remove-site absolute top-2 right-2 text-red-500 hover:text-red-700">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                    <div class="grid grid-cols-4 gap-4">
-                        <!-- Site Name -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Site Name</label>
-                            <input type="text" name="sites[0][name]"
-                                class="block w-full border-gray-300 rounded-md shadow-sm" required>
-                        </div>
-
-                        <!-- Unit Price -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Unit Price ( USD )</label>
-                            <input type="number" name="sites[0][unit_price]"
-                                class="block w-full border-gray-300 rounded-md shadow-sm" step="0.01" min="0"
-                                required>
-                        </div>
-
-                        <!-- Quantity -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Quantity</label>
-                            <input type="number" name="sites[0][quantity]" value="1"
-                                class="block w-full border-gray-300 rounded-md shadow-sm" required disabled>
-                        </div>
-
-                        <!-- Per Adult Price-->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Per Adult Price</label>
-                            <input type="number" name="sites[0][price_per_adult]"
-                                class="block w-full border-gray-300 rounded-md shadow-sm" step="0.01" min="0"
-                                required disabled>
-                        </div>
-
-                    </div>
-                </div>
+            <!-- Replace the existing sites section with this -->
+<div id="sites-section">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Quotation Sites</h3>
+    <div class="site-entry border p-4 rounded-lg mb-4 bg-gray-100 relative">
+        <button type="button" class="remove-site absolute top-2 right-2 text-red-500 hover:text-red-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        <div class="grid grid-cols-4 gap-4">
+            <!-- Site Name -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Site Name</label>
+                <input type="text" name="sites[0][name]" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                <input type="hidden" name="sites[0][type]" value="site">
             </div>
 
-            <!-- Add Another Site Button -->
-            <button type="button" id="add-site"
-                class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">
-                + Add Another Site
-            </button>
+            <!-- Unit Price -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Unit Price ( USD )</label>
+                <input type="number" name="sites[0][unit_price]" class="block w-full border-gray-300 rounded-md shadow-sm" step="0.01" min="0" required>
+            </div>
+
+            <!-- Quantity -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Quantity</label>
+                <input type="number" name="sites[0][quantity]" value="1" class="block w-full border-gray-300 rounded-md shadow-sm" required disabled>
+            </div>
+
+            <!-- Per Adult Price-->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Per Adult Price</label>
+                <input type="number" name="sites[0][price_per_adult]" class="block w-full border-gray-300 rounded-md shadow-sm" step="0.01" min="0" required disabled>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Site Button -->
+<button type="button" id="add-site" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">
+    + Add Another Site
+</button>
+
+<!-- Site Extras Section -->
+<div id="site-extras-section" class="mt-8">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Site Extras</h3>
+    <div class="site-extra-entry border p-4 rounded-lg mb-4 bg-gray-100 relative">
+        <button type="button" class="remove-site-extra absolute top-2 right-2 text-red-500 hover:text-red-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        <div class="grid grid-cols-4 gap-4">
+            <!-- Extra Name -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Extra Name</label>
+                <input type="text" name="site_extras[0][name]" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                <input type="hidden" name="site_extras[0][type]" value="extra">
+            </div>
+
+            <!-- Unit Price -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Unit Price ( USD )</label>
+                <input type="number" name="site_extras[0][unit_price]" class="block w-full border-gray-300 rounded-md shadow-sm" step="0.01" min="0" required>
+            </div>
+
+            <!-- Quantity -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Quantity</label>
+                <input type="number" name="site_extras[0][quantity]" value="1" class="block w-full border-gray-300 rounded-md shadow-sm" required>
+            </div>
+
+            <!-- Per Adult Price-->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Per Adult Price</label>
+                <input type="number" name="site_extras[0][price_per_adult]" class="block w-full border-gray-300 rounded-md shadow-sm" step="0.01" min="0" required disabled>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Site Extra Button -->
+<button type="button" id="add-site-extra" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">
+    + Add Another Site Extra
+</button>
 
             <div class="mt-8">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Quotation Extras</h3>
@@ -209,50 +246,71 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             let siteIndex = 1;
-
+            let siteExtraIndex = 1;
+        
             // Function to calculate per adult price
-            function calculatePerAdultPrice(siteEntry) {
-                const unitPrice = parseFloat(siteEntry.querySelector('input[name*="unit_price"]').value) || 0;
-                const quantity = parseFloat(siteEntry.querySelector('input[name*="quantity"]').value) || 1;
-                const perAdultPriceInput = siteEntry.querySelector('input[name*="price_per_adult"]');
-
+            function calculatePerAdultPrice(entry) {
+                const unitPrice = parseFloat(entry.querySelector('input[name*="unit_price"]').value) || 0;
+                const quantity = parseFloat(entry.querySelector('input[name*="quantity"]').value) || 1;
+                const perAdultPriceInput = entry.querySelector('input[name*="price_per_adult"]');
                 const perAdultPrice = unitPrice * quantity;
                 perAdultPriceInput.value = perAdultPrice.toFixed(2);
             }
-
+        
             // Add event listener for unit price changes
-            function addUnitPriceListener(siteEntry) {
-                const unitPriceInput = siteEntry.querySelector('input[name*="unit_price"]');
+            function addUnitPriceListener(entry) {
+                const unitPriceInput = entry.querySelector('input[name*="unit_price"]');
                 unitPriceInput.addEventListener('input', function() {
-                    calculatePerAdultPrice(siteEntry);
+                    calculatePerAdultPrice(entry);
                 });
             }
-
-            // Add initial listener to first site entry
+        
+            // Add initial listeners
             addUnitPriceListener(document.querySelector('.site-entry'));
-
+            addUnitPriceListener(document.querySelector('.site-extra-entry'));
+        
             // Add new site entry
             function addSiteEntry() {
                 let newSite = document.querySelector(".site-entry").cloneNode(true);
-
+                
                 // Clear values and update indexes
                 newSite.querySelectorAll("input").forEach(input => {
                     input.name = input.name.replace(/\[\d+\]/, "[" + siteIndex + "]");
                     if (input.name.includes('quantity')) {
-                        input.value = "1"; // Set default quantity to 1
+                        input.value = "1";
+                    } else if (input.name.includes('type')) {
+                        input.value = "site";
                     } else {
                         input.value = "";
                     }
                 });
-
-                // Add unit price listener to new entry
+        
                 addUnitPriceListener(newSite);
-
-                // Append new entry
                 document.querySelector("#sites-section").appendChild(newSite);
                 siteIndex++;
             }
-
+        
+            // Add new site extra entry
+            function addSiteExtraEntry() {
+                let newExtra = document.querySelector(".site-extra-entry").cloneNode(true);
+                
+                // Clear values and update indexes
+                newExtra.querySelectorAll("input").forEach(input => {
+                    input.name = input.name.replace(/\[\d+\]/, "[" + siteExtraIndex + "]");
+                    if (input.name.includes('quantity')) {
+                        input.value = "1";
+                    } else if (input.name.includes('type')) {
+                        input.value = "extra";
+                    } else {
+                        input.value = "";
+                    }
+                });
+        
+                addUnitPriceListener(newExtra);
+                document.querySelector("#site-extras-section").appendChild(newExtra);
+                siteExtraIndex++;
+            }
+        
             // Remove site entry
             document.addEventListener("click", function(e) {
                 if (e.target.closest('.remove-site')) {
@@ -264,65 +322,99 @@
                     }
                 }
             });
-
-            // Attach event listener to "Add Site" button
+        
+            // Remove site extra entry
+            document.addEventListener("click", function(e) {
+                if (e.target.closest('.remove-site-extra')) {
+                    const extraEntry = e.target.closest('.site-extra-entry');
+                    if (document.querySelectorAll('.site-extra-entry').length > 1) {
+                        extraEntry.remove();
+                    } else {
+                        alert('At least one site extra is required.');
+                    }
+                }
+            });
+        
+            // Add button event listeners
             document.querySelector("#add-site").addEventListener("click", addSiteEntry);
-
-            // Form validation
+            document.querySelector("#add-site-extra").addEventListener("click", addSiteExtraEntry);
+        
+            // Form validation and submission
             document.getElementById('sitesForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-
-                const siteEntries = document.querySelectorAll('.site-entry');
                 let isValid = true;
-
-                siteEntries.forEach(entry => {
+        
+                // Validate sites
+                document.querySelectorAll('.site-entry').forEach(entry => {
                     const nameInput = entry.querySelector('input[name*="name"]');
                     const unitPriceInput = entry.querySelector('input[name*="unit_price"]');
                     const quantityInput = entry.querySelector('input[name*="quantity"]');
-                    const perAdultPriceInput = entry.querySelector(
-                        'input[name*="price_per_adult"]');
-
-                    // Enable disabled fields before submit to include their values
+                    const perAdultPriceInput = entry.querySelector('input[name*="price_per_adult"]');
+        
+                    // Enable disabled fields
                     quantityInput.disabled = false;
                     perAdultPriceInput.disabled = false;
-
+        
                     if (!nameInput.value.trim()) {
                         alert('Please enter all site names');
                         isValid = false;
                         return;
                     }
-
+        
                     if (!unitPriceInput.value || parseFloat(unitPriceInput.value) < 0) {
                         alert('Please enter valid unit prices for all sites');
                         isValid = false;
                         return;
                     }
-
-                    // Recalculate per adult price before submit
-                    const unitPrice = parseFloat(unitPriceInput.value) || 0;
-                    const quantity = parseFloat(quantityInput.value) || 1;
-                    perAdultPriceInput.value = (unitPrice * quantity).toFixed(2);
+        
+                    // Recalculate per adult price
+                    calculatePerAdultPrice(entry);
                 });
-
+        
+                // Validate site extras
+                document.querySelectorAll('.site-extra-entry').forEach(entry => {
+                    const nameInput = entry.querySelector('input[name*="name"]');
+                    const unitPriceInput = entry.querySelector('input[name*="unit_price"]');
+                    const quantityInput = entry.querySelector('input[name*="quantity"]');
+                    const perAdultPriceInput = entry.querySelector('input[name*="price_per_adult"]');
+        
+                    // Enable disabled fields
+                    perAdultPriceInput.disabled = false;
+        
+                    if (!nameInput.value.trim()) {
+                        alert('Please enter all extra names');
+                        isValid = false;
+                        return;
+                    }
+        
+                    if (!unitPriceInput.value || parseFloat(unitPriceInput.value) < 0) {
+                        alert('Please enter valid unit prices for all extras');
+                        isValid = false;
+                        return;
+                    }
+        
+                    // Recalculate per adult price
+                    calculatePerAdultPrice(entry);
+                });
+        
                 if (isValid) {
-                    // Create hidden fields for any additional data if needed
-                    const formData = new FormData(this);
-
-                    // Submit the form with all data
                     this.submit();
-
-                    // Re-disable the fields after submission
-                    siteEntries.forEach(entry => {
+        
+                    // Re-disable fields after submission
+                    document.querySelectorAll('.site-entry, .site-extra-entry').forEach(entry => {
                         const quantityInput = entry.querySelector('input[name*="quantity"]');
-                        const perAdultPriceInput = entry.querySelector(
-                            'input[name*="price_per_adult"]');
-                        quantityInput.disabled = true;
+                        const perAdultPriceInput = entry.querySelector('input[name*="price_per_adult"]');
+                        
+                        if (entry.classList.contains('site-entry')) {
+                            quantityInput.disabled = true;
+                        }
                         perAdultPriceInput.disabled = true;
                     });
                 }
             });
         });
-    </script>
+        </script>
+        
     <script>
         // Get quotation dates from PHP variables
         const quotationStartDate = "{{ $quotation->start_date }}".split(' ')[0]; // Extract date part only
