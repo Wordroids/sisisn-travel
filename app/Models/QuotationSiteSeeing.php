@@ -19,6 +19,7 @@ class QuotationSiteSeeing extends Model
     protected $fillable = [
         'quotation_id',
         'name',
+        'type',
         'description',
         'unit_price',
         'quantity',
