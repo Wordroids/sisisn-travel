@@ -30,7 +30,6 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'nullable|string|max:20',
             'avatar' => 'nullable|image|max:2048',
-            'role' => 'required|in:admin,user',
             'status' => 'required|in:active,inactive',
             'password' => 'required|string|min:8|confirmed',
         ]);
@@ -45,7 +44,6 @@ class UserController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'avatar' => $avatarPath,
-            'role' => $request->role,
             'status' => $request->status,
             'password' => Hash::make($request->password),
         ]);
@@ -79,7 +77,6 @@ class UserController extends Controller
             'email' => "required|string|email|max:255|unique:users,email,{$user->id}",
             'phone' => 'nullable|string|max:20',
             'avatar' => 'nullable|image|max:2048',
-            'role' => 'required|in:admin,user',
             'status' => 'required|in:active,inactive',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
@@ -95,7 +92,6 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
-            'role' => $request->role,
             'status' => $request->status,
             'password' => $request->password ? Hash::make($request->password) : $user->password,
         ]);
