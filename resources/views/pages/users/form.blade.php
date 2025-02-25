@@ -41,7 +41,7 @@
             @error('avatar') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
         </div>
 
-        <!-- Role -->
+        <!-- Role 
         <div class="mb-4">
             <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
             <select name="role" id="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
@@ -49,7 +49,7 @@
                 <option value="admin" {{ old('role', $user->role ?? '') === 'admin' ? 'selected' : '' }}>Admin</option>
             </select>
             @error('role') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
-        </div>
+        </div>-->
 
         <!-- Status -->
         <div class="mb-4">

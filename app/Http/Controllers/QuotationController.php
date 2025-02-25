@@ -71,8 +71,10 @@ class QuotationController extends Controller
 
         return $steps[$currentStep] ?? [];
     }
+
+
     /**
-     * Display a listing of the resource.
+     * Display a Quotation Details.
      */
     public function index()
     {
@@ -82,6 +84,10 @@ class QuotationController extends Controller
         return view('pages.quotations.index', compact('quotations'));
     }
 
+    
+    /**
+     * Display a Quotation Details.
+     */
     public function show($id)
     {
         $quotation = Quotation::with(['market', 'customer', 'driver', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType', 'siteSeeings', 'extras'])->findOrFail($id);
@@ -90,7 +96,7 @@ class QuotationController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new quotation Step 01.
      */
     public function step_one()
     {
@@ -111,6 +117,9 @@ class QuotationController extends Controller
         return view('pages.quotations.step-01')->with(['markets' => $markets, 'customers' => $customers, 'currencies' => $currencies, 'quoteReference' => $quoteReference, 'bookingReference' => $bookingReference, 'paxSlabs' => $paxSlabs, 'drivers' => $drivers, 'guides' => $guides, 'navigation' => $navigation, 'markups' => $markups]);
     }
 
+    /**
+     * Store a newly created quotation Step 01 in DB.
+     */
     public function store_step_one(Request $request)
     {
         $request->validate([
@@ -152,6 +161,9 @@ class QuotationController extends Controller
         return redirect()->route('quotations.step2', $quotation->id)->with('success', 'Step 1 saved! Proceed to Pax Slab details.');
     }
 
+    /**
+     * Quotation step 01 Edit view.
+     */
     public function editStepOne($id)
     {
         $quotation = Quotation::findOrFail($id);
@@ -168,6 +180,9 @@ class QuotationController extends Controller
         return view('pages.quotations.edit_pages.step-01-edit', compact('quotation', 'markets', 'customers', 'currencies', 'paxSlabs', 'navigation', 'markups', 'drivers', 'guides'));
     }
 
+    /**
+     * Update Quotation Step 01 in DB.
+     */
     public function updateStepOne(Request $request, $id)
     {
         //dd($request->all());
@@ -205,6 +220,10 @@ class QuotationController extends Controller
         return redirect()->route('quotations.edit_step_two', $id)->with('success', 'Quotation details updated successfully.');
     }
 
+    
+    /**
+     * Display the step two form for the specified quotation.
+     */
     public function step_two($id)
     {
         $quotation = Quotation::findOrFail($id);
@@ -224,6 +243,10 @@ class QuotationController extends Controller
         return view('pages.quotations.step-02', compact('quotation', 'paxSlabs', 'vehicleTypes', 'navigation'));
     }
 
+
+    /**
+     * Store a quotation Step 02 in DB.
+     */
     public function store_step_two(Request $request, $id)
     {
         $quotation = Quotation::findOrFail($id);
@@ -253,6 +276,10 @@ class QuotationController extends Controller
         return redirect()->route('quotations.step3', $quotation->id)->with('success', 'Pax Slab details saved.');
     }
 
+
+    /**
+     * Display the step two edit form for the specified quotation.
+     */
     public function editStepTwo($id)
     {
         $quotation = Quotation::with('paxSlabs')->findOrFail($id);
@@ -270,6 +297,9 @@ class QuotationController extends Controller
         return view('pages.quotations.edit_pages.step-02-edit', compact('quotation', 'paxSlabs', 'vehicleTypes', 'navigation'));
     }
 
+    /**
+     * Update a quotation Step 02 in DB.
+     */
     public function updateStepTwo(Request $request, $id)
     {
         $quotation = Quotation::findOrFail($id);
@@ -298,6 +328,10 @@ class QuotationController extends Controller
         return redirect()->route('quotations.edit_step_three', $id)->with('success', 'Pax Slab details updated successfully.');
     }
 
+
+    /**
+     * Display the step three form for the specified quotation.
+     */
     public function step_three($id)
     {
         $quotation = Quotation::findOrFail($id);
@@ -312,6 +346,9 @@ class QuotationController extends Controller
         return view('pages.quotations.step-03', compact('quotation', 'hotels', 'mealPlans', 'roomCategories', 'navigation'));
     }
 
+    /**
+     * Store a quotation Step 03 in DB.
+     */
     public function store_step_three(Request $request, $id)
     {
         $quotation = Quotation::findOrFail($id);
@@ -390,6 +427,9 @@ class QuotationController extends Controller
         return redirect()->route('quotations.step4', $quotation->id)->with('success', 'Accommodation details saved successfully.');
     }
 
+    /**
+     * Display the step three edit form for the specified quotation.
+     */
     public function editStepThree($id)
     {
         $quotation = Quotation::with(['accommodations.roomDetails', 'accommodations.additionalRooms'])->findOrFail($id);
@@ -403,6 +443,9 @@ class QuotationController extends Controller
         return view('pages.quotations.edit_pages.step-03-edit', compact('quotation', 'hotels', 'mealPlans', 'roomCategories', 'navigation'));
     }
 
+    /**
+     * Update a quotation Step 03 in DB.
+     */
     public function updateStepThree(Request $request, $id)
     {
         //dd($request->all());
@@ -478,6 +521,11 @@ class QuotationController extends Controller
         return redirect()->route('quotations.edit_step_four', $id)->with('success', 'Accommodation details updated successfully.');
     }
 
+
+    
+    /**
+     * Display the step four form for the specified quotation.
+     */
     public function step_four($id)
     {
         $quotation = Quotation::findOrFail($id);
@@ -493,6 +541,10 @@ class QuotationController extends Controller
         return view('pages.quotations.step4', compact('quotation', 'routes', 'vehicleTypes', 'navigation'));
     }
 
+
+    /**
+     * Store a quotation Step 04 in DB.
+     */
     public function store_step_four(Request $request, $id)
     {
         $quotation = Quotation::findOrFail($id);
@@ -549,6 +601,9 @@ class QuotationController extends Controller
         return redirect()->route('quotations.step5', $quotation->id)->with('success', 'Travel plan details saved successfully.');
     }
 
+    /**
+     * Edit the step four form for the specified quotation.
+     */
     public function editStepFour($id)
     {
         $quotation = Quotation::with('travelPlans')->findOrFail($id);
@@ -560,6 +615,9 @@ class QuotationController extends Controller
         return view('pages.quotations.edit_pages.step-04-edit', compact('quotation', 'routes', 'vehicleTypes', 'navigation'));
     }
 
+    /**
+     * Update a quotation Step 04 in DB.
+     */
     public function updateStepFour(Request $request, $id)
     {
         $quotation = Quotation::findOrFail($id);
@@ -611,6 +669,10 @@ class QuotationController extends Controller
         return redirect()->route('quotations.edit_step_five', $id)->with('success', 'Travel plans updated successfully.');
     }
 
+
+    /**
+     * Display the step five form for the specified quotation.
+     */
     public function step_five($id)
     {
         $quotation = Quotation::findOrFail($id);
@@ -618,6 +680,9 @@ class QuotationController extends Controller
         return view('pages.quotations.step-05', compact('quotation'));
     }
 
+    /**
+     * Store the step five data for the specified quotation.
+     */
     public function store_step_five(Request $request, $id)
     {
         $quotation = Quotation::findOrFail($id);
@@ -690,6 +755,9 @@ class QuotationController extends Controller
         return redirect()->route('quotations.index')->with('success', 'Site seeing details saved successfully.');
     }
 
+    /**
+     * Edit the step five form for the specified quotation.
+     */
     public function editStepFive($id)
     {
         $quotation = Quotation::with('siteSeeings')->findOrFail($id);
@@ -699,6 +767,9 @@ class QuotationController extends Controller
         return view('pages.quotations.edit_pages.step-05-edit', compact('quotation', 'navigation'));
     }
 
+    /**
+     * Update the step five data for the specified quotation.
+     */
     public function updateStepFive(Request $request, $id)
     {
         //dd($request->all());
@@ -774,6 +845,9 @@ class QuotationController extends Controller
         return redirect()->route('quotations.index')->with('success', 'Site seeing details updated successfully.');
     }
 
+    /**
+     * Update Status quote .
+     */
     public function updateStatus(Request $request, $id)
     {
         $quotation = Quotation::findOrFail($id);

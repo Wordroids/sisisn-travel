@@ -29,7 +29,7 @@
                             <tr>
                                 <th scope="col" class="px-4 py-3">User</th>
                                 <th scope="col" class="px-4 py-3">Email</th>
-                                <th scope="col" class="px-4 py-3">User Role</th>
+                                
                                 <th scope="col" class="px-4 py-3">Status</th>
                                 <th scope="col" class="px-4 py-3 whitespace-nowrap">Last Login</th>
                                 <th scope="col" class="px-4 py-3">
@@ -50,7 +50,7 @@
                                 </th>
                                 <td class="px-4 py-2">{{ $user->email }}</td>
 
-                                <!-- User Role -->
+                                <!-- User Role 
                                 <td class="px-4 py-2">
                                     <div class="inline-flex items-center bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -58,7 +58,7 @@
                                         </svg>
                                         {{ ucfirst($user->role) }}
                                     </div>
-                                </td>
+                                </td>-->
 
                                 <!-- Status -->
                                 <td class="px-4 py-2">

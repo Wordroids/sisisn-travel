@@ -18,6 +18,8 @@ use App\Http\Controllers\GuidesController;
 use App\Models\Hotel;
 use App\Http\Controllers\MarkUpValueController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RolePermissionController;
+use App\Http\Controllers\UserRoleController;
 
 
 // Link Storage 
@@ -123,6 +125,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('markup', MarkUpValueController::class);
 
     Route::post('/quotations/update-status/{id}', [QuotationController::class, 'updateStatus'])->name('quotations.updateStatus');
+
+    Route::get('/role-permissions', [RolePermissionController::class, 'index'])->name('role-permissions.index');
+    Route::post('/role-permissions', [RolePermissionController::class, 'updatePermissions'])->name('role-permissions.update');
+
+    Route::get('/user-roles', [UserRoleController::class, 'index'])->name('user-roles.index');
+    Route::post('/user-roles', [UserRoleController::class, 'updateRole'])->name('user-roles.update');
 
 });
 
