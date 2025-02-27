@@ -26,6 +26,7 @@ use App\Models\QuotationAccommodationRoomDetails;
 use App\Models\QuotationSiteSeeing;
 use App\Models\QuotationExtra;
 use App\Models\QuotationJeepCharge;
+use App\Models\TempBookRef;
 
 class QuotationController extends Controller
 {
@@ -72,7 +73,6 @@ class QuotationController extends Controller
         return $steps[$currentStep] ?? [];
     }
 
-
     /**
      * Display a Quotation Details.
      */
@@ -84,7 +84,6 @@ class QuotationController extends Controller
         return view('pages.quotations.index', compact('quotations'));
     }
 
-    
     /**
      * Display a Quotation Details.
      */
@@ -109,8 +108,38 @@ class QuotationController extends Controller
         $guides = Guide::all();
 
         // Generate Quote & Booking Reference
+        //$quoteReference = 'QT/SP/' . (Quotation::max('id') + 1001);
+        //$bookingReference = 'ST/SP/' . (Quotation::max('id') + 1001);
+
+        // Generate Quote Reference
         $quoteReference = 'QT/SP/' . (Quotation::max('id') + 1001);
-        $bookingReference = 'ST/SP/' . (Quotation::max('id') + 1001);
+
+        // Check for available booking reference in temp booking ref table
+        $tempBookRef = TempBookRef::where('quote_reference', 'LIKE', 'QT/SP/%')->whereNotNull('booking_reference')->latest()->first();
+
+        if ($tempBookRef) {
+            // Use the booking reference from temp booking ref table
+            $bookingReference = $tempBookRef->booking_reference;
+        } else {
+            // Get the highest booking reference number
+            $latestBookingRef = Quotation::where('booking_reference', 'LIKE', 'ST/SP/%')
+                ->get()
+                ->map(function ($q) {
+                    preg_match('/ST\/SP\/(\d+)/', $q->booking_reference, $matches);
+                    return isset($matches[1]) ? (int) $matches[1] : 0;
+                })
+                ->max();
+
+            // Generate new reference number
+            $nextNumber = $latestBookingRef ? $latestBookingRef + 1 : 1001;
+            $bookingReference = 'ST/SP/' . $nextNumber;
+
+            // Verify uniqueness
+            while (Quotation::where('booking_reference', $bookingReference)->exists()) {
+                $nextNumber++;
+                $bookingReference = 'ST/SP/' . $nextNumber;
+            }
+        }
 
         $navigation = $this->getNavigation('step1', null, false);
 
@@ -138,13 +167,13 @@ class QuotationController extends Controller
         ]);
 
         // Generate Quote & Booking Reference
-        $latestQuote = Quotation::latest()->first();
-        $quoteReference = 'QT/SP/' . ($latestQuote ? $latestQuote->id + 1001 : 1001);
-        $bookingReference = 'ST/SP/' . ($latestQuote ? $latestQuote->id + 1001 : 1001);
+        //$latestQuote = Quotation::latest()->first();
+        //$quoteReference = 'QT/SP/' . ($latestQuote ? $latestQuote->id + 1001 : 1001);
+        //$bookingReference = 'ST/SP/' . ($latestQuote ? $latestQuote->id + 1001 : 1001);
 
         $quotation = Quotation::create([
-            'quote_reference' => $quoteReference,
-            'booking_reference' => $bookingReference,
+            'quote_reference' => $request->quote_reference,
+            'booking_reference' => $request->booking_reference,
             'market_id' => $request->market_id,
             'customer_id' => $request->customer_id,
             'start_date' => $request->start_date,
@@ -157,6 +186,12 @@ class QuotationController extends Controller
             'driver_id' => $request->driver_id,
             'guide_id' => $request->guide_id,
         ]);
+
+        //delete used booking reference from the temp table
+
+        if ($request->has('booking_reference')) {
+            TempBookRef::where('booking_reference', $request->booking_reference)->delete();
+        }
 
         return redirect()->route('quotations.step2', $quotation->id)->with('success', 'Step 1 saved! Proceed to Pax Slab details.');
     }
@@ -220,7 +255,6 @@ class QuotationController extends Controller
         return redirect()->route('quotations.edit_step_two', $id)->with('success', 'Quotation details updated successfully.');
     }
 
-    
     /**
      * Display the step two form for the specified quotation.
      */
@@ -242,7 +276,6 @@ class QuotationController extends Controller
 
         return view('pages.quotations.step-02', compact('quotation', 'paxSlabs', 'vehicleTypes', 'navigation'));
     }
-
 
     /**
      * Store a quotation Step 02 in DB.
@@ -275,7 +308,6 @@ class QuotationController extends Controller
         }
         return redirect()->route('quotations.step3', $quotation->id)->with('success', 'Pax Slab details saved.');
     }
-
 
     /**
      * Display the step two edit form for the specified quotation.
@@ -327,7 +359,6 @@ class QuotationController extends Controller
 
         return redirect()->route('quotations.edit_step_three', $id)->with('success', 'Pax Slab details updated successfully.');
     }
-
 
     /**
      * Display the step three form for the specified quotation.
@@ -521,8 +552,6 @@ class QuotationController extends Controller
         return redirect()->route('quotations.edit_step_four', $id)->with('success', 'Accommodation details updated successfully.');
     }
 
-
-    
     /**
      * Display the step four form for the specified quotation.
      */
@@ -540,7 +569,6 @@ class QuotationController extends Controller
 
         return view('pages.quotations.step4', compact('quotation', 'routes', 'vehicleTypes', 'navigation'));
     }
-
 
     /**
      * Store a quotation Step 04 in DB.
@@ -668,7 +696,6 @@ class QuotationController extends Controller
 
         return redirect()->route('quotations.edit_step_five', $id)->with('success', 'Travel plans updated successfully.');
     }
-
 
     /**
      * Display the step five form for the specified quotation.
@@ -846,7 +873,7 @@ class QuotationController extends Controller
     }
 
     /**
-     * Update Status quote .
+     * Update Status quote.
      */
     public function updateStatus(Request $request, $id)
     {
@@ -856,10 +883,83 @@ class QuotationController extends Controller
             'status' => 'required|in:pending,approved,rejected',
         ]);
 
-        $quotation->update([
-            'status' => $request->status,
+        // Handle booking reference based on status
+        switch ($request->status) {
+            case 'rejected':
+                $this->handleRejectedStatus($quotation);
+                break;
+
+            case 'pending':
+                $this->handlePendingStatus($quotation);
+                break;
+        }
+
+        // Update the status
+        $quotation->status = $request->status;
+        $quotation->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Quotation status updated successfully!',
+        ]);
+    }
+
+    /**
+     * Handle rejected status logic
+     */
+    private function handleRejectedStatus(Quotation $quotation)
+    {
+        // Store current booking reference in temp table
+        TempBookRef::create([
+            'quote_reference' => $quotation->quote_reference,
+            'booking_reference' => $quotation->booking_reference,
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Quotation status updated successfully!']);
+        $newref = $quotation->booking_reference . '- Rejected';
+
+        // Clear booking reference
+        $quotation->booking_reference = $newref;
+        $quotation->save();
+    }
+
+    /**
+     * Handle pending status logic
+     */
+    private function handlePendingStatus(Quotation $quotation)
+    {
+        // Restore booking reference from temp table
+        $temp = TempBookRef::where('quote_reference', $quotation->quote_reference)->latest()->first();
+
+        if ($temp) {
+            $quotation->booking_reference = $temp->booking_reference;
+            $quotation->save();
+
+            // Delete the temp record
+            $temp->delete();
+        } else {
+            // Get the highest booking reference number
+            $latestBookingRef = Quotation::where('booking_reference', 'LIKE', 'ST/SP/%')
+                ->where('id', '!=', $quotation->id) // Exclude current quotation
+                ->get()
+                ->map(function ($q) {
+                    // Extract the number from the booking reference
+                    preg_match('/ST\/SP\/(\d+)/', $q->booking_reference, $matches);
+                    return isset($matches[1]) ? (int) $matches[1] : 0;
+                })
+                ->max();
+
+            // Generate new reference number
+            $nextNumber = $latestBookingRef ? $latestBookingRef + 1 : 1001;
+            $bookingReference = 'ST/SP/' . $nextNumber;
+
+            // Verify uniqueness
+            while (Quotation::where('booking_reference', $bookingReference)->exists()) {
+                $nextNumber++;
+                $bookingReference = 'ST/SP/' . $nextNumber;
+            }
+
+            $quotation->booking_reference = $bookingReference;
+            $quotation->save();
+        }
     }
 }
