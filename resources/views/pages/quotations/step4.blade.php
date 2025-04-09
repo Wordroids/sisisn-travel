@@ -65,6 +65,20 @@
             </ol>
         </div>
 
+        @if (count($errors->all()) > 0)
+            <div class="mt-4">
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">Error!</strong>
+                    <span class="block sm:inline">Please correct the following errors:</span>
+                    <ul class="mt-2 list-disc list-inside">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+
         <p class="text-gray-700 mt-10 mb-8">Quotation Reference: <strong>{{ $quotation->quote_reference }}</strong></p>
 
         <form method="POST" action="{{ route('quotations.step4.store', $quotation->id) }}" id="travelPlanForm">
@@ -124,91 +138,95 @@
                     </div>
                 </div>
             </div>
-    </div>
 
-    <!-- Add Another Travel Plan Button -->
-    <button type="button" id="add-travel" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">+
-        Add Another Travel
-        Plan</button>
 
-    <div class="max-w-7xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
-        <div class="mt-8">
-            <div class="flex items-center mb-4">
-                <h3 class="text-lg font-semibold">Jeep Charges</h3>
-                <label class="relative inline-flex items-center cursor-pointer ml-4">
-                    <input type="checkbox" id="enableJeepCharges" name="enable_jeep_charges" class="sr-only peer">
-                    <div
-                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+            <!-- Add Another Travel Plan Button -->
+            <button type="button" id="add-travel"
+                class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">+
+                Add Another Travel
+                Plan</button>
+
+            <div class="max-w-7xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+                <div class="mt-8">
+                    <div class="flex items-center mb-4">
+                        <h3 class="text-lg font-semibold">Jeep Charges</h3>
+                        <label class="relative inline-flex items-center cursor-pointer ml-4">
+                            <input type="checkbox" id="enableJeepCharges" name="enable_jeep_charges"
+                                class="sr-only peer">
+                                <div
+                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+                            </div>
+                            <span class="ml-3 text-sm font-medium text-gray-900">Enable Jeep Charges</span>
+                        </label>
                     </div>
-                    <span class="ml-3 text-sm font-medium text-gray-900">Enable Jeep Charges</span>
-                </label>
-            </div>
 
-            <div id="jeepChargesSection" class="hidden">
-                <div class="bg-gray-100 p-4 rounded-lg">
-                    <table class="w-full text-sm text-left text-gray-500">
-                        <thead>
-                            <tr>
-                                <th class="px-4 py-2">Pax Range</th>
-                                <th class="px-4 py-2">Unit Price (US$)</th>
-                                <th class="px-4 py-2">Quantity</th>
-                                <th class="px-4 py-2">Total Price (US$)</th>
-                                <th class="px-4 py-2">Per Person (US$)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($quotation->paxSlabs as $paxSlab)
-                                <tr>
-                                    <td class="px-4 py-2">
-                                        <input type="text" name="jeep_charges[{{ $loop->index }}][pax_range]"
-                                            value="{{ $paxSlab->paxSlab->name }}"
-                                            class="block w-full border-gray-300 rounded-md shadow-sm" readonly>
-                                    </td>
-                                    <td class="px-4 py-2">
-                                        <input type="number" step="0.01"
-                                            name="jeep_charges[{{ $loop->index }}][unit_price]"
-                                            class="jeep-unit-price block w-full border-gray-300 rounded-md shadow-sm">
-                                    </td>
-                                    <td class="px-4 py-2">
-                                        <input type="number" name="jeep_charges[{{ $loop->index }}][quantity]"
-                                            class="jeep-quantity block w-full border-gray-300 rounded-md shadow-sm">
-                                    </td>
-                                    <td class="px-4 py-2">
-                                        <input type="number" step="0.01"
-                                            name="jeep_charges[{{ $loop->index }}][total_price]"
-                                            class="jeep-total-price block w-full border-gray-300 rounded-md shadow-sm"
-                                            readonly>
-                                    </td>
-                                    <td class="px-4 py-2">
-                                        <input type="number" step="0.01"
-                                            name="jeep_charges[{{ $loop->index }}][per_person]"
-                                            class="jeep-per-person block w-full border-gray-300 rounded-md shadow-sm"
-                                            data-min-pax="{{ $paxSlab->paxSlab->min_pax }}" readonly>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                    <div id="jeepChargesSection" class="hidden">
+                        <div class="bg-gray-100 p-4 rounded-lg">
+                            <table class="w-full text-sm text-left text-gray-500">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-2">Pax Range</th>
+                                        <th class="px-4 py-2">Unit Price (US$)</th>
+                                        <th class="px-4 py-2">Quantity</th>
+                                        <th class="px-4 py-2">Total Price (US$)</th>
+                                        <th class="px-4 py-2">Per Person (US$)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($quotation->paxSlabs as $paxSlab)
+                                        <tr>
+                                            <td class="px-4 py-2">
+                                                <input type="text"
+                                                    name="jeep_charges[{{ $loop->index }}][pax_range]"
+                                                    value="{{ $paxSlab->paxSlab->name }}"
+                                                    class="block w-full border-gray-300 rounded-md shadow-sm" readonly>
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <input type="number" step="0.01"
+                                                    name="jeep_charges[{{ $loop->index }}][unit_price]"
+                                                    class="jeep-unit-price block w-full border-gray-300 rounded-md shadow-sm">
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <input type="number"
+                                                    name="jeep_charges[{{ $loop->index }}][quantity]"
+                                                    class="jeep-quantity block w-full border-gray-300 rounded-md shadow-sm">
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <input type="number" step="0.01"
+                                                    name="jeep_charges[{{ $loop->index }}][total_price]"
+                                                    class="jeep-total-price block w-full border-gray-300 rounded-md shadow-sm"
+                                                    readonly>
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <input type="number" step="0.01"
+                                                    name="jeep_charges[{{ $loop->index }}][per_person]"
+                                                    class="jeep-per-person block w-full border-gray-300 rounded-md shadow-sm"
+                                                    data-min-pax="{{ $paxSlab->paxSlab->min_pax }}" readonly>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="flex justify-between mt-6">
-        @if (isset($navigation['back']))
-            <a href="{{ $navigation['back'] }}"
-                class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
-                Back
-            </a>
-        @else
-            <div></div> {{-- Empty div to maintain spacing --}}
-        @endif
+            <div class="flex justify-between mt-6">
+                @if (isset($navigation['back']))
+                    <a href="{{ $navigation['back'] }}"
+                        class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
+                        Back
+                    </a>
+                @else
+                    <div></div> {{-- Empty div to maintain spacing --}}
+                @endif
 
-        <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-            Save & Complete
-        </button>
-    </div>
-    </form>
+                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                    Save & Complete
+                </button>
+            </div>
+        </form>
     </div>
 
     <script>
@@ -468,19 +486,19 @@
 
             if (enableJeepCharges && jeepChargesSection) {
                 // Set initial state
-                jeepChargesSection.classList.toggle('hidden', !enableJeepCharges.checked);
+        jeepChargesSection.classList.toggle('hidden', !enableJeepCharges.checked);
 
-                // Toggle visibility on checkbox change
-                enableJeepCharges.addEventListener('change', function() {
-                    jeepChargesSection.classList.toggle('hidden', !this.checked);
+// Toggle visibility on checkbox change
+enableJeepCharges.addEventListener('change', function() {
+    jeepChargesSection.classList.toggle('hidden', !this.checked);
 
-                    // Clear inputs when disabled
-                    if (!this.checked) {
-                        jeepChargesSection.querySelectorAll('input:not([readonly])').forEach(input => {
-                            input.value = '';
-                        });
-                    }
-                });
+    // Clear inputs when disabled
+    if (!this.checked) {
+        jeepChargesSection.querySelectorAll('input:not([readonly])').forEach(input => {
+            input.value = '';
+        });
+    }
+});
 
                 // Set up calculations for each row
                 const jeepRows = jeepChargesSection.querySelectorAll('tbody tr');

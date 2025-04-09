@@ -126,7 +126,45 @@
                 @empty
                     <!-- Default empty site entry -->
                     <div class="site-entry border p-4 rounded-lg mb-4 bg-gray-100 relative">
-                        <!-- ... Same structure as above but with empty values ... -->
+                        <button type="button"
+                            class="remove-site absolute top-2 right-2 text-red-500 hover:text-red-700">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                        <div class="grid grid-cols-4 gap-4">
+                            <!-- Site Name -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Site Name</label>
+                                <input type="text" name="sites[0][name]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                                <input type="hidden" name="sites[0][type]" value="site">
+                            </div>
+
+                            <!-- Unit Price -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Unit Price ( USD )</label>
+                                <input type="number" name="sites[0][unit_price]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm" step="0.01"
+                                    min="0" required>
+                            </div>
+
+                            <!-- Quantity -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Quantity</label>
+                                <input type="number" name="sites[0][quantity]" value="1"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm" required disabled>
+                            </div>
+
+                            <!-- Per Adult Price -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Per Adult Price</label>
+                                <input type="number" name="sites[0][price_per_adult]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm" step="0.01"
+                                    min="0" required disabled>
+                            </div>
+                        </div>
                     </div>
                 @endforelse
             </div>
@@ -187,9 +225,48 @@
                         </div>
                     </div>
                 @empty
+
                     <!-- Default empty extra entry -->
                     <div class="site-extra-entry border p-4 rounded-lg mb-4 bg-gray-100 relative">
-                        <!-- ... Same structure as above but with empty values ... -->
+                        <button type="button"
+                            class="remove-site-extra absolute top-2 right-2 text-red-500 hover:text-red-700">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                        <div class="grid grid-cols-4 gap-4">
+                            <!-- Extra Name -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Extra Name</label>
+                                <input type="text" name="site_extras[0][name]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                                <input type="hidden" name="site_extras[0][type]" value="extra">
+                            </div>
+
+                            <!-- Unit Price -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Unit Price ( USD )</label>
+                                <input type="number" name="site_extras[0][unit_price]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm" step="0.01"
+                                    min="0" required>
+                            </div>
+
+                            <!-- Quantity -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Quantity</label>
+                                <input type="number" name="site_extras[0][quantity]" value="1"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm" required>
+                            </div>
+
+                            <!-- Per Adult Price -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Per Adult Price</label>
+                                <input type="number" name="site_extras[0][price_per_adult]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm" step="0.01"
+                                    min="0" required disabled>
+                            </div>
+                        </div>
                     </div>
                 @endforelse
             </div>

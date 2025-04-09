@@ -203,13 +203,7 @@
                             Customer Data
                         </a>
                     </li>
-                    <li>
-                        <a
-                            href="#"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700">
-                            Vehicle Fleet
-                        </a>
-                    </li>
+                    
 
                     <!-- Hotels  -->
                     <li>
