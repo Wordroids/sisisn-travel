@@ -65,7 +65,14 @@
             <!-- Pax Slab Table -->
             <div class="overflow-x-auto bg-gray-100 p-4 rounded-lg">
                 <table class="w-full text-sm text-left text-gray-500">
-
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-2 text-center">Pax Slab</th>
+                            <th class="px-4 py-2 text-center">Exact No. of Pax</th>
+                            <th class="px-4 py-2 text-center">Vehicle Type</th>
+                            <th class="px-4 py-2 text-center">Vehicle Payout Rate</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         @foreach ($paxSlabs as $paxSlab)
                             <tr>
