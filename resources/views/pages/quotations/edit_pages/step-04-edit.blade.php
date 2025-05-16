@@ -324,31 +324,7 @@
                 }
             }
 
-            function checkDateOverlap(startDate, endDate, currentEntry) {
-                const allEntries = document.querySelectorAll('.travel-entry');
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-
-                for (let entry of allEntries) {
-                    if (entry === currentEntry) continue;
-
-                    const otherStartInput = entry.querySelector('input[name*="start_date"]');
-                    const otherEndInput = entry.querySelector('input[name*="end_date"]');
-
-                    if (!otherStartInput.value || !otherEndInput.value) continue;
-
-                    const otherStart = new Date(otherStartInput.value);
-                    const otherEnd = new Date(otherEndInput.value);
-
-                    if ((start <= otherEnd && start >= otherStart) ||
-                        (end <= otherEnd && end >= otherStart) ||
-                        (start <= otherStart && end >= otherEnd)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
+            
             function initializeRouteSelect(container) {
                 const routeSelect = container.querySelector('.route-select');
                 const mileageInput = container.querySelector('.mileage-input');
@@ -485,32 +461,7 @@
                     return false;
                 }
 
-                for (let i = 0; i < dates.length - 1; i++) {
-                    const currentEnd = new Date(dates[i].end);
-                    const nextStart = new Date(dates[i + 1].start);
-                    currentEnd.setHours(0, 0, 0, 0);
-                    nextStart.setHours(0, 0, 0, 0);
-
-                    const expectedNextDay = new Date(currentEnd);
-                    expectedNextDay.setDate(expectedNextDay.getDate() + 1);
-
-                    if (nextStart.getTime() !== expectedNextDay.getTime()) {
-                        const gap = Math.floor((nextStart - expectedNextDay) / (1000 * 60 * 60 * 24));
-                        if (gap > 0) {
-                            alert(
-                                `Found a gap of ${gap} day(s) between ${currentEnd.toLocaleDateString()} and ${nextStart.toLocaleDateString()}`
-                            );
-                            return false;
-                        }
-                    }
-
-                    if (currentEnd >= nextStart) {
-                        alert(
-                            `Travel plans cannot overlap. Found overlap between ${dates[i].start.toLocaleDateString()} - ${dates[i].end.toLocaleDateString()} and ${dates[i + 1].start.toLocaleDateString()} - ${dates[i + 1].end.toLocaleDateString()}`
-                        );
-                        return false;
-                    }
-                }
+                
 
                 this.submit();
             });
