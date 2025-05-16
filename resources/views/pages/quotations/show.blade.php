@@ -453,36 +453,101 @@
         <!-- Add this before the Quote Simulation section -->
         @if ($quotation->jeepCharges->count() > 0)
             <!-- Jeep Charges -->
+            <!-- Jeep Charges -->
             <div class="bg-white p-6 rounded-lg shadow-sm mt-6">
                 <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">Jeep Charges</h3>
-                <div class="overflow-x-auto mt-4">
-                    <table class="w-full text-sm text-left text-gray-700 border rounded-lg shadow">
-                        <thead class="bg-gray-200 text-gray-700">
-                            <tr>
-                                <th class="px-4 py-3 text-left">Pax Range</th>
-                                <th class="px-4 py-3 text-center">Unit Price (USD)</th>
-                                <th class="px-4 py-3 text-center">Quantity</th>
-                                <th class="px-4 py-3 text-center">Total Price (USD)</th>
-                                <th class="px-4 py-3 text-center">Per Person (USD)</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            @foreach ($quotation->jeepCharges as $charge)
-                                <tr class="bg-gray-50 hover:bg-gray-100 transition">
-                                    <td class="px-4 py-3">{{ $charge->pax_range }}</td>
-                                    <td class="px-4 py-3 text-center">{{ number_format($charge->unit_price, 2) }}</td>
-                                    <td class="px-4 py-3 text-center">{{ $charge->quantity }}</td>
-                                    <td class="px-4 py-3 text-center">{{ number_format($charge->total_price, 2) }}
-                                    </td>
-                                    <td class="px-4 py-3 text-center font-semibold text-green-600">
-                                        {{ number_format($charge->per_person, 2) }}
-                                    </td>
-                                </tr>
-                            @endforeach
 
-                        </tbody>
-                    </table>
-                </div>
+                <!-- Global Jeep Charges -->
+                @if ($quotation->jeepCharges->where('travel_plan_id', null)->count() > 0)
+                    <div class="mt-4">
+                        <h4 class="font-medium text-gray-800 mb-2">Global Jeep Charges</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-700 border rounded-lg shadow">
+                                <thead class="bg-gray-200 text-gray-700">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left">Pax Range</th>
+                                        <th class="px-4 py-3 text-center">Unit Price (USD)</th>
+                                        <th class="px-4 py-3 text-center">Quantity</th>
+                                        <th class="px-4 py-3 text-center">Total Price (USD)</th>
+                                        <th class="px-4 py-3 text-center">Per Person (USD)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y">
+                                    @foreach ($quotation->jeepCharges->where('travel_plan_id', null) as $charge)
+                                        <tr class="bg-gray-50 hover:bg-gray-100 transition">
+                                            <td class="px-4 py-3">{{ $charge->pax_range }}</td>
+                                            <td class="px-4 py-3 text-center">
+                                                {{ number_format($charge->unit_price, 2) }}</td>
+                                            <td class="px-4 py-3 text-center">{{ $charge->quantity }}</td>
+                                            <td class="px-4 py-3 text-center">
+                                                {{ number_format($charge->total_price, 2) }}</td>
+                                            <td class="px-4 py-3 text-center font-semibold text-green-600">
+                                                {{ number_format($charge->per_person, 2) }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Route-specific Jeep Charges -->
+                @if ($quotation->jeepCharges->where('travel_plan_id', '!=', null)->count() > 0)
+                    <div class="mt-6">
+                        <h4 class="font-medium text-gray-800 mb-2">Route-specific Jeep Charges</h4>
+
+                        @foreach ($quotation->travelPlans as $travelPlan)
+                            @php
+                                $routeJeepCharges = $quotation->jeepCharges->where('travel_plan_id', $travelPlan->id);
+                            @endphp
+
+                            @if ($routeJeepCharges->count() > 0)
+                                <div class="mb-4 bg-gray-50 p-3 rounded-lg">
+                                    <h5 class="font-medium text-gray-700 mb-2">Route: {{ $travelPlan->route->name }}
+                                        <span class="text-sm text-gray-500">({{ $travelPlan->start_date }} to
+                                            {{ $travelPlan->end_date }})</span>
+                                    </h5>
+
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-sm text-left text-gray-700 border rounded-lg shadow">
+                                            <thead class="bg-gray-200 text-gray-700">
+                                                <tr>
+                                                    <th class="px-4 py-2 text-left">Pax Range</th>
+                                                    <th class="px-4 py-2 text-center">Unit Price (USD)</th>
+                                                    <th class="px-4 py-2 text-center">Quantity</th>
+                                                    <th class="px-4 py-2 text-center">Total Price (USD)</th>
+                                                    <th class="px-4 py-2 text-center">Per Person (USD)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y">
+                                                @foreach ($routeJeepCharges as $charge)
+                                                    <tr class="hover:bg-gray-100 transition">
+                                                        <td class="px-4 py-2">{{ $charge->pax_range }}</td>
+                                                        <td class="px-4 py-2 text-center">
+                                                            {{ number_format($charge->unit_price, 2) }}</td>
+                                                        <td class="px-4 py-2 text-center">{{ $charge->quantity }}</td>
+                                                        <td class="px-4 py-2 text-center">
+                                                            {{ number_format($charge->total_price, 2) }}</td>
+                                                        <td class="px-4 py-2 text-center font-semibold text-green-600">
+                                                            {{ number_format($charge->per_person, 2) }}
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                @endif
+
+                @if ($quotation->jeepCharges->count() === 0)
+                    <div class="mt-4 text-center text-gray-500 py-4">
+                        No jeep charges have been added to this quotation.
+                    </div>
+                @endif
             </div>
         @endif
 
@@ -542,7 +607,7 @@
                         $extrasTotal = $quotation->extras->sum('total_price');
 
                         // Build simulation rows
-                        $simulationRows = [];
+                        /*$simulationRows = [];
                         foreach ($quotation->paxSlabs as $paxSlab) {
                             $minPax = $paxSlab->paxSlab->min_pax;
 
@@ -553,7 +618,8 @@
                                 'pax_range' => $paxSlab->paxSlab->name,
                                 'accommodation' => number_format($doubleAccommodationTotal / 2, 2),
                                 'transport' => number_format(
-                                    ($paxSlab->vehicle_payout_rate * $totalMileage) / $minPax / $conversionRate,
+                                    ($paxSlab->vehicle_payout_rate * $totalMileage)
+/ $minPax / $conversionRate,
                                     2,
                                 ),
                                 'chauffeur' => number_format(
@@ -578,6 +644,70 @@
                                 $extrasTotal / $minPax +
                                 $sitesTotal +
                                 ($jeepCharge ? $jeepCharge->per_person : 0);
+
+                            $totalExVat = $total / 1.18;
+                            $markup = $quotation->markup_per_person;
+                            $nett = ($totalExVat + $markup) * 1.18;
+
+                            $row['total'] = number_format($total, 2);
+                            $row['total_ex_vat'] = number_format($totalExVat, 2);
+                            $row['markup'] = number_format($markup, 2);
+                            $row['nett'] = number_format($nett, 2);
+                            $row['roundup'] = number_format(ceil($nett), 2);
+
+                            $simulationRows[] = $row;
+                        }*/
+                        // Build simulation rows
+                        $simulationRows = [];
+                        foreach ($quotation->paxSlabs as $paxSlab) {
+                            $minPax = $paxSlab->paxSlab->min_pax;
+                            $paxRange = $paxSlab->paxSlab->name;
+
+                            // Get global jeep charge for current pax range
+                            $globalJeepCharge = $quotation->jeepCharges
+                                ->where('travel_plan_id', null)
+                                ->where('pax_range', $paxRange)
+                                ->first();
+
+                            // Get route-specific jeep charges for current pax range
+                            $routeJeepCharges = $quotation->jeepCharges
+                                ->where('travel_plan_id', '!=', null)
+                                ->where('pax_range', $paxRange);
+
+                            // Calculate total jeep charges (global + route-specific)
+                            $totalJeepCharges =
+                                ($globalJeepCharge ? $globalJeepCharge->per_person : 0) +
+                                $routeJeepCharges->sum('per_person');
+
+                            $row = [
+                                'pax_range' => $paxRange,
+                                'accommodation' => number_format($doubleAccommodationTotal / 2, 2),
+                                'transport' => number_format(
+                                    ($paxSlab->vehicle_payout_rate * $totalMileage) / $minPax / $conversionRate,
+                                    2,
+                                ),
+                                'chauffeur' => number_format(
+                                    ($duration * $driverDailyCharge + $driverAccommodation) / $conversionRate / $minPax,
+                                    2,
+                                ),
+                                'guide' => number_format(
+                                    ($duration * $guideDailyCharge + $guideAccommodation) / $conversionRate / $minPax,
+                                    2,
+                                ),
+                                'sites' => number_format($sitesTotal, 2),
+                                'jeep_charges' => $totalJeepCharges > 0 ? number_format($totalJeepCharges, 2) : '-',
+                                'extras' => number_format($extrasTotal / $minPax, 2),
+                            ];
+
+                            // Calculate financials
+                            $total =
+                                $doubleAccommodationTotal / 2 +
+                                ($paxSlab->vehicle_payout_rate * $totalMileage) / $minPax / $conversionRate +
+                                ($duration * $driverDailyCharge + $driverAccommodation) / $conversionRate / $minPax +
+                                ($duration * $guideDailyCharge + $guideAccommodation) / $conversionRate / $minPax +
+                                $extrasTotal / $minPax +
+                                $sitesTotal +
+                                $totalJeepCharges;
 
                             $totalExVat = $total / 1.18;
                             $markup = $quotation->markup_per_person;

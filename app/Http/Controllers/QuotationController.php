@@ -597,6 +597,8 @@ class QuotationController extends Controller
      */
     public function store_step_four(Request $request, $id)
     {
+        //dd($request->all());
+
         $quotation = Quotation::findOrFail($id);
 
         $validationRules = [
@@ -618,18 +620,36 @@ class QuotationController extends Controller
             $validationRules['jeep_charges.*.per_person'] = 'required|numeric|min:0';
         }
 
+        // Only apply validation if route wise - jeep charges are enabled
+        if($request->has('enable_route_jeep_charges')){
+            $validationRules['route_jeep_charges'] = 'required|array';
+            $validationRules['route_jeep_charges.*.charges'] = 'required|array';
+            $validationRules['route_jeep_charges.*.charges.*.pax_range'] = 'required';
+            $validationRules['route_jeep_charges.*.charges.*.unit_price'] = 'required|numeric|min:0';
+            $validationRules['route_jeep_charges.*.charges.*.quantity'] = 'required|integer|min:0';
+            $validationRules['route_jeep_charges.*.charges.*.total_price'] = 'required|numeric|min:0';
+            $validationRules['route_jeep_charges.*.charges.*.per_person'] = 'required|numeric|min:0';
+        }
+
         $request->validate($validationRules);
 
-        foreach ($request->travel as $travel) {
-            QuotationTravelPlan::create([
-                'quotation_id' => $quotation->id,
-                'start_date' => $travel['start_date'],
-                'end_date' => $travel['end_date'],
-                'route_id' => $travel['route_id'],
-                'vehicle_type_id' => $travel['vehicle_type_id'],
-                'mileage' => $travel['mileage'],
-            ]);
-        }
+        // Create travel plans and keep track of them for route-specific jeep charges
+    $travelPlans = [];
+    foreach ($request->travel as $travelIndex => $travel) {
+        $travelPlan = QuotationTravelPlan::create([
+            'quotation_id' => $quotation->id,
+            'start_date' => $travel['start_date'],
+            'end_date' => $travel['end_date'],
+            'route_id' => $travel['route_id'],
+            'vehicle_type_id' => $travel['vehicle_type_id'],
+            'mileage' => $travel['mileage'],
+        ]);
+        
+        $travelPlans[$travelIndex] = $travelPlan;
+    }
+
+    // Delete existing jeep charges
+    $quotation->jeepCharges()->delete();
 
         // Store jeep charges if enabled
         if ($request->has('enable_jeep_charges') && $request->has('jeep_charges')) {
@@ -653,6 +673,36 @@ class QuotationController extends Controller
                 ]);
             }
         }
+
+        // Store route-specific jeep charges if enabled
+    if ($request->has('enable_route_jeep_charges') && $request->has('route_jeep_charges')) {
+        foreach ($request->route_jeep_charges as $travelIndex => $routeCharge) {
+            // Find the travel plan this charge belongs to
+            if (!isset($travelPlans[$travelIndex])) {
+                continue; // Skip if travel plan not found
+            }
+            
+            $travelPlan = $travelPlans[$travelIndex];
+            
+            // Store each charge for this route
+            foreach ($routeCharge['charges'] as $charge) {
+                // Skip empty or incomplete entries
+                if (empty($charge['unit_price']) || empty($charge['quantity'])) {
+                    continue;
+                }
+                
+                QuotationJeepCharge::create([
+                    'quotation_id' => $quotation->id,
+                    'travel_plan_id' => $travelPlan->id, // Associate with specific travel plan
+                    'pax_range' => $charge['pax_range'],
+                    'unit_price' => $charge['unit_price'],
+                    'quantity' => $charge['quantity'],
+                    'total_price' => $charge['total_price'],
+                    'per_person' => $charge['per_person'],
+                ]);
+            }
+        }
+    }
 
         $quotation->save();
 
@@ -700,14 +750,26 @@ class QuotationController extends Controller
             $validationRules['jeep_charges.*.per_person'] = 'required|numeric|min:0';
         }
 
+        // Only apply validation if route wise - jeep charges are enabled
+        if($request->input('enable_route_jeep_charges' == '1')){
+            $validationRules['route_jeep_charges'] = 'required|array';
+            $validationRules['route_jeep_charges.*.charges'] = 'required|array';
+            $validationRules['route_jeep_charges.*.charges.*.pax_range'] = 'required';
+            $validationRules['route_jeep_charges.*.charges.*.unit_price'] = 'required|numeric|min:0';
+            $validationRules['route_jeep_charges.*.charges.*.quantity'] = 'required|integer|min:0';
+            $validationRules['route_jeep_charges.*.charges.*.total_price'] = 'required|numeric|min:0';
+            $validationRules['route_jeep_charges.*.charges.*.per_person'] = 'required|numeric|min:0';
+        }
+
         $request->validate($validationRules);
 
         // Delete existing travel plans
         $quotation->travelPlans()->delete();
 
-        // Create new travel plans
-        foreach ($request->travel as $travel) {
-            QuotationTravelPlan::create([
+        // Create new travel plans and keep track of them for route-specific jeep charges
+        $travelPlans = [];
+        foreach ($request->travel as $travelIndex => $travel) {
+            $travelPlan = QuotationTravelPlan::create([
                 'quotation_id' => $quotation->id,
                 'start_date' => $travel['start_date'],
                 'end_date' => $travel['end_date'],
@@ -715,21 +777,54 @@ class QuotationController extends Controller
                 'vehicle_type_id' => $travel['vehicle_type_id'],
                 'mileage' => $travel['mileage'],
             ]);
+            
+            $travelPlans[$travelIndex] = $travelPlan;
         }
 
         // Always delete existing jeep charges first
         $quotation->jeepCharges()->delete();
 
         // Only create new jeep charges if enabled and data exists
-        if ($request->input('enable_jeep_charges') == '1' && $request->has('jeep_charges')) {
-            foreach ($request->jeep_charges as $charge) {
+        // Store global jeep charges if enabled
+    if ($request->has('enable_jeep_charges') && $request->has('jeep_charges')) {
+        foreach ($request->jeep_charges as $charge) {
+            // Skip empty or incomplete entries
+            if (empty($charge['unit_price']) || empty($charge['quantity'])) {
+                continue;
+            }
+
+            QuotationJeepCharge::create([
+                'quotation_id' => $quotation->id,
+                'travel_plan_id' => null, // Global charges have no specific travel plan
+                'pax_range' => $charge['pax_range'],
+                'unit_price' => $charge['unit_price'],
+                'quantity' => $charge['quantity'],
+                'total_price' => $charge['total_price'],
+                'per_person' => $charge['per_person'],
+            ]);
+        }
+    }
+    
+    // Store route-specific jeep charges if enabled
+    if ($request->has('enable_route_jeep_charges') && $request->has('route_jeep_charges')) {
+        foreach ($request->route_jeep_charges as $travelIndex => $routeCharge) {
+            // Find the travel plan this charge belongs to
+            if (!isset($travelPlans[$travelIndex])) {
+                continue; // Skip if travel plan not found
+            }
+            
+            $travelPlan = $travelPlans[$travelIndex];
+            
+            // Store each charge for this route
+            foreach ($routeCharge['charges'] as $charge) {
                 // Skip empty or incomplete entries
                 if (empty($charge['unit_price']) || empty($charge['quantity'])) {
                     continue;
                 }
-
+                
                 QuotationJeepCharge::create([
                     'quotation_id' => $quotation->id,
+                    'travel_plan_id' => $travelPlan->id, // Associate with specific travel plan
                     'pax_range' => $charge['pax_range'],
                     'unit_price' => $charge['unit_price'],
                     'quantity' => $charge['quantity'],
@@ -738,6 +833,7 @@ class QuotationController extends Controller
                 ]);
             }
         }
+    }
 
         return redirect()->route('quotations.edit_step_five', $id)->with('success', 'Travel plans updated successfully.');
     }

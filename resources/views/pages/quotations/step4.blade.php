@@ -64,23 +64,18 @@
                 </li>
             </ol>
         </div>
-
-        @if (count($errors->all()) > 0)
-            <div class="mt-4">
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                    <strong class="font-bold">Error!</strong>
-                    <span class="block sm:inline">Please correct the following errors:</span>
-                    <ul class="mt-2 list-disc list-inside">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        @endif
-
+        
+            @php
+                // display  all errors
+                if ($errors->any()) {
+                    foreach ($errors->all() as $error) {
+                        echo "<div class='text-red-500'>$error</div>";
+                    }
+                }
+            @endphp
+            
         <p class="text-gray-700 mt-10 mb-8">Quotation Reference: <strong>{{ $quotation->quote_reference }}</strong></p>
-
+            
         <form method="POST" action="{{ route('quotations.step4.store', $quotation->id) }}" id="travelPlanForm">
             @csrf
 
@@ -146,6 +141,7 @@
                 Add Another Travel
                 Plan</button>
 
+            <!-- Modified Jeep Charges section -->
             <div class="max-w-7xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
                 <div class="mt-8">
                     <div class="flex items-center mb-4">
@@ -153,15 +149,16 @@
                         <label class="relative inline-flex items-center cursor-pointer ml-4">
                             <input type="checkbox" id="enableJeepCharges" name="enable_jeep_charges"
                                 class="sr-only peer">
-                                <div
+                            <div
                                 class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
                             </div>
-                            <span class="ml-3 text-sm font-medium text-gray-900">Enable Jeep Charges</span>
+                            <span class="ml-3 text-sm font-medium text-gray-900">Enable Global Jeep Charges</span>
                         </label>
                     </div>
 
                     <div id="jeepChargesSection" class="hidden">
-                        <div class="bg-gray-100 p-4 rounded-lg">
+                        <div class="bg-gray-100 p-4 rounded-lg mb-6">
+                            <h4 class="font-medium mb-2">Global Jeep Charges (Applied to Entire Trip)</h4>
                             <table class="w-full text-sm text-left text-gray-500">
                                 <thead>
                                     <tr>
@@ -207,6 +204,28 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <!-- Route-specific Jeep Charges -->
+                    <div class="mt-12">
+                        <div class="flex items-center mb-4">
+                            <h3 class="text-lg font-semibold">Route-specific Jeep Charges</h3>
+                            <label class="relative inline-flex items-center cursor-pointer ml-4">
+                                <input type="checkbox" id="enableRouteJeepCharges" name="enable_route_jeep_charges"
+                                    class="sr-only peer">
+                                <div
+                                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+                                </div>
+                                <span class="ml-3 text-sm font-medium text-gray-900">Enable Route-specific Jeep
+                                    Charges</span>
+                            </label>
+                        </div>
+
+                        <div id="routeJeepChargesSection" class="hidden">
+                            <div id="route-jeep-charges-container">
+                                <!-- This will be populated with route-specific charge tables by JavaScript -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -291,7 +310,7 @@
                             return;
                         }
 
-                        
+
                     }
                 });
 
@@ -318,7 +337,7 @@
                             return;
                         }
 
-                        
+
                     }
                 });
             }
@@ -426,7 +445,7 @@
                     return false;
                 }
 
-                
+
 
                 // If all validations pass, submit the form
                 this.submit();
@@ -437,25 +456,25 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Get references to the elements
+            // Existing code for global jeep charges
             const enableJeepCharges = document.getElementById('enableJeepCharges');
             const jeepChargesSection = document.getElementById('jeepChargesSection');
 
             if (enableJeepCharges && jeepChargesSection) {
                 // Set initial state
-        jeepChargesSection.classList.toggle('hidden', !enableJeepCharges.checked);
+                jeepChargesSection.classList.toggle('hidden', !enableJeepCharges.checked);
 
-// Toggle visibility on checkbox change
-enableJeepCharges.addEventListener('change', function() {
-    jeepChargesSection.classList.toggle('hidden', !this.checked);
+                // Toggle visibility on checkbox change
+                enableJeepCharges.addEventListener('change', function() {
+                    jeepChargesSection.classList.toggle('hidden', !this.checked);
 
-    // Clear inputs when disabled
-    if (!this.checked) {
-        jeepChargesSection.querySelectorAll('input:not([readonly])').forEach(input => {
-            input.value = '';
-        });
-    }
-});
+                    // Clear inputs when disabled
+                    if (!this.checked) {
+                        jeepChargesSection.querySelectorAll('input:not([readonly])').forEach(input => {
+                            input.value = '';
+                        });
+                    }
+                });
 
                 // Set up calculations for each row
                 const jeepRows = jeepChargesSection.querySelectorAll('tbody tr');
@@ -496,6 +515,181 @@ enableJeepCharges.addEventListener('change', function() {
                         });
                     }
                 });
+            }
+
+            // New code for route-specific jeep charges
+            const enableRouteJeepCharges = document.getElementById('enableRouteJeepCharges');
+            const routeJeepChargesSection = document.getElementById('routeJeepChargesSection');
+            const routeJeepChargesContainer = document.getElementById('route-jeep-charges-container');
+
+            if (enableRouteJeepCharges && routeJeepChargesSection) {
+                // Set initial state
+                routeJeepChargesSection.classList.toggle('hidden', !enableRouteJeepCharges.checked);
+
+                // Toggle visibility on checkbox change
+                enableRouteJeepCharges.addEventListener('change', function() {
+                    routeJeepChargesSection.classList.toggle('hidden', !this.checked);
+
+                    if (this.checked) {
+                        // Generate route-specific jeep charge tables for each travel plan
+                        generateRouteJeepChargeTables();
+                    } else {
+                        // Clear the container when disabled
+                        routeJeepChargesContainer.innerHTML = '';
+                    }
+                });
+
+                // Function to generate route-specific jeep charge tables
+                function generateRouteJeepChargeTables() {
+                    routeJeepChargesContainer.innerHTML = '';
+                    const travelEntries = document.querySelectorAll('.travel-entry');
+
+                    travelEntries.forEach((entry, travelIndex) => {
+                        const routeSelect = entry.querySelector('.route-select');
+                        const routeId = routeSelect.value;
+                        const routeName = routeSelect.options[routeSelect.selectedIndex]?.text ||
+                            'Unknown Route';
+
+                        if (!routeId) return; // Skip if no route is selected
+
+                        // Create a table for this route
+                        const routeTableHtml = `
+                        <div class="bg-gray-100 p-4 rounded-lg mb-4">
+                            <h4 class="font-medium mb-2">Jeep Charges for Route: ${routeName}</h4>
+                            <input type="hidden" name="route_jeep_charges[${travelIndex}][route_id]" value="${routeId}">
+                            <table class="w-full text-sm text-left text-gray-500">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-2">Pax Range</th>
+                                        <th class="px-4 py-2">Unit Price (US$)</th>
+                                        <th class="px-4 py-2">Quantity</th>
+                                        <th class="px-4 py-2">Total Price (US$)</th>
+                                        <th class="px-4 py-2">Per Person (US$)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${generatePaxRows(travelIndex)}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                        routeJeepChargesContainer.insertAdjacentHTML('beforeend', routeTableHtml);
+                    });
+
+                    // Set up calculations for all the newly created tables
+                    setupRouteJeepChargeCalculations();
+                }
+
+                // Function to generate pax rows for a route table
+                function generatePaxRows(travelIndex) {
+                    let rowsHtml = '';
+
+                    @foreach ($quotation->paxSlabs as $index => $paxSlab)
+                        rowsHtml += `
+                        <tr>
+                            <td class="px-4 py-2">
+                                <input type="text"
+                                    name="route_jeep_charges[${travelIndex}][charges][{{ $index }}][pax_range]"
+                                    value="{{ $paxSlab->paxSlab->name }}"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm" readonly>
+                            </td>
+                            <td class="px-4 py-2">
+                                <input type="number" step="0.01"
+                                    name="route_jeep_charges[${travelIndex}][charges][{{ $index }}][unit_price]"
+                                    class="route-jeep-unit-price block w-full border-gray-300 rounded-md shadow-sm">
+                            </td>
+                            <td class="px-4 py-2">
+                                <input type="number"
+                                    name="route_jeep_charges[${travelIndex}][charges][{{ $index }}][quantity]"
+                                    class="route-jeep-quantity block w-full border-gray-300 rounded-md shadow-sm">
+                            </td>
+                            <td class="px-4 py-2">
+                                <input type="number" step="0.01"
+                                    name="route_jeep_charges[${travelIndex}][charges][{{ $index }}][total_price]"
+                                    class="route-jeep-total-price block w-full border-gray-300 rounded-md shadow-sm"
+                                    readonly>
+                            </td>
+                            <td class="px-4 py-2">
+                                <input type="number" step="0.01"
+                                    name="route_jeep_charges[${travelIndex}][charges][{{ $index }}][per_person]"
+                                    class="route-jeep-per-person block w-full border-gray-300 rounded-md shadow-sm"
+                                    data-min-pax="{{ $paxSlab->paxSlab->min_pax }}" readonly>
+                            </td>
+                        </tr>
+                    `;
+                    @endforeach
+
+                    return rowsHtml;
+                }
+
+                // Function to set up calculations for route-specific jeep charges
+                function setupRouteJeepChargeCalculations() {
+                    const routeJeepRows = document.querySelectorAll('#route-jeep-charges-container tbody tr');
+
+                    routeJeepRows.forEach(row => {
+                        const unitPriceInput = row.querySelector('.route-jeep-unit-price');
+                        const quantityInput = row.querySelector('.route-jeep-quantity');
+                        const totalPriceInput = row.querySelector('.route-jeep-total-price');
+                        const perPersonInput = row.querySelector('.route-jeep-per-person');
+
+                        if (unitPriceInput && quantityInput) {
+                            const calculateCharges = () => {
+                                const unitPrice = parseFloat(unitPriceInput.value) || 0;
+                                const quantity = parseInt(quantityInput.value) || 0;
+                                const minPax = parseInt(perPersonInput.dataset.minPax) || 1;
+
+                                // Calculate total price
+                                const totalPrice = unitPrice * quantity;
+                                totalPriceInput.value = totalPrice.toFixed(2);
+
+                                // Calculate per person cost
+                                const perPersonCost = totalPrice / minPax;
+                                perPersonInput.value = perPersonCost.toFixed(2);
+                            };
+
+                            // Add input event listeners
+                            unitPriceInput.addEventListener('input', calculateCharges);
+                            quantityInput.addEventListener('input', calculateCharges);
+
+                            // Validate against negative values
+                            [unitPriceInput, quantityInput].forEach(input => {
+                                input.addEventListener('change', function() {
+                                    const value = parseFloat(this.value);
+                                    if (isNaN(value) || value < 0) {
+                                        this.value = 0;
+                                    }
+                                    calculateCharges();
+                                });
+                            });
+                        }
+                    });
+                }
+
+                // Listen for route selection changes to update route-specific jeep charge tables
+                document.addEventListener('change', function(event) {
+                    if (event.target.classList.contains('route-select') && enableRouteJeepCharges.checked) {
+                        generateRouteJeepChargeTables();
+                    }
+                });
+
+                // Initialize route jeep charges if enabled
+                if (enableRouteJeepCharges.checked) {
+                    generateRouteJeepChargeTables();
+                }
+
+                // Add Event listener for add travel button to update route jeep charges
+                const addTravelButton = document.getElementById('add-travel');
+                if (addTravelButton) {
+                    addTravelButton.addEventListener('click', function() {
+                        // Wait for DOM to update with new travel entry
+                        setTimeout(() => {
+                            if (enableRouteJeepCharges.checked) {
+                                generateRouteJeepChargeTables();
+                            }
+                        }, 100);
+                    });
+                }
             }
         });
     </script>
