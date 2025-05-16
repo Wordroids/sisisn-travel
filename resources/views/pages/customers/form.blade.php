@@ -24,7 +24,7 @@
         <!-- Phone -->
         <div class="mb-4">
             <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-            <input type="text" name="phone" id="phone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            <input type="number" name="phone" id="phone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                    value="{{ old('phone', $customer->phone ?? '') }}" required>
             @error('phone') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
         </div>
@@ -32,7 +32,7 @@
         <!-- WhatsApp -->
         <div class="mb-4">
             <label for="whatsapp" class="block text-sm font-medium text-gray-700">WhatsApp Number</label>
-            <input type="text" name="whatsapp" id="whatsapp" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            <input type="number" name="whatsapp" id="whatsapp" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                    value="{{ old('whatsapp', $customer->whatsapp ?? '') }}" required>
             @error('whatsapp') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
         </div>
