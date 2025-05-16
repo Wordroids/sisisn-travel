@@ -385,7 +385,7 @@ class QuotationController extends Controller
         $quotation = Quotation::findOrFail($id);
 
         // Remove the dd() call
-        // dd($request->all());
+        //dd($request->all());
 
         // Validate input
         $request->validate([
@@ -399,14 +399,14 @@ class QuotationController extends Controller
             'accommodations.*.room_types.*.per_night_cost' => 'required|numeric|min:0',
             'accommodations.*.room_types.*.nights' => 'nullable|integer|min:0',
             'accommodations.*.room_types.*.total_cost' => 'nullable|numeric|min:0',
-            'accommodations.*.additional_rooms' => 'required|array',
-            'accommodations.*.additional_rooms.driver.per_night_cost' => 'required|numeric|min:0',
-            'accommodations.*.additional_rooms.driver.nights' => 'required|integer|min:0',
-            'accommodations.*.additional_rooms.driver.total_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms' => 'nullable|array',
+            'accommodations.*.additional_rooms.driver.per_night_cost' => 'nullable|numeric|min:0',
+            'accommodations.*.additional_rooms.driver.nights' => 'nullable|integer|min:0',
+            'accommodations.*.additional_rooms.driver.total_cost' => 'nullable|numeric|min:0',
             'accommodations.*.additional_rooms.driver.provided_by_hotel' => 'nullable|boolean',
-            'accommodations.*.additional_rooms.guide.per_night_cost' => 'required|numeric|min:0',
-            'accommodations.*.additional_rooms.guide.nights' => 'required|integer|min:0',
-            'accommodations.*.additional_rooms.guide.total_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.guide.per_night_cost' => 'nullable|numeric|min:0',
+            'accommodations.*.additional_rooms.guide.nights' => 'nullable|integer|min:0',
+            'accommodations.*.additional_rooms.guide.total_cost' => 'nullable|numeric|min:0',
             'accommodations.*.additional_rooms.guide.provided_by_hotel' => 'nullable|boolean',
         ]);
 
@@ -442,15 +442,26 @@ class QuotationController extends Controller
             // Store room details for additional rooms (driver, guide)
             foreach ($accommodation['additional_rooms'] as $type => $details) {
                 // Only create records if nights is greater than 0
-                if (!empty($details['nights']) && $details['nights'] > 0) {
-                    AdditionalRooms::create([
-                        'quotation_accommodation_id' => $quotationAccommodation->id,
-                        'room_type' => $type,
-                        'per_night_cost' => $details['per_night_cost'],
-                        'nights' => $details['nights'],
-                        'total_cost' => $details['total_cost'],
-                        'provided_by_hotel' => $details['provided_by_hotel'] ?? false,
-                    ]);
+                if (!empty($details['nights']) && !empty($details['provided_by_hotel'])) {
+                    if ($details['nights'] > 0 && $details['total_cost'] > 0 && $details['per_night_cost'] > 0) {
+                        AdditionalRooms::create([
+                            'quotation_accommodation_id' => $quotationAccommodation->id,
+                            'room_type' => $type,
+                            'per_night_cost' => $details['per_night_cost'],
+                            'nights' => $details['nights'],
+                            'total_cost' => $details['total_cost'],
+                            'provided_by_hotel' => $details['provided_by_hotel'],
+                        ]);
+                    } else {
+                        AdditionalRooms::create([
+                            'quotation_accommodation_id' => $quotationAccommodation->id,
+                            'room_type' => $type,
+                            'per_night_cost' => 0,
+                            'nights' => $details['nights'],
+                            'total_cost' => 0,
+                            'provided_by_hotel' => $details['provided_by_hotel'],
+                        ]);
+                    }
                 }
             }
         }
@@ -493,14 +504,14 @@ class QuotationController extends Controller
             'accommodations.*.room_types.*.per_night_cost' => 'required|numeric|min:0',
             'accommodations.*.room_types.*.nights' => 'nullable|integer|min:0',
             'accommodations.*.room_types.*.total_cost' => 'nullable|numeric|min:0',
-            'accommodations.*.additional_rooms' => 'required|array',
-            'accommodations.*.additional_rooms.driver.per_night_cost' => 'required|numeric|min:0',
-            'accommodations.*.additional_rooms.driver.nights' => 'required|integer|min:0',
-            'accommodations.*.additional_rooms.driver.total_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms' => 'nullable|array',
+            'accommodations.*.additional_rooms.driver.per_night_cost' => 'nullable|numeric|min:0',
+            'accommodations.*.additional_rooms.driver.nights' => 'nullable|integer|min:0',
+            'accommodations.*.additional_rooms.driver.total_cost' => 'nullable|numeric|min:0',
             'accommodations.*.additional_rooms.driver.provided_by_hotel' => 'nullable|boolean',
-            'accommodations.*.additional_rooms.guide.per_night_cost' => 'required|numeric|min:0',
-            'accommodations.*.additional_rooms.guide.nights' => 'required|integer|min:0',
-            'accommodations.*.additional_rooms.guide.total_cost' => 'required|numeric|min:0',
+            'accommodations.*.additional_rooms.guide.per_night_cost' => 'nullable|numeric|min:0',
+            'accommodations.*.additional_rooms.guide.nights' => 'nullable|integer|min:0',
+            'accommodations.*.additional_rooms.guide.total_cost' => 'nullable|numeric|min:0',
             'accommodations.*.additional_rooms.guide.provided_by_hotel' => 'nullable|boolean',
         ]);
 
@@ -536,15 +547,26 @@ class QuotationController extends Controller
             // Store room details for additional rooms (driver, guide)
             foreach ($accommodation['additional_rooms'] as $type => $details) {
                 // Only create records if nights is greater than 0
-                if (!empty($details['nights']) && $details['nights'] > 0) {
-                    AdditionalRooms::create([
-                        'quotation_accommodation_id' => $quotationAccommodation->id,
-                        'room_type' => $type,
-                        'per_night_cost' => $details['per_night_cost'],
-                        'nights' => $details['nights'],
-                        'total_cost' => $details['total_cost'],
-                        'provided_by_hotel' => $details['provided_by_hotel'] ?? false,
-                    ]);
+                if (!empty($details['nights'])) {
+                    if ($details['nights'] > 0 && $details['total_cost'] > 0 && $details['per_night_cost'] > 0) {
+                        AdditionalRooms::updateOrCreate([
+                            'quotation_accommodation_id' => $quotationAccommodation->id,
+                            'room_type' => $type,
+                            'per_night_cost' => $details['per_night_cost'],
+                            'nights' => $details['nights'],
+                            'total_cost' => $details['total_cost'],
+                            'provided_by_hotel' => $details['provided_by_hotel'],
+                        ]);
+                    } else {
+                        AdditionalRooms::updateOrCreate([
+                            'quotation_accommodation_id' => $quotationAccommodation->id,
+                            'room_type' => $type,
+                            'per_night_cost' => 0,
+                            'nights' => $details['nights'],
+                            'total_cost' => 0,
+                            'provided_by_hotel' => $details['provided_by_hotel'],
+                        ]);
+                    }
                 }
             }
         }
@@ -574,69 +596,69 @@ class QuotationController extends Controller
      * Store a quotation Step 04 in DB.
      */
     public function store_step_four(Request $request, $id)
-{
-    $quotation = Quotation::findOrFail($id);
+    {
+        $quotation = Quotation::findOrFail($id);
 
-    $validationRules = [
-        'travel' => 'required|array',
-        'travel.*.start_date' => 'required|date',
-        'travel.*.end_date' => 'required|date|after_or_equal:travel.*.start_date',
-        'travel.*.route_id' => 'required|exists:travel_routes,id',
-        'travel.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
-        'travel.*.mileage' => 'required|numeric',
-    ];
+        $validationRules = [
+            'travel' => 'required|array',
+            'travel.*.start_date' => 'required|date',
+            'travel.*.end_date' => 'required|date|after_or_equal:travel.*.start_date',
+            'travel.*.route_id' => 'required|exists:travel_routes,id',
+            'travel.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
+            'travel.*.mileage' => 'required|numeric',
+        ];
 
-    // Only apply jeep charges validation if they're enabled
-    if ($request->has('enable_jeep_charges')) {
-        $validationRules['jeep_charges'] = 'required|array';
-        $validationRules['jeep_charges.*.pax_range'] = 'required';
-        $validationRules['jeep_charges.*.unit_price'] = 'required|numeric|min:0';
-        $validationRules['jeep_charges.*.quantity'] = 'required|integer|min:0';
-        $validationRules['jeep_charges.*.total_price'] = 'required|numeric|min:0';
-        $validationRules['jeep_charges.*.per_person'] = 'required|numeric|min:0';
-    }
+        // Only apply jeep charges validation if they're enabled
+        if ($request->has('enable_jeep_charges')) {
+            $validationRules['jeep_charges'] = 'required|array';
+            $validationRules['jeep_charges.*.pax_range'] = 'required';
+            $validationRules['jeep_charges.*.unit_price'] = 'required|numeric|min:0';
+            $validationRules['jeep_charges.*.quantity'] = 'required|integer|min:0';
+            $validationRules['jeep_charges.*.total_price'] = 'required|numeric|min:0';
+            $validationRules['jeep_charges.*.per_person'] = 'required|numeric|min:0';
+        }
 
-    $request->validate($validationRules);
+        $request->validate($validationRules);
 
-    foreach ($request->travel as $travel) {
-        QuotationTravelPlan::create([
-            'quotation_id' => $quotation->id,
-            'start_date' => $travel['start_date'],
-            'end_date' => $travel['end_date'],
-            'route_id' => $travel['route_id'],
-            'vehicle_type_id' => $travel['vehicle_type_id'],
-            'mileage' => $travel['mileage'],
-        ]);
-    }
-
-    // Store jeep charges if enabled
-    if ($request->has('enable_jeep_charges') && $request->has('jeep_charges')) {
-        // Delete existing jeep charges first
-        $quotation->jeepCharges()->delete();
-
-        // Store new jeep charges
-        foreach ($request->jeep_charges as $charge) {
-            // Skip empty or incomplete entries
-            if (empty($charge['unit_price']) || empty($charge['quantity'])) {
-                continue;
-            }
-            
-            QuotationJeepCharge::create([
+        foreach ($request->travel as $travel) {
+            QuotationTravelPlan::create([
                 'quotation_id' => $quotation->id,
-                'pax_range' => $charge['pax_range'],
-                'unit_price' => $charge['unit_price'],
-                'quantity' => $charge['quantity'],
-                'total_price' => $charge['total_price'],
-                'per_person' => $charge['per_person'],
+                'start_date' => $travel['start_date'],
+                'end_date' => $travel['end_date'],
+                'route_id' => $travel['route_id'],
+                'vehicle_type_id' => $travel['vehicle_type_id'],
+                'mileage' => $travel['mileage'],
             ]);
         }
+
+        // Store jeep charges if enabled
+        if ($request->has('enable_jeep_charges') && $request->has('jeep_charges')) {
+            // Delete existing jeep charges first
+            $quotation->jeepCharges()->delete();
+
+            // Store new jeep charges
+            foreach ($request->jeep_charges as $charge) {
+                // Skip empty or incomplete entries
+                if (empty($charge['unit_price']) || empty($charge['quantity'])) {
+                    continue;
+                }
+
+                QuotationJeepCharge::create([
+                    'quotation_id' => $quotation->id,
+                    'pax_range' => $charge['pax_range'],
+                    'unit_price' => $charge['unit_price'],
+                    'quantity' => $charge['quantity'],
+                    'total_price' => $charge['total_price'],
+                    'per_person' => $charge['per_person'],
+                ]);
+            }
+        }
+
+        $quotation->save();
+
+        // Redirect to Quotation Step Four page after final step
+        return redirect()->route('quotations.step5', $quotation->id)->with('success', 'Travel plan details saved successfully.');
     }
-
-    $quotation->save();
-
-    // Redirect to Quotation Step Four page after final step
-    return redirect()->route('quotations.step5', $quotation->id)->with('success', 'Travel plan details saved successfully.');
-}
 
     /**
      * Edit the step four form for the specified quotation.
@@ -656,69 +678,69 @@ class QuotationController extends Controller
      * Update a quotation Step 04 in DB.
      */
     public function updateStepFour(Request $request, $id)
-{
-    $quotation = Quotation::findOrFail($id);
+    {
+        $quotation = Quotation::findOrFail($id);
 
-    $validationRules = [
-        'travel' => 'required|array',
-        'travel.*.start_date' => 'required|date',
-        'travel.*.end_date' => 'required|date|after_or_equal:travel.*.start_date',
-        'travel.*.route_id' => 'required|exists:travel_routes,id',
-        'travel.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
-        'travel.*.mileage' => 'required|numeric',
-    ];
+        $validationRules = [
+            'travel' => 'required|array',
+            'travel.*.start_date' => 'required|date',
+            'travel.*.end_date' => 'required|date|after_or_equal:travel.*.start_date',
+            'travel.*.route_id' => 'required|exists:travel_routes,id',
+            'travel.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
+            'travel.*.mileage' => 'required|numeric',
+        ];
 
-    // Only apply jeep charges validation if they're enabled
-    if ($request->input('enable_jeep_charges') == '1') {
-        $validationRules['jeep_charges'] = 'required|array';
-        $validationRules['jeep_charges.*.pax_range'] = 'required';
-        $validationRules['jeep_charges.*.unit_price'] = 'required|numeric|min:0';
-        $validationRules['jeep_charges.*.quantity'] = 'required|integer|min:0';
-        $validationRules['jeep_charges.*.total_price'] = 'required|numeric|min:0';
-        $validationRules['jeep_charges.*.per_person'] = 'required|numeric|min:0';
-    }
+        // Only apply jeep charges validation if they're enabled
+        if ($request->input('enable_jeep_charges') == '1') {
+            $validationRules['jeep_charges'] = 'required|array';
+            $validationRules['jeep_charges.*.pax_range'] = 'required';
+            $validationRules['jeep_charges.*.unit_price'] = 'required|numeric|min:0';
+            $validationRules['jeep_charges.*.quantity'] = 'required|integer|min:0';
+            $validationRules['jeep_charges.*.total_price'] = 'required|numeric|min:0';
+            $validationRules['jeep_charges.*.per_person'] = 'required|numeric|min:0';
+        }
 
-    $request->validate($validationRules);
+        $request->validate($validationRules);
 
-    // Delete existing travel plans
-    $quotation->travelPlans()->delete();
+        // Delete existing travel plans
+        $quotation->travelPlans()->delete();
 
-    // Create new travel plans
-    foreach ($request->travel as $travel) {
-        QuotationTravelPlan::create([
-            'quotation_id' => $quotation->id,
-            'start_date' => $travel['start_date'],
-            'end_date' => $travel['end_date'],
-            'route_id' => $travel['route_id'],
-            'vehicle_type_id' => $travel['vehicle_type_id'],
-            'mileage' => $travel['mileage'],
-        ]);
-    }
-
-    // Always delete existing jeep charges first
-    $quotation->jeepCharges()->delete();
-
-    // Only create new jeep charges if enabled and data exists
-    if ($request->input('enable_jeep_charges') == '1' && $request->has('jeep_charges')) {
-        foreach ($request->jeep_charges as $charge) {
-            // Skip empty or incomplete entries
-            if (empty($charge['unit_price']) || empty($charge['quantity'])) {
-                continue;
-            }
-            
-            QuotationJeepCharge::create([
+        // Create new travel plans
+        foreach ($request->travel as $travel) {
+            QuotationTravelPlan::create([
                 'quotation_id' => $quotation->id,
-                'pax_range' => $charge['pax_range'],
-                'unit_price' => $charge['unit_price'],
-                'quantity' => $charge['quantity'],
-                'total_price' => $charge['total_price'],
-                'per_person' => $charge['per_person'],
+                'start_date' => $travel['start_date'],
+                'end_date' => $travel['end_date'],
+                'route_id' => $travel['route_id'],
+                'vehicle_type_id' => $travel['vehicle_type_id'],
+                'mileage' => $travel['mileage'],
             ]);
         }
-    }
 
-    return redirect()->route('quotations.edit_step_five', $id)->with('success', 'Travel plans updated successfully.');
-}
+        // Always delete existing jeep charges first
+        $quotation->jeepCharges()->delete();
+
+        // Only create new jeep charges if enabled and data exists
+        if ($request->input('enable_jeep_charges') == '1' && $request->has('jeep_charges')) {
+            foreach ($request->jeep_charges as $charge) {
+                // Skip empty or incomplete entries
+                if (empty($charge['unit_price']) || empty($charge['quantity'])) {
+                    continue;
+                }
+
+                QuotationJeepCharge::create([
+                    'quotation_id' => $quotation->id,
+                    'pax_range' => $charge['pax_range'],
+                    'unit_price' => $charge['unit_price'],
+                    'quantity' => $charge['quantity'],
+                    'total_price' => $charge['total_price'],
+                    'per_person' => $charge['per_person'],
+                ]);
+            }
+        }
+
+        return redirect()->route('quotations.edit_step_five', $id)->with('success', 'Travel plans updated successfully.');
+    }
 
     /**
      * Display the step five form for the specified quotation.

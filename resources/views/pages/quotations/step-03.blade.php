@@ -2,7 +2,12 @@
     <div class="max-w-7xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
 
         @php
-            //print_r($errors->all() ?? [])
+            // display  all errors
+            if ($errors->any()) {
+                foreach ($errors->all() as $error) {
+                    echo "<div class='text-red-500'>$error</div>";
+                }
+            }
         @endphp
 
         <!-- Progress Bar  -->
@@ -134,6 +139,9 @@
                                         <option value="">Select Hotel</option>
                                         ${hotelSelectOptions}
                                     </select>
+                                    @error('hotel_id')
+                                        <p class="text-red-500 text-xs">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
                                 <div>
@@ -144,6 +152,7 @@
                                             min="${quotationStartDate}" 
                                             max="${quotationEndDate}"
                                             required>
+
                                         <input type="date" name="accommodations[${cardIndex}][end_date]" 
                                             class="block w-full border-gray-300 rounded-md shadow-sm checkout-date" 
                                             min="${quotationStartDate}" 
@@ -158,12 +167,18 @@
                                         <select name="accommodations[${cardIndex}][meal_plan_id]" class="block w-full border-gray-300 rounded-md shadow-sm" required>
                                             <option value="">Select Plan</option>${mealPlanOptions}
                                         </select>
+                                        @error('meal_plan_id')
+                                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Room Category</label>
                                         <select name="accommodations[${cardIndex}][room_category_id]" class="block w-full border-gray-300 rounded-md shadow-sm" required>
                                             <option value="">Select Category</option>${roomCategoryOptions}
                                         </select>
+                                        @error('room_category_id')
+                                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>
@@ -184,16 +199,25 @@
                                                 <label class="block text-xs text-gray-500">Per Night ( USD )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][room_types][single][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
+                                                     @error('per_night_cost')
+                                                         <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                     @enderror
                                             </div>
                                             <div>
                                                 <label class="block text-xs text-gray-500">Nights</label>
                                                 <input type="number" name="accommodations[${cardIndex}][room_types][single][nights]" 
                                                     class="block w-full border-gray-300 rounded-md shadow-sm total-nights text-center" min="0">
+                                                @error('nights')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                             <div>
                                                 <label class="block text-xs text-gray-500">Total</label>
                                                 <input type="text" name="accommodations[${cardIndex}][room_types][single][total_cost]" 
                                                     class="block w-full bg-gray-50 border-gray-300 rounded-md shadow-sm total-cost text-center" readonly>
+                                                @error('total_cost')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                         </div>
                                     </div>
@@ -209,16 +233,25 @@
                                                 <label class="block text-xs text-gray-500">Per Night ( USD )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][room_types][double][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
+                                                     @error('per_night_cost')
+                                                         <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                     @enderror
                                             </div>
                                             <div>
                                                 <label class="block text-xs text-gray-500">Nights</label>
                                                 <input type="number" name="accommodations[${cardIndex}][room_types][double][nights]" 
                                                     class="block w-full border-gray-300 rounded-md shadow-sm total-nights text-center" min="0">
+                                                @error('nights')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                             <div>
                                                 <label class="block text-xs text-gray-500">Total</label>
                                                 <input type="text" name="accommodations[${cardIndex}][room_types][double][total_cost]" 
                                                     class="block w-full bg-gray-50 border-gray-300 rounded-md shadow-sm total-cost text-center" readonly>
+                                                @error('total_cost')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                         </div>
                                     </div>
@@ -233,16 +266,25 @@
                                                 <label class="block text-xs text-gray-500">Per Night ( USD )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][room_types][triple][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
+                                                        @error('per_night_cost')
+                                                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                        @enderror
                                             </div>
                                             <div>
                                                 <label class="block text-xs text-gray-500">Nights</label>
                                                 <input type="number" name="accommodations[${cardIndex}][room_types][triple][nights]" 
                                                     class="block w-full border-gray-300 rounded-md shadow-sm total-nights text-center" min="0">
+                                                @error('nights')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                             <div>
                                                 <label class="block text-xs text-gray-500">Total</label>
                                                 <input type="text" name="accommodations[${cardIndex}][room_types][triple][total_cost]" 
                                                     class="block w-full bg-gray-50 border-gray-300 rounded-md shadow-sm total-cost text-center" readonly>
+                                                @error('total_cost')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                         </div>
                                     </div>
@@ -257,16 +299,25 @@
                                                 <label class="block text-xs text-gray-500">Per Night ( LKR )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][additional_rooms][driver][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
+                                                        @error('per_night_cost')
+                                                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                        @enderror
                                             </div>
                                             <div>
                                                 <label class="block text-xs text-gray-500">Nights</label>
                                                 <input type="number" name="accommodations[${cardIndex}][additional_rooms][driver][nights]" 
                                                     class="block w-full border-gray-300 rounded-md shadow-sm total-nights text-center" min="0">
+                                                @error('nights')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                             <div>
                                                 <label class="block text-xs text-gray-500">Total</label>
                                                 <input type="text" name="accommodations[${cardIndex}][additional_rooms][driver][total_cost]" 
                                                     class="block w-full bg-gray-50 border-gray-300 rounded-md shadow-sm total-cost text-center" readonly>
+                                                @error('total_cost')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                         </div>
                                         <div class="flex gap-4 mt-4 items-center">
@@ -274,10 +325,16 @@
                                             <div class="flex items-center">
                                                 <input type="radio" id="${cardIndex}_driver_provided_by_hotel_yes" name="accommodations[${cardIndex}][additional_rooms][driver][provided_by_hotel]" value="1" class="mr-2">
                                                 <label for="${cardIndex}_driver_provided_by_hotel_yes" class="text-sm">Yes</label>
+                                                @error('provided_by_hotel')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="radio" id="${cardIndex}_driver_provided_by_hotel_no" name="accommodations[${cardIndex}][additional_rooms][driver][provided_by_hotel]" value="0" class="mr-2">
                                                 <label for="${cardIndex}_driver_provided_by_hotel_no" class="text-sm">No</label>
+                                                @error('provided_by_hotel')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                         </div>
                                     </div>
@@ -292,16 +349,25 @@
                                                 <label class="block text-xs text-gray-500">Per Night ( LKR )</label>
                                                 <input type="number" name="accommodations[${cardIndex}][additional_rooms][guide][per_night_cost]" 
                                                      class="block w-full border-gray-300 rounded-md shadow-sm per-night-cost text-center">
+                                                        @error('per_night_cost')
+                                                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                        @enderror
                                             </div>
                                             <div>
                                                 <label class="block text-xs text-gray-500">Nights</label>
                                                 <input type="number" name="accommodations[${cardIndex}][additional_rooms][guide][nights]" 
                                                     class="block w-full border-gray-300 rounded-md shadow-sm total-nights text-center" min="0">
+                                                @error('nights')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                             <div>
                                                 <label class="block text-xs text-gray-500">Total</label>
                                                 <input type="text" name="accommodations[${cardIndex}][additional_rooms][guide][total_cost]" 
                                                     class="block w-full bg-gray-50 border-gray-300 rounded-md shadow-sm total-cost text-center" readonly>
+                                                @error('total_cost')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                         </div>
                                         <div class="flex gap-4 mt-4 items-center">
@@ -309,10 +375,16 @@
                                             <div class="flex items-center">
                                                 <input type="radio" id="${cardIndex}_guide_provided_by_hotel_yes" name="accommodations[${cardIndex}][additional_rooms][guide][provided_by_hotel]" value="1" class="mr-2">
                                                 <label for="${cardIndex}_guide_provided_by_hotel_yes" class="text-sm">Yes</label>
+                                                @error('provided_by_hotel')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="radio" id="${cardIndex}_guide_provided_by_hotel_no" name="accommodations[${cardIndex}][additional_rooms][guide][provided_by_hotel]" value="0" class="mr-2">
                                                 <label for="${cardIndex}_guide_provided_by_hotel_no" class="text-sm">No</label>
+                                                @error('provided_by_hotel')
+                                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                         </div>
                                     </div>

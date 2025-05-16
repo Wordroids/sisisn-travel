@@ -91,6 +91,9 @@
                                 <option value="{{ $market->id }}">{{ $market->name }}</option>
                             @endforeach
                         </select>
+                        @error('market_id')
+                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Customer Drop Down -->
@@ -104,6 +107,9 @@
                                     <option value="{{ $customer->id }}">{{ $customer->name }}</option>
                                 @endforeach
                             </select>
+                            @error('customer_id')
+                                <p class="text-red-500 text-xs">{{ $message }}</p>
+                            @enderror
                         </div>
 
 
@@ -154,6 +160,9 @@
                                 </option>
                             @endforeach
                         </select>
+                        @error('currency_id')
+                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="flex gap-3">
@@ -165,6 +174,9 @@
                                     class="block w-full border-gray-300 rounded-md shadow-sm"
                                     value="{{ $currencies->where('code', 'USD')->first()->conversion_rate ?? '' }}"
                                     readonly>
+                                @error('conversion_rate')
+                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
@@ -190,6 +202,9 @@
                                 </option>
                             @endforeach
                         </select>
+                        @error('markup_per_pax')
+                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="mb-4">
@@ -200,6 +215,9 @@
                                 <option value="{{ $paxSlab->id }}">{{ $paxSlab->name }}</option>
                             @endforeach
                         </select>
+                        @error('pax_slab_id')
+                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="mb-4">
@@ -210,6 +228,9 @@
                                 <option value="{{ $driver->id }}">{{ $driver->name }}</option>
                             @endforeach
                         </select>
+                        @error('driver_id')
+                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="mb-4">
@@ -220,6 +241,9 @@
                                 <option value="{{ $guide->id }}">{{ $guide->name }}</option>
                             @endforeach
                         </select>
+                        @error('guide_id')
+                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
@@ -266,12 +290,12 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700">Phone</label>
-                    <input type="text" name="phone" id="customer_phone"
+                    <input type="number" name="phone" id="customer_phone"
                         class="block w-full border-gray-300 rounded-md shadow-sm" required>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700">Whatsapp</label>
-                    <input type="text" name="whatsapp" id="customer_whatsapp"
+                    <input type="number" name="whatsapp" id="customer_whatsapp"
                         class="block w-full border-gray-300 rounded-md shadow-sm" required>
                 </div>
                 <div class="mb-4">
