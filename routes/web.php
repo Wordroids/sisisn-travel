@@ -20,6 +20,7 @@ use App\Http\Controllers\MarkUpValueController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\UserRoleController;
+use App\Http\Controllers\QuotationTemplateController;
 
 
 // Link Storage 
@@ -131,6 +132,16 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/user-roles', [UserRoleController::class, 'index'])->name('user-roles.index');
     Route::post('/user-roles', [UserRoleController::class, 'updateRole'])->name('user-roles.update');
+
+    Route::get('/quotations-templates/index', [QuotationTemplateController::class, 'index'])->name('quotations_templates.index');
+    Route::get('/quotation-templates/create', [QuotationTemplateController::class, 'create'])->name('quotations_templates.create');
+    Route::post('/quotation-templates/store', [QuotationTemplateController::class, 'store'])->name('quotations_templates.store');
+    Route::get('/quotation-templates/{template}/edit', [QuotationTemplateController::class, 'edit'])->name('quotations_templates.edit');
+    Route::put('/quotation-templates/{template}', [QuotationTemplateController::class, 'update'])->name('quotations_templates.update');
+    Route::delete('/quotation-templates/{template}', [QuotationTemplateController::class, 'destroy'])->name('quotations_templates.destroy');
+    Route::get('/quotation-templates/{template}/show', [QuotationTemplateController::class, 'show'])->name('quotations_templates.show');
+    Route::patch('/quotation-templates/{template}/toggle-status', [QuotationTemplateController::class, 'toggleStatus'])
+    ->name('quotations_templates.toggle_status');
 
 });
 
