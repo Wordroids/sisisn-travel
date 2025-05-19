@@ -144,32 +144,34 @@ Route::middleware('auth')->group(function () {
     Route::patch('/quotation-templates/{template}/toggle-status', [QuotationTemplateController::class, 'toggleStatus'])
     ->name('quotations_templates.toggle_status');
 
-    // Group Quotation Routes
-Route::prefix('group-quotations')->name('group_quotations.')->group(function () {
-    Route::get('/', [GroupQuotationController::class, 'index'])->name('index');
-
-
-    // Add these new step-by-step routes
-    Route::get('/create/{id}/step-01', [GroupQuotationController::class, 'step_01'])->name('step_01');
-    Route::put('/create/{id}/step-01/store', [GroupQuotationController::class, 'store_step_01'])->name('store_step_01');
-    Route::get('/create/{id}/step-02', [GroupQuotationController::class, 'step_02'])->name('step_02');
-    Route::put('/create/{id}/step-02/store', [GroupQuotationController::class, 'store_step_02'])->name('store_step_02');
-    Route::get('/create/{id}/step-03', [GroupQuotationController::class, 'step_03'])->name('step_03');
-    Route::put('/create/{id}/step-03/store', [GroupQuotationController::class, 'store_step_03'])->name('store_step_03');
-    Route::get('/create/{id}/step-04', [GroupQuotationController::class, 'step_04'])->name('step_04');
-    Route::put('/create/{id}/step-04/store', [GroupQuotationController::class, 'store_step_04'])->name('store_step_04');
-    Route::get('/create/{id}/step-05', [GroupQuotationController::class, 'step_05'])->name('step_05');
-    Route::put('/create/{id}/step-05/store', [GroupQuotationController::class, 'store_step_05'])->name('store_step_05');
 
     
-});
+    // Group Quotation Routes
+    Route::prefix('group-quotations')->name('group_quotations.')->group(function () {
+        Route::get('/', [GroupQuotationController::class, 'index'])->name('index');
 
-Route::get('/select-template', [GroupQuotationController::class, 'selectTemplate'])
-        ->name('select_template');
 
-    Route::post('/process-template', [GroupQuotationController::class, 'processTemplateSelection'])
-        ->name('process_template');
+        // Add these new step-by-step routes
+        Route::get('/edit/{id}/step-01', [GroupQuotationController::class, 'step_01'])->name('step_01');
+        Route::put('/edit/{id}/step-01/store', [GroupQuotationController::class, 'store_step_01'])->name('store_step_01');
+        Route::get('/edit/{id}/step-02', [GroupQuotationController::class, 'step_02'])->name('step_02');
+        Route::put('/edit/{id}/step-02/store', [GroupQuotationController::class, 'store_step_02'])->name('store_step_02');
+        Route::get('/edit/{id}/step-03', [GroupQuotationController::class, 'step_03'])->name('step_03');
+        Route::put('/edit/{id}/step-03/store', [GroupQuotationController::class, 'store_step_03'])->name('store_step_03');
+        Route::get('/edit/{id}/step-04', [GroupQuotationController::class, 'step_04'])->name('step_04');
+        Route::put('/edit/{id}/step-04/store', [GroupQuotationController::class, 'store_step_04'])->name('store_step_04');
+        Route::get('/edit/{id}/step-05', [GroupQuotationController::class, 'step_05'])->name('step_05');
+        Route::put('/edit/{id}/step-05/store', [GroupQuotationController::class, 'store_step_05'])->name('store_step_05');
 
-});
+        
+    });
+
+    Route::get('/select-template', [GroupQuotationController::class, 'selectTemplate'])
+            ->name('select_template');
+
+        Route::post('/process-template', [GroupQuotationController::class, 'processTemplateSelection'])
+            ->name('process_template');
+
+    });
 
 require __DIR__ . '/auth.php';

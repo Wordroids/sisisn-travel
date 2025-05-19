@@ -99,6 +99,19 @@
                 </a>
             </li>
 
+            <!-- Group Quotations Link -->
+            <li>
+                <a href="{{ route('group_quotations.index') }}"
+                    class="flex items-center p-2 w-full text-base font-medium text-white rounded-lg transition duration-75 group hover:bg-gray-100 hover:text-gray-700 test:hover:bg-gray-700">
+                    <svg aria-hidden="true"
+                        class="flex-shrink-0 w-6 h-6 text-white transition duration-75 group-hover:text-gray-900 test:group-hover:text-white"
+                        fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path> {{-- Example User Group Icon --}}
+                    </svg>
+                    <span class="flex-1 ml-3 text-left whitespace-nowrap">Group Quotations</span>
+                </a>
+            </li>
+
             <!-- Users  -->
             <li>
                 <button type="button"

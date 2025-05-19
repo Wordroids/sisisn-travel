@@ -66,6 +66,7 @@
 
         <form method="POST" action="{{ route('group_quotations.store_step_02', $groupQuotation->id) }}">
             @csrf
+            @method('PUT')
 
             <!-- Pax Slab Table -->
             <div class="overflow-x-auto bg-gray-100 p-4 rounded-lg">

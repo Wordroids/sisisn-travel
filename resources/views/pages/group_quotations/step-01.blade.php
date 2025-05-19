@@ -69,6 +69,7 @@
         <div class="pt-16">
             <form action="{{ route('group_quotations.store_step_01', $groupQuotation->id ?? '') }}" method="post" enctype="multipart/form-data">
                 @csrf
+                @method('PUT')
 
                 <!-- Pass the quotation ID if editing an existing one -->
                 @if(isset($groupQuotation))

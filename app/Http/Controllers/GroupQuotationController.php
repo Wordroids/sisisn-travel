@@ -355,8 +355,51 @@ class GroupQuotationController extends Controller
     /**
      * Store the fourth step of the group quotation creation process
      */
+    public function step_04($id)
+    {
+        $quotation = GroupQuotation::with([
+            'travelPlans.route', // Ensure 'route' relationship loads mileage if not default
+            'travelPlans.vehicleType',
+            'travelPlans.jeepCharges',
+            'jeepCharges' => function ($query) {
+                $query->whereNull('travel_plan_id');
+            },
+            'paxSlabs.paxSlab'
+        ])->findOrFail($id);
+
+        $travelRoutes = TravelRoute::orderBy('name')->get(); // This should fetch mileage by default
+        $vehicleTypes = VehicleType::orderBy('name')->get();
+        
+        // Get the PaxSlab instances related to this quotation's GroupQuotationPaxSlab entries
+        $relatedPaxSlabIds = $quotation->paxSlabs->pluck('pax_slab_id')->unique();
+        $paxSlabsForRanges = PaxSlab::whereIn('id', $relatedPaxSlabIds)->orderBy('order')->get();
+
+        // Create an array of pax range strings like "2-3 Pax", "4-5 Pax"
+        $paxSlabRanges = $paxSlabsForRanges->map(function ($slab) {
+            return $slab->min_pax . '-' . $slab->max_pax . ' Pax';
+        })->unique()->values()->all();
+
+        // Determine if global jeep charges or route-wise jeep charges were previously enabled/used
+        // These flags help set the initial state of checkboxes in the view.
+        $hasGlobalJeepCharges = $quotation->jeepCharges->whereNull('travel_plan_id')->isNotEmpty();
+        
+        $hasRouteWiseJeepCharges = $quotation->travelPlans->some(function ($plan) {
+            return $plan->jeepCharges->isNotEmpty();
+        });
+
+        return view('pages.group_quotations.step-04', compact(
+            'quotation', 
+            'travelRoutes', 
+            'vehicleTypes', 
+            'paxSlabRanges',
+            'hasGlobalJeepCharges',
+            'hasRouteWiseJeepCharges'
+        ));
+    }
+    
     public function store_step_04(Request $request, $id)
     {
+        //dd($request->all());
         $groupQuotation = GroupQuotation::findOrFail($id);
 
         $validationRules = [
@@ -369,7 +412,7 @@ class GroupQuotationController extends Controller
         ];
 
         // Only apply jeep charges validation if they're enabled
-        if ($request->has('enable_jeep_charges')) {
+        if ($request->input('enable_jeep_charges') == '1') {
             $validationRules['jeep_charges'] = 'required|array';
             $validationRules['jeep_charges.*.pax_range'] = 'required';
             $validationRules['jeep_charges.*.unit_price'] = 'required|numeric|min:0';
@@ -379,9 +422,9 @@ class GroupQuotationController extends Controller
         }
 
         // Only apply validation if route wise - jeep charges are enabled
-        if ($request->has('enable_route_jeep_charges')) {
-            $validationRules['route_jeep_charges'] = 'required|array';
-            $validationRules['route_jeep_charges.*.charges'] = 'required|array';
+        if ($request->input('enable_route_jeep_charges')) {
+            $validationRules['route_jeep_charges'] = 'nullable|array'; // Nullable if no charges are added for any route
+            $validationRules['route_jeep_charges.*.charges'] = 'required_with:route_jeep_charges|array';
             $validationRules['route_jeep_charges.*.charges.*.pax_range'] = 'required';
             $validationRules['route_jeep_charges.*.charges.*.unit_price'] = 'required|numeric|min:0';
             $validationRules['route_jeep_charges.*.charges.*.quantity'] = 'required|integer|min:0';
@@ -391,70 +434,75 @@ class GroupQuotationController extends Controller
 
         $request->validate($validationRules);
 
-        // Delete existing travel plans and jeep charges
-        $groupQuotation->jeepCharges()->delete();
-        $groupQuotation->travelPlans()->delete();
+        // Delete existing travel plans and their associated jeep charges, and global jeep charges
+        foreach ($groupQuotation->travelPlans as $plan) {
+            $plan->jeepCharges()->delete();
+            $plan->delete();
+        }
+        $groupQuotation->jeepCharges()->whereNull('travel_plan_id')->delete();
+
 
         // Create travel plans and keep track of them for route-specific jeep charges
-        $travelPlans = [];
-        foreach ($request->travel as $travelIndex => $travel) {
-            $travelPlan = GroupQuotationTravelPlan::create([
-                'group_quotation_id' => $groupQuotation->id,
-                'start_date' => $travel['start_date'],
-                'end_date' => $travel['end_date'],
-                'route_id' => $travel['route_id'],
-                'vehicle_type_id' => $travel['vehicle_type_id'],
-                'mileage' => $travel['mileage'],
-            ]);
-
-            $travelPlans[$travelIndex] = $travelPlan;
+        $createdTravelPlans = [];
+        if ($request->has('travel')) {
+            foreach ($request->travel as $travelIndex => $travelData) {
+                $travelPlan = GroupQuotationTravelPlan::create([
+                    'group_quotation_id' => $groupQuotation->id,
+                    'start_date' => $travelData['start_date'],
+                    'end_date' => $travelData['end_date'],
+                    'route_id' => $travelData['route_id'],
+                    'vehicle_type_id' => $travelData['vehicle_type_id'],
+                    'mileage' => $travelData['mileage'],
+                ]);
+                $createdTravelPlans[$travelIndex] = $travelPlan;
+            }
         }
 
-        // Store jeep charges if enabled
-        if ($request->has('enable_jeep_charges') && $request->has('jeep_charges')) {
+        // Store global jeep charges if enabled
+        if ($request->input('enable_jeep_charges') == '1' && $request->has('jeep_charges')) {
             foreach ($request->jeep_charges as $charge) {
-                // Skip empty or incomplete entries
-                if (empty($charge['unit_price']) || empty($charge['quantity'])) {
-                    continue;
+                if (empty($charge['pax_range']) || (!isset($charge['unit_price']) || $charge['unit_price'] === '' || $charge['unit_price'] === null) || (!isset($charge['quantity']) || $charge['quantity'] === '' || $charge['quantity'] === null )) {
+                    continue; // Skip if essential data is missing
+                }
+                 if (floatval($charge['unit_price']) == 0 && intval($charge['quantity']) == 0) {
+                    continue; // Skip if both unit price and quantity are zero
                 }
 
                 GroupQuotationJeepCharge::create([
                     'group_quotation_id' => $groupQuotation->id,
-                    'travel_plan_id' => null, // Global charges have no specific travel plan
+                    'travel_plan_id' => null,
                     'pax_range' => $charge['pax_range'],
-                    'unit_price' => $charge['unit_price'],
-                    'quantity' => $charge['quantity'],
-                    'total_price' => $charge['total_price'],
-                    'per_person' => $charge['per_person'],
+                    'unit_price' => $charge['unit_price'] ?? 0,
+                    'quantity' => $charge['quantity'] ?? 0,
+                    'total_price' => $charge['total_price'] ?? 0,
+                    'per_person' => $charge['per_person'] ?? 0,
                 ]);
             }
         }
 
         // Store route-specific jeep charges if enabled
-        if ($request->has('enable_route_jeep_charges') && $request->has('route_jeep_charges')) {
-            foreach ($request->route_jeep_charges as $travelIndex => $routeCharge) {
-                // Find the travel plan this charge belongs to
-                if (!isset($travelPlans[$travelIndex])) {
-                    continue; // Skip if travel plan not found
+        if ($request->input('enable_route_jeep_charges') == '1' && $request->has('route_jeep_charges')) {
+            foreach ($request->route_jeep_charges as $travelIndex => $routeChargeData) {
+                if (!isset($createdTravelPlans[$travelIndex]) || !isset($routeChargeData['charges'])) {
+                    continue;
                 }
-
-                $travelPlan = $travelPlans[$travelIndex];
-
-                // Store each charge for this route
-                foreach ($routeCharge['charges'] as $charge) {
-                    // Skip empty or incomplete entries
-                    if (empty($charge['unit_price']) || empty($charge['quantity'])) {
-                        continue;
+                $travelPlan = $createdTravelPlans[$travelIndex];
+                foreach ($routeChargeData['charges'] as $charge) {
+                    if (empty($charge['pax_range']) || (!isset($charge['unit_price']) || $charge['unit_price'] === '' || $charge['unit_price'] === null) || (!isset($charge['quantity']) || $charge['quantity'] === '' || $charge['quantity'] === null)) {
+                        continue; // Skip if essential data is missing
+                    }
+                    if (floatval($charge['unit_price']) == 0 && intval($charge['quantity']) == 0) {
+                        continue; // Skip if both unit price and quantity are zero
                     }
 
                     GroupQuotationJeepCharge::create([
                         'group_quotation_id' => $groupQuotation->id,
-                        'travel_plan_id' => $travelPlan->id, // Associate with specific travel plan
+                        'travel_plan_id' => $travelPlan->id,
                         'pax_range' => $charge['pax_range'],
-                        'unit_price' => $charge['unit_price'],
-                        'quantity' => $charge['quantity'],
-                        'total_price' => $charge['total_price'],
-                        'per_person' => $charge['per_person'],
+                        'unit_price' => $charge['unit_price'] ?? 0,
+                        'quantity' => $charge['quantity'] ?? 0,
+                        'total_price' => $charge['total_price'] ?? 0,
+                        'per_person' => $charge['per_person'] ?? 0,
                     ]);
                 }
             }
@@ -466,75 +514,92 @@ class GroupQuotationController extends Controller
     /**
      * Store the fifth step of the group quotation creation process
      */
+    public function step_05($id)
+    {
+        $quotation = GroupQuotation::with(['siteSeeings', 'extras'])->findOrFail($id);
+
+        return view('pages.group_quotations.step-05', compact('quotation'));
+    }
+
+    /**
+     * Store the fifth step of the group quotation creation process (Site Seeing & Extras).
+     */
     public function store_step_05(Request $request, $id)
     {
         $groupQuotation = GroupQuotation::findOrFail($id);
 
-        // Validate the request data
-        $request->validate([
-            'sites' => 'required|array',
-            'sites.*.name' => 'required|string|max:255',
-            'sites.*.unit_price' => 'required|numeric|min:0',
-            'sites.*.quantity' => 'required|integer|min:1',
-            'sites.*.price_per_adult' => 'required|numeric|min:0',
+        $validatedData = $request->validate([
+            'site_seeings' => 'nullable|array',
+            'site_seeings.*.name' => 'required_with:site_seeings|string|max:255',
+            'site_seeings.*.type' => 'nullable|string|max:100',
+            'site_seeings.*.description' => 'nullable|string',
+            'site_seeings.*.unit_price' => 'nullable|numeric|min:0',
+            'site_seeings.*.quantity' => 'nullable|integer|min:0',
+            'site_seeings.*.price_per_adult' => 'nullable|numeric|min:0',
 
-            'site_extras' => 'required|array',
-            'site_extras.*.name' => 'required|string|max:255',
-            'site_extras.*.unit_price' => 'required|numeric|min:0',
-            'site_extras.*.quantity' => 'required|integer|min:1',
-            'site_extras.*.price_per_adult' => 'required|numeric|min:0',
-
-            'extras' => 'required|array',
-            'extras.*.description' => 'required|string|max:255',
-            'extras.*.unit_price' => 'required|numeric|min:0',
-            'extras.*.quantity_per_pax' => 'required|integer|min:1',
-            'extras.*.total_price' => 'required|numeric|min:0',
+            'extras' => 'nullable|array',
+            'extras.*.date' => 'nullable|date',
+            'extras.*.description' => 'required_with:extras|string|max:255',
+            'extras.*.unit_price' => 'nullable|numeric|min:0',
+            'extras.*.quantity_per_pax' => 'nullable|integer|min:0',
+            // 'extras.*.total_price' is not submitted from the form, so not validated here.
+            // It should be calculated if needed or stored as null/0 if not provided.
         ]);
 
-        // Delete existing records
+        // Delete existing site seeings and extras to prevent duplicates
         $groupQuotation->siteSeeings()->delete();
         $groupQuotation->extras()->delete();
 
-        // Store sites
-        foreach ($request->sites as $site) {
-            GroupQuotationSiteSeeing::create([
-                'group_quotation_id' => $groupQuotation->id,
-                'name' => $site['name'],
-                'type' => 'site',
-                'unit_price' => $site['unit_price'],
-                'quantity' => $site['quantity'],
-                'price_per_adult' => $site['price_per_adult'],
-            ]);
+        // Store Site Seeing entries
+        if ($request->has('site_seeings')) {
+            foreach ($validatedData['site_seeings'] as $siteSeeingData) {
+                // Skip if essential data like name is missing or if all price/qty fields are zero/empty
+                if (empty($siteSeeingData['name']) && 
+                    (empty($siteSeeingData['unit_price']) || $siteSeeingData['unit_price'] == 0) &&
+                    (empty($siteSeeingData['quantity']) || $siteSeeingData['quantity'] == 0) &&
+                    (empty($siteSeeingData['price_per_adult']) || $siteSeeingData['price_per_adult'] == 0)
+                ) {
+                    continue;
+                }
+                GroupQuotationSiteSeeing::create([
+                    'group_quotation_id' => $groupQuotation->id,
+                    'name' => $siteSeeingData['name'],
+                    'type' => $siteSeeingData['type'] ?? null,
+                    'description' => $siteSeeingData['description'] ?? null,
+                    'unit_price' => $siteSeeingData['unit_price'] ?? 0,
+                    'quantity' => $siteSeeingData['quantity'] ?? 0,
+                    'price_per_adult' => $siteSeeingData['price_per_adult'] ?? 0,
+                ]);
+            }
         }
 
-        // Store site extras
-        foreach ($request->site_extras as $extra) {
-            GroupQuotationSiteSeeing::create([
-                'group_quotation_id' => $groupQuotation->id,
-                'name' => $extra['name'],
-                'type' => 'extra',
-                'unit_price' => $extra['unit_price'],
-                'quantity' => $extra['quantity'],
-                'price_per_adult' => $extra['price_per_adult'],
-            ]);
+        // Store Other Extras
+        if ($request->has('extras')) {
+            foreach ($validatedData['extras'] as $extraData) {
+                 // Skip if essential data like description is missing or if all price/qty fields are zero/empty
+                if (empty($extraData['description']) &&
+                    (empty($extraData['unit_price']) || $extraData['unit_price'] == 0) &&
+                    (empty($extraData['quantity_per_pax']) || $extraData['quantity_per_pax'] == 0)
+                ) {
+                    continue;
+                }
+                GroupQuotationExtra::create([
+                    'group_quotation_id' => $groupQuotation->id,
+                    'date' => $extraData['date'] ?? null,
+                    'description' => $extraData['description'],
+                    'unit_price' => $extraData['unit_price'] ?? 0,
+                    'quantity_per_pax' => $extraData['quantity_per_pax'] ?? 0,
+                    'total_price' => ($extraData['unit_price'] ?? 0) * ($extraData['quantity_per_pax'] ?? 0), // Calculate total price
+                ]);
+            }
         }
 
-        // Store extras
-        foreach ($request->extras as $extra) {
-            GroupQuotationExtra::create([
-                'group_quotation_id' => $groupQuotation->id,
-                'description' => $extra['description'],
-                'unit_price' => $extra['unit_price'],
-                'quantity_per_pax' => $extra['quantity_per_pax'],
-                'total_price' => $extra['total_price'],
-            ]);
-        }
-
-        // Update quotation status to pending
-        $groupQuotation->status = 'pending';
+        // Optionally, update the quotation status to indicate completion or move to a summary/review stage
+        $groupQuotation->status = 'pending'; // Or 'completed', 'review', etc.
         $groupQuotation->save();
 
-        return redirect()->route('group_quotations.index')->with('success', 'Group quotation created successfully!');
+        
+        return redirect()->route('group_quotations.index')->with('success', 'Site Seeing & Extras saved! Quotation is now pending.');
     }
 
     /**
