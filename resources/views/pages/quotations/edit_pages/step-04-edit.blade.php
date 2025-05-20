@@ -163,7 +163,7 @@
                         <label class="relative inline-flex items-center cursor-pointer ml-4">
                             <input type="checkbox" id="enableJeepCharges" name="enable_jeep_charges" value="1"
                                 {{ $quotation->jeepCharges->count() > 0 ? 'checked' : '' }} class="sr-only peer">
-                                <div
+                            <div
                                 class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
                             </div>
                             <span class="ml-3 text-sm font-medium text-gray-900">Enable Jeep Charges</span>
@@ -223,20 +223,125 @@
                                                     data-min-pax="{{ $paxSlab->paxSlab->min_pax }}" readonly>
                                             </td>
                                         </tr>
-                                
-                                        @endforeach
+                                    @endforeach
 
-                                        @if ($quotation->paxSlabs->isEmpty())
-    <tr>
-        <td colspan="5" class="px-4 py-2 text-center">
-            <p class="text-gray-500">No Jeep Charges inputs available. Please Complete Pax Slabs Details.</p>
-        </td>
-    </tr>
-@endif
+                                    @if ($quotation->paxSlabs->isEmpty())
+                                        <tr>
+                                            <td colspan="5" class="px-4 py-2 text-center">
+                                                <p class="text-gray-500">No Jeep Charges inputs available. Please
+                                                    Complete Pax Slabs Details.</p>
+                                            </td>
+                                        </tr>
+                                    @endif
                                 </tbody>
                             </table>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Add this after the existing Jeep Charges section -->
+            <div class="max-w-7xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+                <div class="mt-8">
+                    <div class="flex items-center mb-4">
+                        <h3 class="text-lg font-semibold">Route-specific Jeep Charges</h3>
+                        <label class="relative inline-flex items-center cursor-pointer ml-4">
+                            <input type="checkbox" id="enableRouteJeepCharges" name="enable_route_jeep_charges"
+                                value="1"
+                                {{ $quotation->jeepCharges->where('travel_plan_id', '!=', null)->count() > 0 ? 'checked' : '' }}
+                                class="sr-only peer">
+                            <div
+                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+                            </div>
+                            <span class="ml-3 text-sm font-medium text-gray-900">Enable Route-specific Jeep
+                                Charges</span>
+                        </label>
+                    </div>
+
+                    <div id="routeJeepChargesSection"
+    class="{{ $quotation->jeepCharges->where('travel_plan_id', '!=', null)->count() > 0 ? '' : 'hidden' }}">
+    <div id="route-jeep-charges-container">
+        @foreach ($quotation->travelPlans as $travelIndex => $travelPlan)
+            <div class="bg-gray-100 p-4 rounded-lg mb-4 route-jeep-charge-entry" data-travel-index="{{ $travelIndex }}">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-medium">Jeep Charges for Route: {{ $travelPlan->route->name }}</h4>
+                    <button type="button" class="remove-route-jeep-charge text-red-500 hover:text-red-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <input type="hidden" name="route_jeep_charges[{{ $travelIndex }}][route_id]"
+                    value="{{ $travelPlan->route_id }}">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-2">Pax Range</th>
+                            <th class="px-4 py-2">Unit Price (US$)</th>
+                            <th class="px-4 py-2">Quantity</th>
+                            <th class="px-4 py-2">Total Price (US$)</th>
+                            <th class="px-4 py-2">Per Person (US$)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($quotation->paxSlabs as $paxSlabIndex => $paxSlab)
+                            @php
+                                $routeJeepCharge = $quotation->jeepCharges
+                                    ->where('travel_plan_id', $travelPlan->id)
+                                    ->where('pax_range', $paxSlab->paxSlab->name)
+                                    ->first();
+                            @endphp
+                            <tr>
+                                <td class="px-4 py-2">
+                                    <input type="text"
+                                        name="route_jeep_charges[{{ $travelIndex }}][charges][{{ $paxSlabIndex }}][pax_range]"
+                                        value="{{ $paxSlab->paxSlab->name }}"
+                                        class="block w-full border-gray-300 rounded-md shadow-sm"
+                                        readonly>
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input type="number" step="0.01"
+                                        name="route_jeep_charges[{{ $travelIndex }}][charges][{{ $paxSlabIndex }}][unit_price]"
+                                        value="{{ $routeJeepCharge->unit_price ?? '' }}"
+                                        class="route-jeep-unit-price block w-full border-gray-300 rounded-md shadow-sm">
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input type="number"
+                                        name="route_jeep_charges[{{ $travelIndex }}][charges][{{ $paxSlabIndex }}][quantity]"
+                                        value="{{ $routeJeepCharge->quantity ?? '' }}"
+                                        class="route-jeep-quantity block w-full border-gray-300 rounded-md shadow-sm">
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input type="number" step="0.01"
+                                        name="route_jeep_charges[{{ $travelIndex }}][charges][{{ $paxSlabIndex }}][total_price]"
+                                        value="{{ $routeJeepCharge->total_price ?? '' }}"
+                                        class="route-jeep-total-price block w-full border-gray-300 rounded-md shadow-sm"
+                                        readonly>
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input type="number" step="0.01"
+                                        name="route_jeep_charges[{{ $travelIndex }}][charges][{{ $paxSlabIndex }}][per_person]"
+                                        value="{{ $routeJeepCharge->per_person ?? '' }}"
+                                        class="route-jeep-per-person block w-full border-gray-300 rounded-md shadow-sm"
+                                        data-min-pax="{{ $paxSlab->paxSlab->min_pax }}" readonly>
+                                </td>
+                            </tr>
+                        @endforeach
+
+                        @if ($quotation->paxSlabs->isEmpty())
+                            <tr>
+                                <td colspan="5" class="px-4 py-2 text-center">
+                                    <p class="text-gray-500">No Route Jeep Charges inputs
+                                        available. Please Complete Pax Slabs Details.</p>
+                                </td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        @endforeach
+    </div>
+</div>
                 </div>
             </div>
 
@@ -324,7 +429,7 @@
                 }
             }
 
-            
+
             function initializeRouteSelect(container) {
                 const routeSelect = container.querySelector('.route-select');
                 const mileageInput = container.querySelector('.mileage-input');
@@ -461,7 +566,7 @@
                     return false;
                 }
 
-                
+
 
                 this.submit();
             });
@@ -572,6 +677,300 @@
             }
         });
     </script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const enableRouteJeepCharges = document.getElementById('enableRouteJeepCharges');
+        const routeJeepChargesSection = document.getElementById('routeJeepChargesSection');
+        const routeJeepChargesContainer = document.getElementById('route-jeep-charges-container');
+        const travelPlanForm = document.getElementById('travelPlanForm');
+
+        if (enableRouteJeepCharges && routeJeepChargesSection) {
+            // Create hidden input for enable_route_jeep_charges if it doesn't exist
+            let hiddenInput = document.querySelector('input[name="enable_route_jeep_charges"][type="hidden"]');
+            if (!hiddenInput) {
+                hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'enable_route_jeep_charges';
+                travelPlanForm.appendChild(hiddenInput);
+            }
+
+            // Set initial value
+            hiddenInput.value = enableRouteJeepCharges.checked ? '1' : '0';
+
+            // Set initial state
+            routeJeepChargesSection.classList.toggle('hidden', !enableRouteJeepCharges.checked);
+
+            // Toggle visibility and update hidden input on checkbox change
+            enableRouteJeepCharges.addEventListener('change', function() {
+                routeJeepChargesSection.classList.toggle('hidden', !this.checked);
+                hiddenInput.value = this.checked ? '1' : '0';
+
+                // Initialize or clear inputs
+                if (this.checked) {
+                    // Generate route-specific jeep charge tables for each travel plan
+                    generateRouteJeepChargeTables();
+                } else {
+                    // Clear all route-specific jeep charges
+                    routeJeepChargesContainer.innerHTML = '';
+                }
+            });
+
+            // Initialize calculations for route-specific jeep charges
+            initRouteJeepCalculations();
+
+            // Function to regenerate route-specific jeep charge tables
+            function generateRouteJeepChargeTables() {
+                if (!enableRouteJeepCharges.checked) return;
+
+                routeJeepChargesContainer.innerHTML = '';
+                const travelEntries = document.querySelectorAll('.travel-entry');
+
+                travelEntries.forEach((entry, travelIndex) => {
+                    const routeSelect = entry.querySelector('.route-select');
+                    const routeId = routeSelect.value;
+                    const routeName = routeSelect.options[routeSelect.selectedIndex]?.text ||
+                        'Unknown Route';
+
+                    if (!routeId) return; // Skip if no route is selected
+
+                    // Create a table for this route
+                    const routeTableHtml = `
+                    <div class="bg-gray-100 p-4 rounded-lg mb-4 route-jeep-charge-entry" data-travel-index="${travelIndex}">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-medium">Jeep Charges for Route: ${routeName}</h4>
+                            <button type="button" class="remove-route-jeep-charge text-red-500 hover:text-red-700">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <input type="hidden" name="route_jeep_charges[${travelIndex}][route_id]" value="${routeId}">
+                        <table class="w-full text-sm text-left text-gray-500">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-2">Pax Range</th>
+                                    <th class="px-4 py-2">Unit Price (US$)</th>
+                                    <th class="px-4 py-2">Quantity</th>
+                                    <th class="px-4 py-2">Total Price (US$)</th>
+                                    <th class="px-4 py-2">Per Person (US$)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${generatePaxRows(travelIndex)}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                    routeJeepChargesContainer.insertAdjacentHTML('beforeend', routeTableHtml);
+                });
+                
+                // Add event listeners for removal buttons
+                addRouteJeepChargeRemovalListeners();
+                
+                // Set up calculations for all the newly created tables
+                initRouteJeepCalculations();
+            }
+            
+            // Function to add event listeners for remove buttons
+            function addRouteJeepChargeRemovalListeners() {
+                const removeButtons = routeJeepChargesContainer.querySelectorAll('.remove-route-jeep-charge');
+                removeButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const chargeEntry = this.closest('.route-jeep-charge-entry');
+                        if (chargeEntry) {
+                            // Get the travel index to update hidden inputs if needed
+                            const travelIndex = chargeEntry.dataset.travelIndex;
+                            
+                            // Add a hidden input to mark this route charge as removed in the backend
+                            const removeInput = document.createElement('input');
+                            removeInput.type = 'hidden';
+                            removeInput.name = `remove_route_jeep_charge[${travelIndex}]`;
+                            removeInput.value = '1';
+                            travelPlanForm.appendChild(removeInput);
+                            
+                            // Remove the charge entry from DOM
+                            chargeEntry.remove();
+                            
+                            // If no more route charges, disable the checkbox
+                            if (routeJeepChargesContainer.querySelectorAll('.route-jeep-charge-entry').length === 0) {
+                                enableRouteJeepCharges.checked = false;
+                                routeJeepChargesSection.classList.add('hidden');
+                                hiddenInput.value = '0';
+                            }
+                        }
+                    });
+                });
+            }
+
+            // Function to generate pax rows for a route table
+            function generatePaxRows(travelIndex) {
+                let rowsHtml = '';
+
+                @foreach ($quotation->paxSlabs as $paxSlabIndex => $paxSlab)
+                    rowsHtml += `
+                    <tr>
+                        <td class="px-4 py-2">
+                            <input type="text"
+                                name="route_jeep_charges[${travelIndex}][charges][{{ $paxSlabIndex }}][pax_range]"
+                                value="{{ $paxSlab->paxSlab->name }}"
+                                class="block w-full border-gray-300 rounded-md shadow-sm" readonly>
+                        </td>
+                        <td class="px-4 py-2">
+                            <input type="number" step="0.01"
+                                name="route_jeep_charges[${travelIndex}][charges][{{ $paxSlabIndex }}][unit_price]"
+                                value="0"
+                                class="route-jeep-unit-price block w-full border-gray-300 rounded-md shadow-sm">
+                        </td>
+                        <td class="px-4 py-2">
+                            <input type="number"
+                                name="route_jeep_charges[${travelIndex}][charges][{{ $paxSlabIndex }}][quantity]"
+                                value="0"
+                                class="route-jeep-quantity block w-full border-gray-300 rounded-md shadow-sm">
+                        </td>
+                        <td class="px-4 py-2">
+                            <input type="number" step="0.01"
+                                name="route_jeep_charges[${travelIndex}][charges][{{ $paxSlabIndex }}][total_price]"
+                                value="0.00"
+                                class="route-jeep-total-price block w-full border-gray-300 rounded-md shadow-sm"
+                                readonly>
+                        </td>
+                        <td class="px-4 py-2">
+                            <input type="number" step="0.01"
+                                name="route_jeep_charges[${travelIndex}][charges][{{ $paxSlabIndex }}][per_person]"
+                                value="0.00"
+                                class="route-jeep-per-person block w-full border-gray-300 rounded-md shadow-sm"
+                                data-min-pax="{{ $paxSlab->paxSlab->min_pax }}" readonly>
+                        </td>
+                    </tr>
+                `;
+                @endforeach
+
+                @if ($quotation->paxSlabs->isEmpty())
+                    rowsHtml += `
+                    <tr>
+                        <td colspan="5" class="px-4 py-2 text-center">
+                            <p class="text-gray-500">No Route Jeep Charges inputs available. Please Complete Pax Slabs Details.</p>
+                        </td>
+                    </tr>
+                `;
+                @endif
+
+                return rowsHtml;
+            }
+
+            // Initialize route jeep charge calculations
+            function initRouteJeepCalculations() {
+                const routeJeepRows = routeJeepChargesSection.querySelectorAll('tbody tr');
+
+                routeJeepRows.forEach(row => {
+                    initializeRouteJeepRow(row);
+                });
+            }
+
+            // Initialize existing route-specific jeep charges with removal buttons
+            function initializeExistingRouteJeepCharges() {
+                const existingEntries = document.querySelectorAll('.route-jeep-charge-entry');
+                
+                existingEntries.forEach((entry, index) => {
+                    // Add remove button if it doesn't exist
+                    if (!entry.querySelector('.remove-route-jeep-charge')) {
+                        const heading = entry.querySelector('h4');
+                        if (heading) {
+                            // Create wrapper div for heading and button
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'flex justify-between items-center mb-2';
+                            
+                            // Move heading to wrapper
+                            heading.parentNode.insertBefore(wrapper, heading);
+                            wrapper.appendChild(heading);
+                            
+                            // Add remove button
+                            const removeButton = document.createElement('button');
+                            removeButton.type = 'button';
+                            removeButton.className = 'remove-route-jeep-charge text-red-500 hover:text-red-700';
+                            removeButton.innerHTML = `
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            `;
+                            wrapper.appendChild(removeButton);
+                        }
+                    }
+                });
+                
+                // Add event listeners for the remove buttons
+                addRouteJeepChargeRemovalListeners();
+            }
+
+            function initializeRouteJeepRow(row) {
+                const unitPriceInput = row.querySelector('.route-jeep-unit-price');
+                const quantityInput = row.querySelector('.route-jeep-quantity');
+
+                if (unitPriceInput && quantityInput) {
+                    unitPriceInput.addEventListener('input', () => calculateRouteRowTotals(row));
+                    quantityInput.addEventListener('input', () => calculateRouteRowTotals(row));
+                }
+            }
+
+            function calculateRouteRowTotals(row) {
+                if (!enableRouteJeepCharges.checked) return;
+
+                const unitPriceInput = row.querySelector('.route-jeep-unit-price');
+                const quantityInput = row.querySelector('.route-jeep-quantity');
+                const totalPriceInput = row.querySelector('.route-jeep-total-price');
+                const perPersonInput = row.querySelector('.route-jeep-per-person');
+
+                const unitPrice = parseFloat(unitPriceInput.value) || 0;
+                const quantity = parseInt(quantityInput.value) || 0;
+                const minPax = parseInt(perPersonInput.dataset.minPax) || 1;
+
+                const totalPrice = unitPrice * quantity;
+                totalPriceInput.value = totalPrice.toFixed(2);
+
+                const perPerson = totalPrice / minPax;
+                perPersonInput.value = perPerson.toFixed(2);
+            }
+
+            // Update route jeep charges when travel plans change
+            function checkTravelPlanChanges() {
+                // Add event listeners for travel plan changes
+                document.getElementById('add-travel').addEventListener('click', function() {
+                    if (enableRouteJeepCharges.checked) {
+                        // Wait for DOM to update with new travel entry
+                        setTimeout(() => {
+                            generateRouteJeepChargeTables();
+                        }, 100);
+                    }
+                });
+
+                // Listen for route selection changes
+                document.addEventListener('change', function(event) {
+                    if (event.target.classList.contains('route-select') && enableRouteJeepCharges.checked) {
+                        generateRouteJeepChargeTables();
+                    }
+                });
+
+                // Listen for travel plan removal
+                document.addEventListener('click', function(event) {
+                    if (event.target.closest('.remove-travel') && enableRouteJeepCharges.checked) {
+                        // Wait for DOM to update after removal
+                        setTimeout(() => {
+                            generateRouteJeepChargeTables();
+                        }, 100);
+                    }
+                });
+            }
+
+            // Call this to set up event listeners for travel plan changes
+            checkTravelPlanChanges();
+            
+            // Initialize existing entries with remove buttons
+            initializeExistingRouteJeepCharges();
+        }
+    });
+</script>
 
 
 </x-app-layout>
