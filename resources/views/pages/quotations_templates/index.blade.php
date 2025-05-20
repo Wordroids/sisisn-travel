@@ -27,6 +27,8 @@
                 <thead>
                     <tr class="bg-gray-100">
                         <th class="py-3 px-4 text-left border-b">Template Name</th>
+                        <th class="py-3 px-4 text-left border-b">Quote Reference</th>
+                        <th class="py-3 px-4 text-left border-b">Booking Reference</th>
                         <th class="py-3 px-4 text-left border-b">Description</th>
                         <th class="py-3 px-4 text-left border-b">Created By</th>
                         <th class="py-3 px-4 text-left border-b">Created Date</th>
@@ -38,6 +40,8 @@
                     @forelse($templates as $template)
                         <tr class="hover:bg-gray-50">
                             <td class="py-3 px-4 border-b">{{ $template->template_name }}</td>
+                            <td class="py-3 px-4 border-b">{{ $template->quote_reference }}</td>
+                            <td class="py-3 px-4 border-b">{{ $template->booking_reference }}</td>
                             <td class="py-3 px-4 border-b">{{ Str::limit($template->description, 50) }}</td>
                             <td class="py-3 px-4 border-b">{{ $template->createdBy ? $template->createdBy->name : 'System' }}</td>
                             <td class="py-3 px-4 border-b">{{ $template->created_at->format('d M, Y') }}</td>
@@ -82,11 +86,7 @@
                                         </svg>
                                     </button>
                                 </form>
-                                <a href="" class="text-purple-500 hover:underline" title="Create quotation from this template">
-                                    <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
-                                    </svg>
-                                </a>
+                                
                             </td>
                         </tr>
                     @empty
@@ -102,18 +102,6 @@
             {{ $templates->links() }}
         </div>
 
-        <div class="mt-8 bg-gray-50 p-4 rounded-lg">
-            <h3 class="text-lg font-medium text-gray-800 mb-2">About Templates</h3>
-            <p class="text-gray-600">
-                Quotation templates allow you to create pre-defined travel itineraries that can be reused to quickly generate 
-                new quotations. This saves time by skipping steps 1 and 2 of the quotation process.
-            </p>
-            <ul class="mt-3 list-disc list-inside text-gray-600">
-                <li>Create templates with standard accommodations, travel plans, and activities</li>
-                <li>Use templates to instantly generate new quotations</li>
-                <li>Customize dates, customer details, and other specifics when creating from a template</li>
-                <li>Deactivate templates that are no longer needed without deleting them</li>
-            </ul>
-        </div>
+       
     </div>
 </x-app-layout>

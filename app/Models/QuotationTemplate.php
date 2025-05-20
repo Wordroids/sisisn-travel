@@ -16,6 +16,8 @@ class QuotationTemplate extends Model
      */
     protected $fillable = [
         'template_name',
+        'quote_reference',
+        'booking_reference',
         'description',
         'is_active',
         'created_by',

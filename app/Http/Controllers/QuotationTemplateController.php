@@ -100,9 +100,16 @@ class QuotationTemplateController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        // Generate Quote & Booking Reference for the template
+        $sequenceNumber = (QuotationTemplate::max('id') ?? 0) + 1001;
+        $quoteReference = 'QT/SP/' . $sequenceNumber;
+        $bookingReference = 'ST/SIC/' . $sequenceNumber;
+
         // Create template with JSON data
         $template = QuotationTemplate::create([
             'template_name' => $request->template_name,
+            'quote_reference' => $quoteReference,
+            'booking_reference' => $bookingReference,
             'description' => $request->description,
             'is_active' => true,
             'created_by' => Auth::id(),
@@ -239,58 +246,4 @@ class QuotationTemplateController extends Controller
         return redirect()->back()->with('success', 'Template status updated successfully');
     }
 
-    /**
-     * Create a new quotation from a template.
-     */
-    public function createQuotationFromTemplate(Request $request)
-    {
-        $templates = QuotationTemplate::where('is_active', true)->get();
-        $markets = Market::all();
-        $customers = Customers::all();
-        $currencies = Currency::all();
-        $paxSlabs = PaxSlab::ordered()->get();
-        $markups = MarkUpValue::all();
-        $drivers = Driver::all();
-        $guides = Guide::all();
-
-        // Generate quote reference and booking reference logic (same as in QuotationController)
-        // ...
-
-        return view('pages.quotation-templates.create-quotation', compact('templates', 'markets', 'customers', 'currencies', 'paxSlabs', 'markups', 'drivers', 'guides'));
-    }
-
-    /**
-     * Store a new quotation created from a template.
-     */
-    public function storeQuotationFromTemplate(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'template_id' => 'required|exists:quotation_templates,id',
-            'market_id' => 'required|exists:markets,id',
-            'customer_id' => 'nullable|exists:customers,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'no_of_days' => 'required|integer',
-            'no_of_nights' => 'required|integer',
-            'currency_id' => 'required|exists:currencies,id',
-            'conversion_rate' => 'required|numeric',
-            'markup_per_pax' => 'required|numeric',
-            'pax_slab_id' => 'required|exists:pax_slabs,id',
-            'driver_id' => 'required|exists:drivers,id',
-            'guide_id' => 'nullable|exists:guides,id',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        // Get the template
-        $template = QuotationTemplate::findOrFail($request->template_id);
-
-        // Create the quotation with basic info
-        // Code to create quotation and associated records using template data
-        // ...
-
-        return redirect()->route('quotations.index')->with('success', 'Quotation created successfully from template');
-    }
 }

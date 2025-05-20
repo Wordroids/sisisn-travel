@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('quotation_templates', function (Blueprint $table) {
             $table->id();
             $table->string('template_name');
+            $table->string('quote_reference')->unique();
+            $table->string('booking_reference')->nullable()->unique();
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
             $table->unsignedBigInteger('created_by')->nullable();
