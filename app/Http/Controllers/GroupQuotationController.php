@@ -61,34 +61,51 @@ class GroupQuotationController extends Controller
         // Get the selected template
         $template = QuotationTemplate::findOrFail($validated['template_id']);
 
-        // Generate Quote Reference
-        $quoteReference = 'GQ/SP/' . (GroupQuotation::max('id') + 1001);
+        // Use the template's full reference as the base for group quotations
+        $baseQuoteRef = $template->quote_reference; // e.g., QT/SP/1001
+        $baseBookingRef = $template->booking_reference; // e.g., ST/SIC/1001
 
-        // Get booking reference
-        $tempBookRef = TempBookRef::where('quote_reference', 'LIKE', 'GQ/SP/%')->whereNotNull('booking_reference')->latest()->first();
+        // Generate new sequence number for Group Quotation based on the template's references
+        // This will look for existing group quotes like 'QT/SP/1001/%'
+        $latestGroupQuotation = GroupQuotation::where('quote_reference', 'LIKE', $baseQuoteRef . '/%')
+            ->orderBy('quote_reference', 'desc')
+            ->first();
 
-        if ($tempBookRef) {
-            $bookingReference = $tempBookRef->booking_reference;
-        } else {
-            // Get the highest booking reference number
-            $latestBookingRef = GroupQuotation::where('booking_reference', 'LIKE', 'GS/SP/%')
-                ->get()
-                ->map(function ($q) {
-                    preg_match('/GS\/SP\/(\d+)/', $q->booking_reference, $matches);
-                    return isset($matches[1]) ? (int) $matches[1] : 0;
-                })
-                ->max();
-
-            // Generate new reference number
-            $nextNumber = $latestBookingRef ? $latestBookingRef + 1 : 1001;
-            $bookingReference = 'GS/SP/' . $nextNumber;
-
-            // Verify uniqueness
-            while (GroupQuotation::where('booking_reference', $bookingReference)->exists()) {
-                $nextNumber++;
-                $bookingReference = 'GS/SP/' . $nextNumber;
+        $nextSequence = 1;
+        if ($latestGroupQuotation) {
+            $parts = explode('/', $latestGroupQuotation->quote_reference);
+            $lastSubSequence = end($parts); // This gets the sub-sequence like '0001'
+            if (is_numeric($lastSubSequence)) {
+                $nextSequence = intval($lastSubSequence) + 1;
             }
         }
+        $groupSequencePadded = str_pad($nextSequence, 4, '0', STR_PAD_LEFT); // e.g., 0001 or 0002
+
+        // Construct the new references in the format BASE_REF/SUB_SEQUENCE
+        $quoteReference = $baseQuoteRef . '/' . $groupSequencePadded; // e.g., QT/SP/1001/0001
+        $bookingReference = $baseBookingRef . '/' . $groupSequencePadded; // e.g., ST/SIC/1001/0001
+
+        // Check for existing temp booking reference for this specific new booking reference
+        $tempBookRef = TempBookRef::where('booking_reference', $bookingReference)->latest()->first();
+
+        if ($tempBookRef) {
+            // This case implies a previously rejected quote with this exact reference is being reused.
+            // Potentially, this means the temp record should be cleared, or specific logic applied.
+            // For now, we assume if a temp ref exists for the *exact* new booking ref, we use it,
+            // though this scenario might need further business logic refinement.
+        } else {
+            // Verify uniqueness for the generated booking reference, increment if necessary
+            // This loop ensures that if somehow the sequence generation above results in a conflict
+            // (e.g., due to manual DB entries or race conditions), we find a unique one.
+            while (GroupQuotation::where('booking_reference', $bookingReference)->exists()) {
+                $nextSequence++;
+                $groupSequencePadded = str_pad($nextSequence, 4, '0', STR_PAD_LEFT);
+                $bookingReference = $baseBookingRef . '/' . $groupSequencePadded;
+                // Also update quote reference to keep them in sync if booking ref had to change
+                $quoteReference = $baseQuoteRef . '/' . $groupSequencePadded;
+            }
+        }
+
 
         // Create a draft group quotation with template data
         $groupQuotation = GroupQuotation::create([
