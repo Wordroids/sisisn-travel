@@ -130,7 +130,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const quotationStartDate =
-            "{{ $quotation->start_date ? $quotation->start_date->format('Y-m-d') : '' }}";
+                "{{ $quotation->start_date ? $quotation->start_date->format('Y-m-d') : '' }}";
             const quotationEndDate = "{{ $quotation->end_date ? $quotation->end_date->format('Y-m-d') : '' }}";
 
             const travelRouteOptions =
@@ -518,7 +518,7 @@
                 mainForm.addEventListener('submit', function() {
                     document.querySelectorAll('.jeep-pax-range-display').forEach(displaySelect => {
                         const hiddenInput = displaySelect
-                        .nextElementSibling; // Assumes hidden input is immediately after
+                            .nextElementSibling; // Assumes hidden input is immediately after
                         if (hiddenInput && hiddenInput.classList.contains('jeep-pax-range')) {
                             hiddenInput.value = displaySelect.value;
                         }

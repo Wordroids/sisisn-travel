@@ -96,4 +96,9 @@ class GroupQuotation extends Model
     {
         return $this->belongsToMany(Quotation::class, 'group_quotation_members');
     }
+
+    public function members()
+    {
+        return $this->hasMany(GroupQuotationMember::class, 'group_quotations_id');
+    }
 }

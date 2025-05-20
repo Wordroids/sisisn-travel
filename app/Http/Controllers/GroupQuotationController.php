@@ -28,6 +28,8 @@ use App\Models\TravelRoute;
 use App\Models\VehicleType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\GroupQuotationMember;
+
 
 class GroupQuotationController extends Controller
 {
@@ -247,7 +249,7 @@ class GroupQuotationController extends Controller
      */
     public function step_02($id)
     {
-        $groupQuotation = GroupQuotation::with('paxSlabs')->findOrFail($id);
+        $groupQuotation = GroupQuotation::with(['paxSlabs', 'members'])->findOrFail($id); // Eager load members here
 
         // Get the selected pax slab from step 1
         $selectedPaxSlab = PaxSlab::findOrFail($groupQuotation->pax_slab_id);
@@ -279,7 +281,7 @@ class GroupQuotationController extends Controller
             }
 
             // Reload the relationship
-            $groupQuotation->load('paxSlabs');
+            $groupQuotation->load('paxSlabs'); // This reloads paxSlabs, members are already loaded
         }
 
         return view('pages.group_quotations.step-02', compact('groupQuotation', 'paxSlabs', 'vehicleTypes'));
@@ -287,21 +289,32 @@ class GroupQuotationController extends Controller
 
     public function store_step_02(Request $request, $id)
     {
+        // dd($request->all()); // You can remove this or keep for debugging
+
         $groupQuotation = GroupQuotation::findOrFail($id);
 
-        // Validate the incoming request
-        $request->validate([
+        // Validate the incoming request, including members
+        $validatedData = $request->validate([
             'pax_slab' => 'required|array',
             'pax_slab.*.exact_pax' => 'required|integer|min:1',
             'pax_slab.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
             'pax_slab.*.vehicle_payout_rate' => 'required|numeric|min:0',
+            'members' => 'nullable|array', // Add validation for members
+            'members.*.id' => 'nullable|exists:group_quotation_members,id', // For existing members
+            'members.*.name' => 'required_with:members|string|max:255', // name is required if members array is present
+            'members.*.email' => 'nullable|email|max:255',
+            'members.*.phone' => 'nullable|string|max:20',
+            'members.*.whatsapp' => 'nullable|string|max:20',
+            'members.*.country' => 'nullable|string|max:100',
         ]);
 
+        // --- Handle Pax Slabs ---
         // Delete existing pax slabs first
         $groupQuotation->paxSlabs()->delete();
 
         // Loop through the Pax Slabs and store each row
-        foreach ($request->pax_slab as $paxSlabId => $slab) {
+        // Use $validatedData['pax_slab'] as it's now validated
+        foreach ($validatedData['pax_slab'] as $paxSlabId => $slab) {
             GroupQuotationPaxSlab::create([
                 'group_quotation_id' => $groupQuotation->id,
                 'pax_slab_id' => $paxSlabId,
@@ -311,9 +324,48 @@ class GroupQuotationController extends Controller
             ]);
         }
 
-        return redirect()->route('group_quotations.step_03', $groupQuotation->id)->with('success', 'Pax Slab details saved! Proceed to Accommodation details.');
-    }
+        // --- Handle Members ---
+        $submittedMemberIds = [];
+        // Now $validatedData['members'] will exist if members were submitted and passed validation
+        if (isset($validatedData['members']) && is_array($validatedData['members'])) {
+            foreach ($validatedData['members'] as $memberInput) {
+                $memberData = [
+                    'name' => $memberInput['name'],
+                    'email' => $memberInput['email'] ?? null,
+                    'phone' => $memberInput['phone'] ?? null,
+                    'whatsapp' => $memberInput['whatsapp'] ?? null,
+                    'country' => $memberInput['country'] ?? null,
+                    'group_quotations_id' => $groupQuotation->id,
+                ];
 
+                if (!empty($memberInput['id'])) {
+                    // Update existing member
+                    $member = GroupQuotationMember::find($memberInput['id']);
+                    // Ensure member belongs to this quotation before updating
+                    if ($member && $member->group_quotations_id == $groupQuotation->id) {
+                        $member->update($memberData);
+                        $submittedMemberIds[] = $member->id;
+                    }
+                } else {
+                    // Create new member
+                    $newMember = GroupQuotationMember::create($memberData);
+                    $submittedMemberIds[] = $newMember->id;
+                }
+            }
+        }
+
+        // Delete members that were removed from the form
+        $existingMemberIds = $groupQuotation->members()->pluck('id')->all();
+        $memberIdsToDelete = array_diff($existingMemberIds, $submittedMemberIds);
+        if (!empty($memberIdsToDelete)) {
+            GroupQuotationMember::destroy($memberIdsToDelete);
+        }
+        
+        // Reload members to ensure the view has the latest data if redirecting back or for subsequent steps
+        $groupQuotation->load('members');
+
+        return redirect()->route('group_quotations.step_03', $groupQuotation->id)->with('success', 'Pax Slab and Member details saved! Proceed to Accommodation details.');
+    }
     /**
      * Store the third step of the group quotation creation process
      */
@@ -687,6 +739,7 @@ class GroupQuotationController extends Controller
         'jeepCharges',
         'siteSeeings', 
         'extras',
+        'members'
         // Temporarily remove this line until the table exists
         // 'quotations.customer'
     ])->findOrFail($id);

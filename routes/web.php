@@ -164,6 +164,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/edit/{id}/step-05/store', [GroupQuotationController::class, 'store_step_05'])->name('store_step_05');
 
         Route::get('/group-quotation/{id}', [GroupQuotationController::class, 'show'])->name('show');
+         Route::put('/edit/{id}/step-02/store', [GroupQuotationController::class, 'store_step_02'])->name('store_step_02');
         
     });
 

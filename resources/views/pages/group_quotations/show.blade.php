@@ -35,6 +35,41 @@
             </div>
         </div>
 
+        <!-- Group Members Details -->
+        <div class="bg-white p-6 rounded-lg shadow-sm mt-6">
+            <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">Group Members Details</h3>
+            @if($groupQuotation->members && $groupQuotation->members->count() > 0)
+                <div class="overflow-x-auto mt-4">
+                    <table class="w-full text-sm text-left text-gray-700 border rounded-lg shadow">
+                        <thead class="bg-gray-200 text-gray-700">
+                            <tr>
+                                <th class="px-4 py-3 text-left">#</th>
+                                <th class="px-4 py-3 text-left">Name</th>
+                                <th class="px-4 py-3 text-left">Email</th>
+                                <th class="px-4 py-3 text-left">Phone</th>
+                                <th class="px-4 py-3 text-left">WhatsApp</th>
+                                <th class="px-4 py-3 text-left">Country</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            @foreach ($groupQuotation->members as $index => $member)
+                                <tr class="bg-gray-50 hover:bg-gray-100 transition">
+                                    <td class="px-4 py-3">{{ $index + 1 }}</td>
+                                    <td class="px-4 py-3">{{ $member->name }}</td>
+                                    <td class="px-4 py-3">{{ $member->email ?? 'N/A' }}</td>
+                                    <td class="px-4 py-3">{{ $member->phone ?? 'N/A' }}</td>
+                                    <td class="px-4 py-3">{{ $member->whatsapp ?? 'N/A' }}</td>
+                                    <td class="px-4 py-3">{{ $member->country ?? 'N/A' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <p class="mt-4 text-gray-500">No members have been added to this group quotation yet.</p>
+            @endif
+        </div>
+
         <!-- Pax Slab Details -->
         <div class="bg-white p-6 rounded-lg shadow-sm mt-6">
             <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">Pax Slab Details</h3>
