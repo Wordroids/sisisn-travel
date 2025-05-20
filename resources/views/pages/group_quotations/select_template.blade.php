@@ -18,7 +18,7 @@
                 <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:border-blue-500 transition">
                     <div class="p-6">
                         <div class="flex justify-between items-start">
-                            <h2 class="text-lg font-medium text-gray-900">{{ $template->name }}</h2>
+                            <h2 class="text-lg font-medium text-gray-900">{{ $template->template_name }}</h2>
                             <span class="px-2 py-1 text-xs rounded-full {{ $template->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                 {{ $template->is_active ? 'Active' : 'Inactive' }}
                             </span>

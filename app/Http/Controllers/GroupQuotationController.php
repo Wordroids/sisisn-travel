@@ -61,48 +61,93 @@ class GroupQuotationController extends Controller
         // Get the selected template
         $template = QuotationTemplate::findOrFail($validated['template_id']);
 
-        // Use the template's full reference as the base for group quotations
         $baseQuoteRef = $template->quote_reference; // e.g., QT/SP/1001
         $baseBookingRef = $template->booking_reference; // e.g., ST/SIC/1001
 
-        // Generate new sequence number for Group Quotation based on the template's references
-        // This will look for existing group quotes like 'QT/SP/1001/%'
-        $latestGroupQuotation = GroupQuotation::where('quote_reference', 'LIKE', $baseQuoteRef . '/%')
-            ->orderBy('quote_reference', 'desc')
-            ->first();
+        $finalQuoteReference = null;
+        $finalBookingReference = null;
 
-        $nextSequence = 1;
-        if ($latestGroupQuotation) {
-            $parts = explode('/', $latestGroupQuotation->quote_reference);
-            $lastSubSequence = end($parts); // This gets the sub-sequence like '0001'
-            if (is_numeric($lastSubSequence)) {
-                $nextSequence = intval($lastSubSequence) + 1;
+        // Step 1: Attempt to find and use a booking_reference from TempBookRef
+        // Derive the general search prefix for booking references (e.g., "ST/SIC/%")
+        $bookingRefParts = explode('/', $baseBookingRef);
+        $searchPrefixForTempBookingRef = '';
+        if (count($bookingRefParts) >= 2) { // Ensures we have at least TYPE/MARKET like ST/SIC
+            $searchPrefixForTempBookingRef = $bookingRefParts[0] . '/' . $bookingRefParts[1] . '/%';
+        } else {
+            // Fallback if baseBookingRef format is unexpected (e.g. just "ST")
+            \Log::warning("Unexpected baseBookingRef format for template ID {$template->id}: {$baseBookingRef}");
+            $searchPrefixForTempBookingRef = $baseBookingRef . '%'; // Less specific search
+        }
+
+        $reusableTempEntry = TempBookRef::where('booking_reference', 'LIKE', $searchPrefixForTempBookingRef)
+                                    ->orderBy('created_at', 'ASC') // Get the oldest available
+                                    ->first();
+
+        if ($reusableTempEntry) {
+            // Ensure this booking_reference isn't currently active in GroupQuotation table
+            if (!GroupQuotation::where('booking_reference', $reusableTempEntry->booking_reference)->exists()) {
+                $finalBookingReference = $reusableTempEntry->booking_reference; // Use this booking_reference
+                $reusableTempEntry->delete();
+            } else {
+                // The booking_reference from TempBookRef is already in use by an active GroupQuotation.
+                // Log this and remove the temp entry to avoid future conflicts.
+                \Log::warning("TempBookRef: Booking reference {$reusableTempEntry->booking_reference} from temp table is already active in GroupQuotations. Removing temp entry.");
+                $reusableTempEntry->delete();
+                // $finalBookingReference remains null, so a new one will be generated.
             }
         }
-        $groupSequencePadded = str_pad($nextSequence, 4, '0', STR_PAD_LEFT); // e.g., 0001 or 0002
 
-        // Construct the new references in the format BASE_REF/SUB_SEQUENCE
-        $quoteReference = $baseQuoteRef . '/' . $groupSequencePadded; // e.g., QT/SP/1001/0001
-        $bookingReference = $baseBookingRef . '/' . $groupSequencePadded; // e.g., ST/SIC/1001/0001
+        // Step 2: Generate a unique quote_reference
+        $currentQuoteSequence = 1;
+        $latestGroupQuotationForQuoteSeries = GroupQuotation::where('quote_reference', 'LIKE', $baseQuoteRef . '/%')
+            ->orderByRaw("CAST(SUBSTRING_INDEX(quote_reference, '/', -1) AS UNSIGNED) DESC")
+            ->first();
 
-        // Check for existing temp booking reference for this specific new booking reference
-        $tempBookRef = TempBookRef::where('booking_reference', $bookingReference)->latest()->first();
+        if ($latestGroupQuotationForQuoteSeries) {
+            $parts = explode('/', $latestGroupQuotationForQuoteSeries->quote_reference);
+            $lastSubSequence = end($parts);
+            if (is_numeric($lastSubSequence)) {
+                $currentQuoteSequence = intval($lastSubSequence) + 1;
+            }
+        }
 
-        if ($tempBookRef) {
-            // This case implies a previously rejected quote with this exact reference is being reused.
-            // Potentially, this means the temp record should be cleared, or specific logic applied.
-            // For now, we assume if a temp ref exists for the *exact* new booking ref, we use it,
-            // though this scenario might need further business logic refinement.
-        } else {
-            // Verify uniqueness for the generated booking reference, increment if necessary
-            // This loop ensures that if somehow the sequence generation above results in a conflict
-            // (e.g., due to manual DB entries or race conditions), we find a unique one.
-            while (GroupQuotation::where('booking_reference', $bookingReference)->exists()) {
-                $nextSequence++;
-                $groupSequencePadded = str_pad($nextSequence, 4, '0', STR_PAD_LEFT);
-                $bookingReference = $baseBookingRef . '/' . $groupSequencePadded;
-                // Also update quote reference to keep them in sync if booking ref had to change
-                $quoteReference = $baseQuoteRef . '/' . $groupSequencePadded;
+        while (true) {
+            $quoteSequencePadded = str_pad($currentQuoteSequence, 4, '0', STR_PAD_LEFT);
+            $generatedQuoteRef = $baseQuoteRef . '/' . $quoteSequencePadded;
+            if (!GroupQuotation::where('quote_reference', $generatedQuoteRef)->exists()) {
+                $finalQuoteReference = $generatedQuoteRef;
+                break;
+            }
+            $currentQuoteSequence++;
+        }
+
+        // Step 3: Generate a unique booking_reference if not already set from TempBookRef
+        if (is_null($finalBookingReference)) {
+            $currentBookingSequence = 1;
+            // Find the highest sequence number for this booking reference prefix in the group_quotations table
+            // Consider booking references that might have "- Rejected" and strip it for sequence calculation
+            $latestBookingInDB = GroupQuotation::where('booking_reference', 'LIKE', $baseBookingRef . '/%')
+                ->selectRaw("*, CAST(SUBSTRING_INDEX(REPLACE(booking_reference, '- Rejected', ''), '/', -1) AS UNSIGNED) as booking_seq_num")
+                ->orderBy('booking_seq_num', 'DESC')
+                ->first();
+
+            if ($latestBookingInDB) {
+                $cleanBookingRef = str_replace('- Rejected', '', $latestBookingInDB->booking_reference);
+                $parts = explode('/', $cleanBookingRef);
+                $lastSubSeq = end($parts);
+                if (is_numeric($lastSubSeq)) {
+                    $currentBookingSequence = intval($lastSubSeq) + 1;
+                }
+            }
+            
+            while (true) {
+                $bookingSequencePadded = str_pad($currentBookingSequence, 4, '0', STR_PAD_LEFT);
+                $generatedBookingRef = $baseBookingRef . '/' . $bookingSequencePadded;
+                if (!GroupQuotation::where('booking_reference', $generatedBookingRef)->exists()) {
+                    $finalBookingReference = $generatedBookingRef;
+                    break;
+                }
+                $currentBookingSequence++;
             }
         }
 
@@ -110,8 +155,8 @@ class GroupQuotationController extends Controller
         // Create a draft group quotation with template data
         $groupQuotation = GroupQuotation::create([
             'name' => $template->template_name ?? 'New Group Quotation',
-            'quote_reference' => $quoteReference,
-            'booking_reference' => $bookingReference,
+            'quote_reference' => $finalQuoteReference,
+            'booking_reference' => $finalBookingReference,
             'description' => $template->description,
             'status' => 'draft',
             'is_template' => false,
@@ -623,11 +668,31 @@ class GroupQuotationController extends Controller
      * Display the specified group quotation.
      */
     public function show($id)
-    {
-        $groupQuotation = GroupQuotation::with(['market', 'customer', 'driver', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomCategory', 'accommodations.roomDetails', 'accommodations.additionalRooms', 'travelPlans.route', 'travelPlans.vehicleType', 'siteSeeings', 'extras'])->findOrFail($id);
+{
+    $groupQuotation = GroupQuotation::with([
+        'market', 
+        'customer', 
+        'driver', 
+        'guide',
+        'paxSlabs.paxSlab', 
+        'paxSlabs.vehicleType', 
+        'accommodations.hotel', 
+        'accommodations.mealPlan', 
+        'accommodations.roomCategory', 
+        'accommodations.roomDetails', 
+        'accommodations.additionalRooms', 
+        'travelPlans.route', 
+        'travelPlans.vehicleType', 
+        'travelPlans.jeepCharges',
+        'jeepCharges',
+        'siteSeeings', 
+        'extras',
+        // Temporarily remove this line until the table exists
+        // 'quotations.customer'
+    ])->findOrFail($id);
 
-        return view('pages.group_quotations.show', compact('groupQuotation'));
-    }
+    return view('pages.group_quotations.show', compact('groupQuotation'));
+}
 
     /**
      * Remove the specified group quotation from storage.
@@ -645,10 +710,10 @@ class GroupQuotationController extends Controller
      */
     public function updateStatus(Request $request, $id)
     {
-        $groupQuotation = GroupQuotation::findOrFail($id);
+        $groupQuotation = GroupQuotation::findOrFail($id); // Changed from Quotation to GroupQuotation
 
         $request->validate([
-            'status' => 'required|in:draft,pending,approved,rejected',
+            'status' => 'required|in:pending,approved,rejected',
         ]);
 
         // Handle booking reference based on status
@@ -656,6 +721,7 @@ class GroupQuotationController extends Controller
             case 'rejected':
                 $this->handleRejectedStatus($groupQuotation);
                 break;
+
             case 'pending':
                 $this->handlePendingStatus($groupQuotation);
                 break;
@@ -665,9 +731,8 @@ class GroupQuotationController extends Controller
         $groupQuotation->status = $request->status;
         $groupQuotation->save();
 
-        return response()->json([
-            'message' => 'Group quotation status updated successfully!',
-        ]);
+        // Redirect back to the index page with a success message
+        return redirect()->route('group_quotations.index')->with('success', 'Group quotation status updated successfully!');
     }
 
     /**
@@ -675,17 +740,15 @@ class GroupQuotationController extends Controller
      */
     private function handleRejectedStatus(GroupQuotation $groupQuotation)
     {
-        // Store current booking reference in temp table
-        TempBookRef::create([
-            'booking_reference' => $groupQuotation->booking_reference,
-            'quote_reference' => $groupQuotation->quote_reference,
-        ]);
-
-        $newref = $groupQuotation->booking_reference . '- Rejected';
-
-        // Clear booking reference
-        $groupQuotation->booking_reference = $newref;
-        $groupQuotation->save();
+        // Store current booking reference in temp table if it's not already marked as rejected
+        if ($groupQuotation->booking_reference && !str_ends_with($groupQuotation->booking_reference, '- Rejected')) {
+            TempBookRef::create([
+                'booking_reference' => $groupQuotation->booking_reference,
+                'quote_reference' => $groupQuotation->quote_reference, // Ensure this field exists or is relevant
+            ]);
+            $groupQuotation->booking_reference = $groupQuotation->booking_reference . '- Rejected';
+            // The save will be handled by the updateStatus method
+        }
     }
 
     /**
@@ -693,13 +756,85 @@ class GroupQuotationController extends Controller
      */
     private function handlePendingStatus(GroupQuotation $groupQuotation)
     {
-        // Restore booking reference from temp table
-        $temp = TempBookRef::where('quote_reference', $groupQuotation->quote_reference)->latest()->first();
+        $originalBookingReference = str_replace('- Rejected', '', $groupQuotation->booking_reference);
+        $tempRestored = false;
 
-        if ($temp) {
-            $groupQuotation->booking_reference = $temp->booking_reference;
-            $temp->delete();
+        // Attempt to restore booking reference from temp table
+        if ($groupQuotation->quote_reference && $originalBookingReference) {
+            $temp = TempBookRef::where('quote_reference', $groupQuotation->quote_reference)
+                               ->where('booking_reference', $originalBookingReference) 
+                               ->latest()
+                               ->first();
+
+            if ($temp) {
+                // Ensure the booking reference from temp is not currently active elsewhere
+                if (!GroupQuotation::where('booking_reference', $temp->booking_reference)->where('id', '!=', $groupQuotation->id)->exists()) {
+                    $groupQuotation->booking_reference = $temp->booking_reference;
+                    $temp->delete();
+                    $tempRestored = true;
+                } else {
+                    \Log::warning("TempBookRef: Booking reference {$temp->booking_reference} for quote {$groupQuotation->quote_reference} is already active. Temp record not used and deleted.");
+                    $temp->delete(); // Clean up unusable temp record
+                }
+            }
         }
+
+        if (!$tempRestored) {
+            // If not restored from temp, we need to ensure a valid booking reference.
+            // This could be stripping "- Rejected" or generating a new sequential one.
+            // For robust sequencing, let's prefer generating a new one if the current one is marked rejected or if no temp was found.
+
+            $baseBookingRefForGeneration = null;
+            $currentBookingParts = explode('/', $originalBookingReference);
+            if (count($currentBookingParts) > 1) { // Check if we have at least Prefix/Sequence
+                array_pop($currentBookingParts); // Remove the old sequence part
+                $baseBookingRefForGeneration = implode('/', $currentBookingParts);
+            }
+
+            if ($baseBookingRefForGeneration) {
+                $currentBookingSequence = 1;
+                // Find the highest sequence number for this booking reference prefix in the group_quotations table
+                $latestBookingInDB = GroupQuotation::where('booking_reference', 'LIKE', $baseBookingRefForGeneration . '/%')
+                    // Exclude the current quotation itself from the check if its booking_reference is not the one being changed
+                    ->where('id', '!=', $groupQuotation->id) 
+                    ->selectRaw("*, CAST(SUBSTRING_INDEX(REPLACE(booking_reference, '- Rejected', ''), '/', -1) AS UNSIGNED) as booking_seq_num")
+                    ->orderBy('booking_seq_num', 'DESC')
+                    ->first();
+
+                if ($latestBookingInDB) {
+                    $cleanLatestBookingRef = str_replace('- Rejected', '', $latestBookingInDB->booking_reference);
+                    $parts = explode('/', $cleanLatestBookingRef);
+                    $lastSubSeq = end($parts);
+                    if (is_numeric($lastSubSeq)) {
+                        $currentBookingSequence = intval($lastSubSeq) + 1;
+                    }
+                }
+                
+                // Loop to find the next available booking reference
+                while (true) {
+                    $bookingSequencePadded = str_pad($currentBookingSequence, 4, '0', STR_PAD_LEFT);
+                    $generatedBookingRef = $baseBookingRefForGeneration . '/' . $bookingSequencePadded;
+                    
+                    if (!GroupQuotation::where('booking_reference', $generatedBookingRef)->where('id', '!=', $groupQuotation->id)->exists()) {
+                        $groupQuotation->booking_reference = $generatedBookingRef;
+                        break;
+                    }
+                    $currentBookingSequence++;
+                }
+            } elseif (str_ends_with($groupQuotation->booking_reference ?? '', '- Rejected')) {
+                // Fallback: If we couldn't derive a base for generation, but it was rejected, just strip "- Rejected".
+                // This is less ideal as it doesn't guarantee sequential correctness if numbers were skipped.
+                $groupQuotation->booking_reference = $originalBookingReference;
+                 \Log::info("Fallback: Stripped '- Rejected' for booking reference of GroupQuotation ID {$groupQuotation->id} as base for new generation could not be derived.");
+            } else {
+                // If booking reference was not rejected and no temp ref, and no base derivable,
+                // it implies it might be a new quotation or one without a standard booking ref.
+                // This scenario might need specific handling or logging.
+                // For now, we assume it either had a temp ref, was rejected, or this function isn't called.
+                 \Log::warning("HandlePendingStatus: Could not determine a valid booking reference for GroupQuotation ID {$groupQuotation->id}. Current booking_reference: {$groupQuotation->booking_reference}");
+            }
+        }
+        // The save will be handled by the updateStatus method
     }
 
     private function copyTemplateDataToQuotation($groupQuotation, $template)

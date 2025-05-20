@@ -421,33 +421,33 @@
                     'grid grid-cols-1 sm:grid-cols-6 gap-2 items-center jeep-charge-row p-2 border rounded bg-white';
                 // REMOVED disabled from pax_range select, added hidden input
                 row.innerHTML = `
-            <div>
-                <label class="text-xs text-gray-600">Pax Range</label>
-                <select class="jeep-pax-range-display mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-xs py-1 bg-gray-100" disabled>
-                     ${paxSlabRangeOptionsHTML}
-                </select>
-                 <input type="hidden" name="jeep_charges[${chargeIndex}][pax_range]" class="jeep-pax-range">
-            </div>
-            <div>
-                <label class="text-xs text-gray-600">Unit Price</label>
-                <input type="number" step="0.01" name="jeep_charges[${chargeIndex}][unit_price]" class="jeep-unit-price mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-xs py-1" placeholder="0.00">
-            </div>
-            <div>
-                <label class="text-xs text-gray-600">Qty</label>
-                <input type="number" name="jeep_charges[${chargeIndex}][quantity]" class="jeep-quantity mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-xs py-1" placeholder="0">
-            </div>
-            <div>
-                <label class="text-xs text-gray-600">Total</label>
-                <input type="number" step="0.01" name="jeep_charges[${chargeIndex}][total_price]" class="jeep-total-price bg-gray-100 mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-xs py-1" readonly>
-            </div>
-            <div>
-                <label class="text-xs text-gray-600">Per Person</label>
-                <input type="number" step="0.01" name="jeep_charges[${chargeIndex}][per_person]" class="jeep-per-person bg-gray-100 mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-xs py-1" readonly>
-            </div>
-            <button type="button" class="remove-jeep-charge text-red-500 hover:text-red-700 self-end mb-1">
-                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        `;
+                    <div>
+                        <label class="text-xs text-gray-600">Pax Range</label>
+                        <select class="jeep-pax-range-display mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-xs py-1 bg-gray-100" disabled>
+                            ${paxSlabRangeOptionsHTML}
+                        </select>
+                        <input type="hidden" name="jeep_charges[${chargeIndex}][pax_range]" class="jeep-pax-range">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-600">Unit Price</label>
+                        <input type="number" step="0.01" name="jeep_charges[${chargeIndex}][unit_price]" class="jeep-unit-price mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-xs py-1" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-600">Qty</label>
+                        <input type="number" name="jeep_charges[${chargeIndex}][quantity]" class="jeep-quantity mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-xs py-1" placeholder="0">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-600">Total</label>
+                        <input type="number" step="0.01" name="jeep_charges[${chargeIndex}][total_price]" class="jeep-total-price bg-gray-100 mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-xs py-1" readonly>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-600">Per Person</label>
+                        <input type="number" step="0.01" name="jeep_charges[${chargeIndex}][per_person]" class="jeep-per-person bg-gray-100 mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-xs py-1" readonly>
+                    </div>
+                    <button type="button" class="remove-jeep-charge text-red-500 hover:text-red-700 self-end mb-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                `;
                 globalJeepChargesList.appendChild(row);
                 const paxRangeDisplaySelect = row.querySelector('.jeep-pax-range-display');
                 const paxRangeHiddenInput = row.querySelector('.jeep-pax-range');

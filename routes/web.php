@@ -163,8 +163,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/edit/{id}/step-05', [GroupQuotationController::class, 'step_05'])->name('step_05');
         Route::put('/edit/{id}/step-05/store', [GroupQuotationController::class, 'store_step_05'])->name('store_step_05');
 
+        Route::get('/group-quotation/{id}', [GroupQuotationController::class, 'show'])->name('show');
         
     });
+
+    Route::post('/group-quotations/update-status/{id}', [App\Http\Controllers\GroupQuotationController::class, 'updateStatus'])->name('group_quotations.updateStatus');
 
     Route::get('/select-template', [GroupQuotationController::class, 'selectTemplate'])
             ->name('select_template');
