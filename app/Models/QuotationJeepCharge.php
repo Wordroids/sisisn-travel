@@ -13,6 +13,7 @@ class QuotationJeepCharge extends Model
 
     protected $fillable = [
         'quotation_id',
+        'travel_plan_id',
         'pax_range',
         'unit_price',
         'quantity',
@@ -23,5 +24,9 @@ class QuotationJeepCharge extends Model
     public function quotation()
     {
         return $this->belongsTo(Quotation::class);
+    }
+    public function travelPlan()
+    {
+        return $this->belongsTo(QuotationTravelPlan::class, 'travel_plan_id');
     }
 }

@@ -32,4 +32,10 @@ class QuotationTravelPlan extends Model
     {
         return $this->belongsTo(vehicleType::class);
     }
+
+    public function quotationJeepCharges()
+    {
+        return $this->hasMany(QuotationJeepCharge::class, 'travel_plan_id');
+    }
+
 }

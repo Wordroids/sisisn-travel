@@ -20,6 +20,8 @@ use App\Http\Controllers\MarkUpValueController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\UserRoleController;
+use App\Http\Controllers\QuotationTemplateController;
+use App\Http\Controllers\GroupQuotationController;
 
 
 // Link Storage 
@@ -132,6 +134,48 @@ Route::middleware('auth')->group(function () {
     Route::get('/user-roles', [UserRoleController::class, 'index'])->name('user-roles.index');
     Route::post('/user-roles', [UserRoleController::class, 'updateRole'])->name('user-roles.update');
 
-});
+    Route::get('/quotations-templates/index', [QuotationTemplateController::class, 'index'])->name('quotations_templates.index');
+    Route::get('/quotation-templates/create', [QuotationTemplateController::class, 'create'])->name('quotations_templates.create');
+    Route::post('/quotation-templates/store', [QuotationTemplateController::class, 'store'])->name('quotations_templates.store');
+    Route::get('/quotation-templates/{template}/edit', [QuotationTemplateController::class, 'edit'])->name('quotations_templates.edit');
+    Route::put('/quotation-templates/{template}', [QuotationTemplateController::class, 'update'])->name('quotations_templates.update');
+    Route::delete('/quotation-templates/{template}', [QuotationTemplateController::class, 'destroy'])->name('quotations_templates.destroy');
+    Route::get('/quotation-templates/{template}/show', [QuotationTemplateController::class, 'show'])->name('quotations_templates.show');
+    Route::patch('/quotation-templates/{template}/toggle-status', [QuotationTemplateController::class, 'toggleStatus'])
+    ->name('quotations_templates.toggle_status');
+
+
+    
+    // Group Quotation Routes
+    Route::prefix('group-quotations')->name('group_quotations.')->group(function () {
+        Route::get('/', [GroupQuotationController::class, 'index'])->name('index');
+
+
+        // Add these new step-by-step routes
+        Route::get('/edit/{id}/step-01', [GroupQuotationController::class, 'step_01'])->name('step_01');
+        Route::put('/edit/{id}/step-01/store', [GroupQuotationController::class, 'store_step_01'])->name('store_step_01');
+        Route::get('/edit/{id}/step-02', [GroupQuotationController::class, 'step_02'])->name('step_02');
+        Route::put('/edit/{id}/step-02/store', [GroupQuotationController::class, 'store_step_02'])->name('store_step_02');
+        Route::get('/edit/{id}/step-03', [GroupQuotationController::class, 'step_03'])->name('step_03');
+        Route::put('/edit/{id}/step-03/store', [GroupQuotationController::class, 'store_step_03'])->name('store_step_03');
+        Route::get('/edit/{id}/step-04', [GroupQuotationController::class, 'step_04'])->name('step_04');
+        Route::put('/edit/{id}/step-04/store', [GroupQuotationController::class, 'store_step_04'])->name('store_step_04');
+        Route::get('/edit/{id}/step-05', [GroupQuotationController::class, 'step_05'])->name('step_05');
+        Route::put('/edit/{id}/step-05/store', [GroupQuotationController::class, 'store_step_05'])->name('store_step_05');
+
+        Route::get('/group-quotation/{id}', [GroupQuotationController::class, 'show'])->name('show');
+         Route::put('/edit/{id}/step-02/store', [GroupQuotationController::class, 'store_step_02'])->name('store_step_02');
+        
+    });
+
+    Route::post('/group-quotations/update-status/{id}', [App\Http\Controllers\GroupQuotationController::class, 'updateStatus'])->name('group_quotations.updateStatus');
+
+    Route::get('/select-template', [GroupQuotationController::class, 'selectTemplate'])
+            ->name('select_template');
+
+        Route::post('/process-template', [GroupQuotationController::class, 'processTemplateSelection'])
+            ->name('process_template');
+
+    });
 
 require __DIR__ . '/auth.php';

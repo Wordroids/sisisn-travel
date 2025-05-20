@@ -85,5 +85,10 @@ class Quotation extends Model
     {
         return $this->hasMany(QuotationJeepCharge::class);
     }
+
+    public function members()
+    {
+        return $this->hasMany(QuotationMember::class, 'quotations_id');
+    }
     
 }
