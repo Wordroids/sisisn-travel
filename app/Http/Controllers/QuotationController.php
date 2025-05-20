@@ -27,6 +27,7 @@ use App\Models\QuotationSiteSeeing;
 use App\Models\QuotationExtra;
 use App\Models\QuotationJeepCharge;
 use App\Models\TempBookRef;
+use App\Models\QuotationMember;
 
 class QuotationController extends Controller
 {
@@ -89,7 +90,7 @@ class QuotationController extends Controller
      */
     public function show($id)
     {
-        $quotation = Quotation::with(['market', 'customer', 'driver', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType', 'siteSeeings', 'extras'])->findOrFail($id);
+        $quotation = Quotation::with(['market', 'customer', 'driver', 'paxSlabs.paxSlab', 'paxSlabs.vehicleType', 'accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomType', 'accommodations.roomDetails', 'travelPlans.route', 'travelPlans.vehicleType', 'siteSeeings', 'extras' , 'members'])->findOrFail($id);
 
         return view('pages.quotations.show', compact('quotation'));
     }
@@ -285,15 +286,22 @@ class QuotationController extends Controller
         $quotation = Quotation::findOrFail($id);
 
         // Validate the incoming request
-        $request->validate([
+        $validatedData = $request->validate([
             'pax_slab' => 'required|array',
             'pax_slab.*.exact_pax' => 'required|integer|min:1',
             'pax_slab.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
             'pax_slab.*.vehicle_payout_rate' => 'required|numeric|min:0',
+            'members' => 'nullable|array',
+            'members.*.id' => 'nullable|exists:quotation_members,id',
+            'members.*.name' => 'required_with:members|string|max:255',
+            'members.*.email' => 'nullable|email|max:255',
+            'members.*.phone' => 'nullable|string|max:20',
+            'members.*.whatsapp' => 'nullable|string|max:20',
+            'members.*.country' => 'nullable|string|max:100',
         ]);
 
         // Loop through the Pax Slabs and store each row
-        foreach ($request->pax_slab as $paxSlabId => $slab) {
+        foreach ($validatedData['pax_slab'] as $paxSlabId => $slab) {
             QuotationPaxSlab::updateOrCreate(
                 [
                     'quotation_id' => $quotation->id,
@@ -303,10 +311,46 @@ class QuotationController extends Controller
                     'exact_pax' => $slab['exact_pax'],
                     'vehicle_type_id' => $slab['vehicle_type_id'],
                     'vehicle_payout_rate' => $slab['vehicle_payout_rate'],
-                ],
+                ]
             );
         }
-        return redirect()->route('quotations.step3', $quotation->id)->with('success', 'Pax Slab details saved.');
+
+        // --- Handle Members ---
+        $submittedMemberIds = [];
+        if (isset($validatedData['members']) && is_array($validatedData['members'])) {
+            foreach ($validatedData['members'] as $memberInput) {
+                $memberData = [
+                    'name' => $memberInput['name'],
+                    'email' => $memberInput['email'] ?? null,
+                    'phone' => $memberInput['phone'] ?? null,
+                    'whatsapp' => $memberInput['whatsapp'] ?? null,
+                    'country' => $memberInput['country'] ?? null,
+                    'quotations_id' => $quotation->id,
+                ];
+
+                if (!empty($memberInput['id'])) {
+                    $member = QuotationMember::find($memberInput['id']);
+                    if ($member && $member->quotations_id == $quotation->id) {
+                        $member->update($memberData);
+                        $submittedMemberIds[] = $member->id;
+                    }
+                } else {
+                    $newMember = QuotationMember::create($memberData);
+                    $submittedMemberIds[] = $newMember->id;
+                }
+            }
+        }
+
+        // Delete members that were removed
+        $existingMemberIds = $quotation->members()->pluck('id')->all();
+        $memberIdsToDelete = array_diff($existingMemberIds, $submittedMemberIds);
+        if (!empty($memberIdsToDelete)) {
+            QuotationMember::destroy($memberIdsToDelete);
+        }
+        
+        $quotation->load('members'); // Reload members
+
+        return redirect()->route('quotations.step3', $quotation->id)->with('success', 'Pax Slab and Member details saved.');
     }
 
     /**
@@ -336,14 +380,21 @@ class QuotationController extends Controller
     {
         $quotation = Quotation::findOrFail($id);
 
-        $request->validate([
+        $validatedData = $request->validate([
             'pax_slab' => 'required|array',
             'pax_slab.*.exact_pax' => 'required|integer|min:1',
             'pax_slab.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
             'pax_slab.*.vehicle_payout_rate' => 'required|numeric|min:0',
+            'members' => 'nullable|array',
+            'members.*.id' => 'nullable|exists:quotation_members,id',
+            'members.*.name' => 'required_with:members|string|max:255',
+            'members.*.email' => 'nullable|email|max:255',
+            'members.*.phone' => 'nullable|string|max:20',
+            'members.*.whatsapp' => 'nullable|string|max:20',
+            'members.*.country' => 'nullable|string|max:100',
         ]);
 
-        foreach ($request->pax_slab as $paxSlabId => $slab) {
+        foreach ($validatedData['pax_slab'] as $paxSlabId => $slab) {
             QuotationPaxSlab::updateOrCreate(
                 [
                     'quotation_id' => $quotation->id,
@@ -353,11 +404,45 @@ class QuotationController extends Controller
                     'exact_pax' => $slab['exact_pax'],
                     'vehicle_type_id' => $slab['vehicle_type_id'],
                     'vehicle_payout_rate' => $slab['vehicle_payout_rate'],
-                ],
+                ]
             );
         }
 
-        return redirect()->route('quotations.edit_step_three', $id)->with('success', 'Pax Slab details updated successfully.');
+        // --- Handle Members ---
+        $submittedMemberIds = [];
+        if (isset($validatedData['members']) && is_array($validatedData['members'])) {
+            foreach ($validatedData['members'] as $memberInput) {
+                $memberData = [
+                    'name' => $memberInput['name'],
+                    'email' => $memberInput['email'] ?? null,
+                    'phone' => $memberInput['phone'] ?? null,
+                    'whatsapp' => $memberInput['whatsapp'] ?? null,
+                    'country' => $memberInput['country'] ?? null,
+                    'quotations_id' => $quotation->id,
+                ];
+
+                if (!empty($memberInput['id'])) {
+                    $member = QuotationMember::find($memberInput['id']);
+                    if ($member && $member->quotations_id == $quotation->id) {
+                        $member->update($memberData);
+                        $submittedMemberIds[] = $member->id;
+                    }
+                } else {
+                    $newMember = QuotationMember::create($memberData);
+                    $submittedMemberIds[] = $newMember->id;
+                }
+            }
+        }
+        
+        $existingMemberIds = $quotation->members()->pluck('id')->all();
+        $memberIdsToDelete = array_diff($existingMemberIds, $submittedMemberIds);
+        if (!empty($memberIdsToDelete)) {
+            QuotationMember::destroy($memberIdsToDelete);
+        }
+
+        $quotation->load('members'); // Reload members
+
+        return redirect()->route('quotations.edit_step_three', $id)->with('success', 'Pax Slab and Member details updated successfully.');
     }
 
     /**

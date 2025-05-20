@@ -25,4 +25,6 @@ class QuotationMember extends Model
     {
         return $this->belongsTo(Quotation::class, 'quotations_id');
     }
+
+    
 }

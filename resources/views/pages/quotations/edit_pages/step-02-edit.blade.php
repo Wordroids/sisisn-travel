@@ -118,6 +118,20 @@
                 </table>
             </div>
 
+            <!-- Members Details Section -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">Members Details</h3>
+                <div id="members-container" class="space-y-6">
+                    {{-- Member rows will be populated here by JavaScript --}}
+                </div>
+                <button type="button" id="add-member-btn" class="mt-4 inline-flex items-center px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Add Member
+                </button>
+            </div>
+
             <div class="flex justify-between mt-6">
                 <a href="{{ $navigation['back'] }}" class="bg-gray-500 text-white py-2 px-4 rounded-md">
                     Back
@@ -140,6 +154,110 @@
                     }
                 });
             });
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            // --- Members Details Script ---
+            const membersContainer = document.getElementById('members-container');
+            const addMemberBtn = document.getElementById('add-member-btn');
+            let memberIndex = 0; 
+
+            function escapeHtml(unsafe) {
+                if (unsafe === null || typeof unsafe === 'undefined') {
+                    return '';
+                }
+                return unsafe
+                    .toString()
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            function addMemberRow(memberData = null) {
+                const currentRowIndex = memberIndex;
+                const memberRow = document.createElement('div');
+                memberRow.classList.add('member-entry', 'p-4', 'border', 'border-gray-300', 'rounded-lg', 'bg-gray-50', 'shadow-sm');
+                memberRow.setAttribute('id', `member-row-${currentRowIndex}`);
+
+                const memberIdInput = memberData && memberData.id ?
+                    `<input type="hidden" name="members[${currentRowIndex}][id]" value="${escapeHtml(memberData.id)}">` : '';
+
+                memberRow.innerHTML = `
+                    ${memberIdInput}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                        <div>
+                            <label for="member_name_${currentRowIndex}" class="block text-sm font-medium text-gray-700">Name <span class="text-red-500">*</span></label>
+                            <input type="text" name="members[${currentRowIndex}][name]" id="member_name_${currentRowIndex}"
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                   value="${memberData && memberData.name ? escapeHtml(memberData.name) : ''}" required>
+                        </div>
+                        <div>
+                            <label for="member_email_${currentRowIndex}" class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" name="members[${currentRowIndex}][email]" id="member_email_${currentRowIndex}"
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                   value="${memberData && memberData.email ? escapeHtml(memberData.email) : ''}">
+                        </div>
+                        <div>
+                            <label for="member_phone_${currentRowIndex}" class="block text-sm font-medium text-gray-700">Phone</label>
+                            <input type="text" name="members[${currentRowIndex}][phone]" id="member_phone_${currentRowIndex}"
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                   value="${memberData && memberData.phone ? escapeHtml(memberData.phone) : ''}">
+                        </div>
+                        <div>
+                            <label for="member_whatsapp_${currentRowIndex}" class="block text-sm font-medium text-gray-700">WhatsApp</label>
+                            <input type="text" name="members[${currentRowIndex}][whatsapp]" id="member_whatsapp_${currentRowIndex}"
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                   value="${memberData && memberData.whatsapp ? escapeHtml(memberData.whatsapp) : ''}">
+                        </div>
+                        <div>
+                            <label for="member_country_${currentRowIndex}" class="block text-sm font-medium text-gray-700">Country</label>
+                            <input type="text" name="members[${currentRowIndex}][country]" id="member_country_${currentRowIndex}"
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                   value="${memberData && memberData.country ? escapeHtml(memberData.country) : ''}">
+                        </div>
+                        <div class="flex items-end justify-start sm:justify-end lg:col-span-1">
+                            <button type="button" class="remove-member-btn inline-flex items-center px-4 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 w-full sm:w-auto">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                if (membersContainer) {
+                    membersContainer.appendChild(memberRow);
+                    memberRow.querySelector('.remove-member-btn').addEventListener('click', function() {
+                        memberRow.remove();
+                    });
+                }
+                memberIndex++;
+            }
+
+            function loadExistingMembers() {
+                const existingMembers = @json($quotation->members ?? []); 
+                if (existingMembers && existingMembers.length > 0) {
+                    existingMembers.forEach(member => {
+                        addMemberRow(member);
+                    });
+                }
+            }
+
+            if (addMemberBtn) {
+                addMemberBtn.addEventListener('click', function() {
+                    addMemberRow();
+                });
+            }
+            
+            if (membersContainer) {
+                 loadExistingMembers();
+            }
+            // --- End of Members Details Script ---
         });
     </script>
 </x-app-layout>
