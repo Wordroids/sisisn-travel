@@ -168,7 +168,7 @@ Route::middleware('auth')->group(function () {
         
     });
 
-    Route::post('/group-quotations/update-status/{id}', [App\Http\Controllers\GroupQuotationController::class, 'updateStatus'])->name('group_quotations.updateStatus');
+    Route::post('/group-quotations/update-status/{id}', [GroupQuotationController::class, 'updateStatus'])->name('group_quotations.updateStatus');
 
     Route::get('/select-template', [GroupQuotationController::class, 'selectTemplate'])
             ->name('select_template');
