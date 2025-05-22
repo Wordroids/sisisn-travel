@@ -1,5 +1,5 @@
 <x-app-layout>
-    <section class="bg-gray-50 py-3 sm:py-5">
+    <section class="py-3 sm:py-5">
         <div class="px-3">
             <div class="relative overflow-hidden bg-white shadow-md sm:rounded-lg">
                 <div class="px-4 divide-y">
