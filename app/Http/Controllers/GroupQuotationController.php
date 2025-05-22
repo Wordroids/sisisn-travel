@@ -29,7 +29,7 @@ use App\Models\VehicleType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\GroupQuotationMember;
-
+use App\Models\GroupTempSaveRefno;
 
 class GroupQuotationController extends Controller
 {
@@ -73,7 +73,8 @@ class GroupQuotationController extends Controller
         // Derive the general search prefix for booking references (e.g., "ST/SIC/%")
         $bookingRefParts = explode('/', $baseBookingRef);
         $searchPrefixForTempBookingRef = '';
-        if (count($bookingRefParts) >= 2) { // Ensures we have at least TYPE/MARKET like ST/SIC
+        if (count($bookingRefParts) >= 2) {
+            // Ensures we have at least TYPE/MARKET like ST/SIC
             $searchPrefixForTempBookingRef = $bookingRefParts[0] . '/' . $bookingRefParts[1] . '/%';
         } else {
             // Fallback if baseBookingRef format is unexpected (e.g. just "ST")
@@ -81,9 +82,9 @@ class GroupQuotationController extends Controller
             $searchPrefixForTempBookingRef = $baseBookingRef . '%'; // Less specific search
         }
 
-        $reusableTempEntry = TempBookRef::where('booking_reference', 'LIKE', $searchPrefixForTempBookingRef)
-                                    ->orderBy('created_at', 'ASC') // Get the oldest available
-                                    ->first();
+        $reusableTempEntry = GroupTempSaveRefno::where('booking_reference', 'LIKE', $searchPrefixForTempBookingRef)
+            ->orderBy('created_at', 'ASC') // Get the oldest available
+            ->first();
 
         if ($reusableTempEntry) {
             // Ensure this booking_reference isn't currently active in GroupQuotation table
@@ -141,7 +142,7 @@ class GroupQuotationController extends Controller
                     $currentBookingSequence = intval($lastSubSeq) + 1;
                 }
             }
-            
+
             while (true) {
                 $bookingSequencePadded = str_pad($currentBookingSequence, 4, '0', STR_PAD_LEFT);
                 $generatedBookingRef = $baseBookingRef . '/' . $bookingSequencePadded;
@@ -152,7 +153,6 @@ class GroupQuotationController extends Controller
                 $currentBookingSequence++;
             }
         }
-
 
         // Create a draft group quotation with template data
         $groupQuotation = GroupQuotation::create([
@@ -238,7 +238,7 @@ class GroupQuotationController extends Controller
 
         // If there was a temporary booking reference, delete it since it's now assigned
         if ($request->has('booking_reference')) {
-            TempBookRef::where('booking_reference', $request->booking_reference)->delete();
+            GroupTempSaveRefno::where('booking_reference', $request->booking_reference)->delete();
         }
 
         return redirect()->route('group_quotations.step_02', $groupQuotation->id)->with('success', 'Basic information saved! Proceed to Pax Slab details.');
@@ -360,7 +360,7 @@ class GroupQuotationController extends Controller
         if (!empty($memberIdsToDelete)) {
             GroupQuotationMember::destroy($memberIdsToDelete);
         }
-        
+
         // Reload members to ensure the view has the latest data if redirecting back or for subsequent steps
         $groupQuotation->load('members');
 
@@ -478,39 +478,36 @@ class GroupQuotationController extends Controller
             'jeepCharges' => function ($query) {
                 $query->whereNull('travel_plan_id');
             },
-            'paxSlabs.paxSlab'
+            'paxSlabs.paxSlab',
         ])->findOrFail($id);
 
         $travelRoutes = TravelRoute::orderBy('name')->get(); // This should fetch mileage by default
         $vehicleTypes = VehicleType::orderBy('name')->get();
-        
+
         // Get the PaxSlab instances related to this quotation's GroupQuotationPaxSlab entries
         $relatedPaxSlabIds = $quotation->paxSlabs->pluck('pax_slab_id')->unique();
         $paxSlabsForRanges = PaxSlab::whereIn('id', $relatedPaxSlabIds)->orderBy('order')->get();
 
         // Create an array of pax range strings like "2-3 Pax", "4-5 Pax"
-        $paxSlabRanges = $paxSlabsForRanges->map(function ($slab) {
-            return $slab->min_pax . '-' . $slab->max_pax . ' Pax';
-        })->unique()->values()->all();
+        $paxSlabRanges = $paxSlabsForRanges
+            ->map(function ($slab) {
+                return $slab->min_pax . '-' . $slab->max_pax . ' Pax';
+            })
+            ->unique()
+            ->values()
+            ->all();
 
         // Determine if global jeep charges or route-wise jeep charges were previously enabled/used
         // These flags help set the initial state of checkboxes in the view.
         $hasGlobalJeepCharges = $quotation->jeepCharges->whereNull('travel_plan_id')->isNotEmpty();
-        
+
         $hasRouteWiseJeepCharges = $quotation->travelPlans->some(function ($plan) {
             return $plan->jeepCharges->isNotEmpty();
         });
 
-        return view('pages.group_quotations.step-04', compact(
-            'quotation', 
-            'travelRoutes', 
-            'vehicleTypes', 
-            'paxSlabRanges',
-            'hasGlobalJeepCharges',
-            'hasRouteWiseJeepCharges'
-        ));
+        return view('pages.group_quotations.step-04', compact('quotation', 'travelRoutes', 'vehicleTypes', 'paxSlabRanges', 'hasGlobalJeepCharges', 'hasRouteWiseJeepCharges'));
     }
-    
+
     public function store_step_04(Request $request, $id)
     {
         //dd($request->all());
@@ -555,7 +552,6 @@ class GroupQuotationController extends Controller
         }
         $groupQuotation->jeepCharges()->whereNull('travel_plan_id')->delete();
 
-
         // Create travel plans and keep track of them for route-specific jeep charges
         $createdTravelPlans = [];
         if ($request->has('travel')) {
@@ -575,10 +571,10 @@ class GroupQuotationController extends Controller
         // Store global jeep charges if enabled
         if ($request->input('enable_jeep_charges') == '1' && $request->has('jeep_charges')) {
             foreach ($request->jeep_charges as $charge) {
-                if (empty($charge['pax_range']) || (!isset($charge['unit_price']) || $charge['unit_price'] === '' || $charge['unit_price'] === null) || (!isset($charge['quantity']) || $charge['quantity'] === '' || $charge['quantity'] === null )) {
+                if (empty($charge['pax_range']) || (!isset($charge['unit_price']) || $charge['unit_price'] === '' || $charge['unit_price'] === null) || (!isset($charge['quantity']) || $charge['quantity'] === '' || $charge['quantity'] === null)) {
                     continue; // Skip if essential data is missing
                 }
-                 if (floatval($charge['unit_price']) == 0 && intval($charge['quantity']) == 0) {
+                if (floatval($charge['unit_price']) == 0 && intval($charge['quantity']) == 0) {
                     continue; // Skip if both unit price and quantity are zero
                 }
 
@@ -668,11 +664,7 @@ class GroupQuotationController extends Controller
         if ($request->has('site_seeings')) {
             foreach ($validatedData['site_seeings'] as $siteSeeingData) {
                 // Skip if essential data like name is missing or if all price/qty fields are zero/empty
-                if (empty($siteSeeingData['name']) && 
-                    (empty($siteSeeingData['unit_price']) || $siteSeeingData['unit_price'] == 0) &&
-                    (empty($siteSeeingData['quantity']) || $siteSeeingData['quantity'] == 0) &&
-                    (empty($siteSeeingData['price_per_adult']) || $siteSeeingData['price_per_adult'] == 0)
-                ) {
+                if (empty($siteSeeingData['name']) && (empty($siteSeeingData['unit_price']) || $siteSeeingData['unit_price'] == 0) && (empty($siteSeeingData['quantity']) || $siteSeeingData['quantity'] == 0) && (empty($siteSeeingData['price_per_adult']) || $siteSeeingData['price_per_adult'] == 0)) {
                     continue;
                 }
                 GroupQuotationSiteSeeing::create([
@@ -690,11 +682,8 @@ class GroupQuotationController extends Controller
         // Store Other Extras
         if ($request->has('extras')) {
             foreach ($validatedData['extras'] as $extraData) {
-                 // Skip if essential data like description is missing or if all price/qty fields are zero/empty
-                if (empty($extraData['description']) &&
-                    (empty($extraData['unit_price']) || $extraData['unit_price'] == 0) &&
-                    (empty($extraData['quantity_per_pax']) || $extraData['quantity_per_pax'] == 0)
-                ) {
+                // Skip if essential data like description is missing or if all price/qty fields are zero/empty
+                if (empty($extraData['description']) && (empty($extraData['unit_price']) || $extraData['unit_price'] == 0) && (empty($extraData['quantity_per_pax']) || $extraData['quantity_per_pax'] == 0)) {
                     continue;
                 }
                 GroupQuotationExtra::create([
@@ -712,7 +701,6 @@ class GroupQuotationController extends Controller
         $groupQuotation->status = 'pending'; // Or 'completed', 'review', etc.
         $groupQuotation->save();
 
-        
         return redirect()->route('group_quotations.index')->with('success', 'Site Seeing & Extras saved! Quotation is now pending.');
     }
 
@@ -720,32 +708,32 @@ class GroupQuotationController extends Controller
      * Display the specified group quotation.
      */
     public function show($id)
-{
-    $groupQuotation = GroupQuotation::with([
-        'market', 
-        'customer', 
-        'driver', 
-        'guide',
-        'paxSlabs.paxSlab', 
-        'paxSlabs.vehicleType', 
-        'accommodations.hotel', 
-        'accommodations.mealPlan', 
-        'accommodations.roomCategory', 
-        'accommodations.roomDetails', 
-        'accommodations.additionalRooms', 
-        'travelPlans.route', 
-        'travelPlans.vehicleType', 
-        'travelPlans.jeepCharges',
-        'jeepCharges',
-        'siteSeeings', 
-        'extras',
-        'members'
-        // Temporarily remove this line until the table exists
-        // 'quotations.customer'
-    ])->findOrFail($id);
+    {
+        $groupQuotation = GroupQuotation::with([
+            'market',
+            'customer',
+            'driver',
+            'guide',
+            'paxSlabs.paxSlab',
+            'paxSlabs.vehicleType',
+            'accommodations.hotel',
+            'accommodations.mealPlan',
+            'accommodations.roomCategory',
+            'accommodations.roomDetails',
+            'accommodations.additionalRooms',
+            'travelPlans.route',
+            'travelPlans.vehicleType',
+            'travelPlans.jeepCharges',
+            'jeepCharges',
+            'siteSeeings',
+            'extras',
+            'members',
+            // Temporarily remove this line until the table exists
+            // 'quotations.customer'
+        ])->findOrFail($id);
 
-    return view('pages.group_quotations.show', compact('groupQuotation'));
-}
+        return view('pages.group_quotations.show', compact('groupQuotation'));
+    }
 
     /**
      * Remove the specified group quotation from storage.
@@ -784,8 +772,7 @@ class GroupQuotationController extends Controller
         $groupQuotation->status = $request->status;
         $groupQuotation->save();
 
-        // Redirect back to the index page with a success message
-        return redirect()->route('group_quotations.index')->with('success', 'Group quotation status updated successfully!');
+        return response()->json(['success' => true, 'message' => 'Group quotation status updated successfully!']);
     }
 
     /**
@@ -795,7 +782,7 @@ class GroupQuotationController extends Controller
     {
         // Store current booking reference in temp table if it's not already marked as rejected
         if ($groupQuotation->booking_reference && !str_ends_with($groupQuotation->booking_reference, '- Rejected')) {
-            TempBookRef::create([
+            GroupTempSaveRefno::create([
                 'booking_reference' => $groupQuotation->booking_reference,
                 'quote_reference' => $groupQuotation->quote_reference, // Ensure this field exists or is relevant
             ]);
@@ -814,10 +801,7 @@ class GroupQuotationController extends Controller
 
         // Attempt to restore booking reference from temp table
         if ($groupQuotation->quote_reference && $originalBookingReference) {
-            $temp = TempBookRef::where('quote_reference', $groupQuotation->quote_reference)
-                               ->where('booking_reference', $originalBookingReference) 
-                               ->latest()
-                               ->first();
+            $temp = GroupTempSaveRefno::where('quote_reference', $groupQuotation->quote_reference)->where('booking_reference', $originalBookingReference)->latest()->first();
 
             if ($temp) {
                 // Ensure the booking reference from temp is not currently active elsewhere
@@ -839,7 +823,8 @@ class GroupQuotationController extends Controller
 
             $baseBookingRefForGeneration = null;
             $currentBookingParts = explode('/', $originalBookingReference);
-            if (count($currentBookingParts) > 1) { // Check if we have at least Prefix/Sequence
+            if (count($currentBookingParts) > 1) {
+                // Check if we have at least Prefix/Sequence
                 array_pop($currentBookingParts); // Remove the old sequence part
                 $baseBookingRefForGeneration = implode('/', $currentBookingParts);
             }
@@ -849,7 +834,7 @@ class GroupQuotationController extends Controller
                 // Find the highest sequence number for this booking reference prefix in the group_quotations table
                 $latestBookingInDB = GroupQuotation::where('booking_reference', 'LIKE', $baseBookingRefForGeneration . '/%')
                     // Exclude the current quotation itself from the check if its booking_reference is not the one being changed
-                    ->where('id', '!=', $groupQuotation->id) 
+                    ->where('id', '!=', $groupQuotation->id)
                     ->selectRaw("*, CAST(SUBSTRING_INDEX(REPLACE(booking_reference, '- Rejected', ''), '/', -1) AS UNSIGNED) as booking_seq_num")
                     ->orderBy('booking_seq_num', 'DESC')
                     ->first();
@@ -862,12 +847,12 @@ class GroupQuotationController extends Controller
                         $currentBookingSequence = intval($lastSubSeq) + 1;
                     }
                 }
-                
+
                 // Loop to find the next available booking reference
                 while (true) {
                     $bookingSequencePadded = str_pad($currentBookingSequence, 4, '0', STR_PAD_LEFT);
                     $generatedBookingRef = $baseBookingRefForGeneration . '/' . $bookingSequencePadded;
-                    
+
                     if (!GroupQuotation::where('booking_reference', $generatedBookingRef)->where('id', '!=', $groupQuotation->id)->exists()) {
                         $groupQuotation->booking_reference = $generatedBookingRef;
                         break;
@@ -878,13 +863,13 @@ class GroupQuotationController extends Controller
                 // Fallback: If we couldn't derive a base for generation, but it was rejected, just strip "- Rejected".
                 // This is less ideal as it doesn't guarantee sequential correctness if numbers were skipped.
                 $groupQuotation->booking_reference = $originalBookingReference;
-                 \Log::info("Fallback: Stripped '- Rejected' for booking reference of GroupQuotation ID {$groupQuotation->id} as base for new generation could not be derived.");
+                \Log::info("Fallback: Stripped '- Rejected' for booking reference of GroupQuotation ID {$groupQuotation->id} as base for new generation could not be derived.");
             } else {
                 // If booking reference was not rejected and no temp ref, and no base derivable,
                 // it implies it might be a new quotation or one without a standard booking ref.
                 // This scenario might need specific handling or logging.
                 // For now, we assume it either had a temp ref, was rejected, or this function isn't called.
-                 \Log::warning("HandlePendingStatus: Could not determine a valid booking reference for GroupQuotation ID {$groupQuotation->id}. Current booking_reference: {$groupQuotation->booking_reference}");
+                \Log::warning("HandlePendingStatus: Could not determine a valid booking reference for GroupQuotation ID {$groupQuotation->id}. Current booking_reference: {$groupQuotation->booking_reference}");
             }
         }
         // The save will be handled by the updateStatus method
