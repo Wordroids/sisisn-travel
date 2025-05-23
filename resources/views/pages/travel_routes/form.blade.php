@@ -9,17 +9,20 @@
             <label class="block text-sm font-medium text-gray-700">Route Name</label>
             <input type="text" name="name" class="block w-full border-gray-300 rounded-md shadow-sm"
                 value="{{ old('name', $travelRoute->name ?? '') }}" required>
+            @error('name') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
         </div>
 
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700">Description</label>
             <textarea name="description" class="block w-full h-52 border-gray-300 rounded-md shadow-sm">{{ old('description', $travelRoute->description ?? '') }}</textarea>
+            @error('description') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
         </div>
 
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700">Mileage (KM)</label>
             <input type="number" name="mileage" class="block w-full border-gray-300 rounded-md shadow-sm"
                 value="{{ old('mileage', $travelRoute->mileage ?? '') }}" min="1">
+            @error('mileage') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
         </div>
 
         <div class="mb-4">
