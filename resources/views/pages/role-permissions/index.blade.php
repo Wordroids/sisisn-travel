@@ -1,5 +1,5 @@
 <x-app-layout>
-    <section class="bg-gray-50 py-3 sm:py-5">
+    <section class="py-3 sm:py-5">
         <div class="px-3">
             @if (session('success'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
