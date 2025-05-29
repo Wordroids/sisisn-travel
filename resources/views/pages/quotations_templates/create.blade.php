@@ -33,6 +33,23 @@
                             class="block text-sm font-medium text-gray-700 mb-1">Description</label>
                         <textarea id="description" name="description" rows="2" class="block w-full border-gray-300 rounded-md shadow-sm">{{ old('description') }}</textarea>
                     </div>
+
+                     <!-- Booking Reference Format Selection -->
+        <div class="mt-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Booking Reference Format</label>
+            <div class="flex gap-4">
+                <div class="flex items-center">
+                    <input type="radio" id="booking_ref_standard" name="booking_ref_format" value="standard" 
+                        class="mr-2" checked>
+                    <label for="booking_ref_standard" class="text-sm">ST/SIC/1001</label>
+                </div>
+                <div class="flex items-center">
+                    <input type="radio" id="booking_ref_ce" name="booking_ref_format" value="ce" 
+                        class="mr-2">
+                    <label for="booking_ref_ce" class="text-sm">ST/SIC/CE/1001</label>
+                </div>
+            </div>
+        </div>
                 </div>
             </div>
 

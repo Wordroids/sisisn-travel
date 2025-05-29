@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->nullable();
             $table->string('quote_reference')->unique();
-            $table->string('booking_reference')->nullable()->unique();
+            $table->string('booking_reference')->nullable();
             $table->foreignId('market_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();
             $table->date('start_date')->nullable();
