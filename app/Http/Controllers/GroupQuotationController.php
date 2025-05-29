@@ -127,9 +127,15 @@ class GroupQuotationController extends Controller
         // Step 3: Generate a unique booking_reference if not already set from TempBookRef
         if (is_null($finalBookingReference)) {
             $currentBookingSequence = 1;
-            // Find the highest sequence number for this booking reference prefix in the group_quotations table
-            // Consider booking references that might have "- Rejected" and strip it for sequence calculation
-            $latestBookingInDB = GroupQuotation::where('booking_reference', 'LIKE', $baseBookingRef . '/%')
+            // Construct the base booking reference with fixed 1001
+            if (strpos($baseBookingRef, 'CE') !== false) {
+                $baseBookingRefWithFixed = 'ST/SIC/CE/1001';
+            } else {
+                $baseBookingRefWithFixed = 'ST/SIC/1001';
+            }
+
+            // Find the highest sequence number for this booking reference pattern
+            $latestBookingInDB = GroupQuotation::where('booking_reference', 'LIKE', $baseBookingRefWithFixed . '/%')
                 ->selectRaw("*, CAST(SUBSTRING_INDEX(REPLACE(booking_reference, '- Rejected', ''), '/', -1) AS UNSIGNED) as booking_seq_num")
                 ->orderBy('booking_seq_num', 'DESC')
                 ->first();
@@ -144,8 +150,10 @@ class GroupQuotationController extends Controller
             }
 
             while (true) {
-                $bookingSequencePadded = str_pad($currentBookingSequence, 4, '0', STR_PAD_LEFT);
-                $generatedBookingRef = $baseBookingRef . '/' . $bookingSequencePadded;
+                // Format as two digits: 01, 02, etc.
+                $bookingSequencePadded = str_pad($currentBookingSequence, 2, '0', STR_PAD_LEFT);
+                $generatedBookingRef = $baseBookingRefWithFixed . '/' . $bookingSequencePadded;
+                
                 if (!GroupQuotation::where('booking_reference', $generatedBookingRef)->exists()) {
                     $finalBookingReference = $generatedBookingRef;
                     break;

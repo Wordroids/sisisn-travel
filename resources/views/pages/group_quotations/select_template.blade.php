@@ -25,6 +25,7 @@
                         </div>
                         
                         <p class="mt-2 text-sm text-gray-600 line-clamp-2">{{ $template->description ?? 'No description available' }}</p>
+                        <p class="mt-2 text-sm text-gray-600 line-clamp-2">{{ $template->booking_reference ?? 'No description available' }}</p>
                         
                         <div class="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-600">
                             <div>
