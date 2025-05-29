@@ -102,8 +102,32 @@ class QuotationTemplateController extends Controller
 
         // Generate Quote & Booking Reference for the template
         $sequenceNumber = (QuotationTemplate::max('id') ?? 0) + 1001;
-        $quoteReference = 'QT/SP/' . $sequenceNumber;
-        $bookingReference = 'ST/SIC/' . $sequenceNumber;
+        $quoteReference = 'QT/SP/';
+
+        // Use the selected booking reference format and find the latest number
+        if ($request->booking_ref_format === 'ce') {
+            $prefix = 'ST/SIC/CE/';
+            $latestRef = QuotationTemplate::where('booking_reference', 'like', $prefix.'%')
+                ->orderByRaw('CAST(SUBSTRING(booking_reference, ' . (strlen($prefix) + 1) . ') AS UNSIGNED) DESC')
+                ->first();
+        } else {
+            $prefix = 'ST/SIC/';
+            $latestRef = QuotationTemplate::where('booking_reference', 'like', $prefix.'%')
+                ->orderByRaw('CAST(SUBSTRING(booking_reference, ' . (strlen($prefix) + 1) . ') AS UNSIGNED) DESC')
+                ->first();
+        }
+
+        // Extract number from latest reference or start from 1000
+        if ($latestRef) {
+            $latestNumber = (int)substr($latestRef->booking_reference, strlen($prefix));
+            $sequenceNumber = $latestNumber + 1;
+        } else {
+            $sequenceNumber = 1000;
+        }
+
+        // Set the references
+        $quoteReference .= $sequenceNumber;
+        $bookingReference = $prefix . $sequenceNumber;
 
         // Create template with JSON data
         $template = QuotationTemplate::create([
