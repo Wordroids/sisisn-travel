@@ -26,11 +26,20 @@ class RolePermissionSeeder extends Seeder
         // Create permissions with guard_name
         $permissions = [
             'make-quotations',
-            'make-reservations',
-            'generate-tour-plan',
-            'upload-confirmed-tours',
             'generate-vouchers',
-            'view-accounts'
+            // New permissions
+            'manage-customer-data',
+            'manage-hotels',
+            'manage-routes',
+            'manage-drivers',
+            'manage-guides',
+            'manage-markets',
+            'manage-currencies',
+            'manage-room-categories',
+            'manage-room-types',
+            'manage-pax-slabs',
+            'manage-vehicle-types',
+            'manage-markup-value',
         ];
 
         foreach ($permissions as $permission) {
