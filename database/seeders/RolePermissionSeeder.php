@@ -47,6 +47,7 @@ class RolePermissionSeeder extends Seeder
             'manage-pax-slabs',
             'manage-vehicle-types',
             'manage-markup-value',
+            'manage-meals',
         ];
 
         // update cache to know about the newly created permissions (required if using WithoutModelEvents in seeders)
