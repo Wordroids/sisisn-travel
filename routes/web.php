@@ -32,7 +32,7 @@ Route::get('/linkstorage', function () {
 Route::get('/run-seeder', function () {
     
     Illuminate\Support\Facades\Artisan::call('db:seed', [
-        '--class' => 'Database\\Seeders\\RolePermissionSeeder'
+        '--class' => 'Database\Seeders\RolePermissionSeeder'
     ]);
     
     return 'Seeder executed successfully!';
