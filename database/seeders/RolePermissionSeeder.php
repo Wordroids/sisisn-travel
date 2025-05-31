@@ -19,6 +19,7 @@ class RolePermissionSeeder extends Seeder
 
         // Create roles with guard_name
         $admin = Role::create(['name' => 'admin', 'guard_name' => $guard]);
+        $director = Role::create(['name' => 'director', 'guard_name' => $guard]);
         $reservations = Role::create(['name' => 'reservations', 'guard_name' => $guard]);
         $operations = Role::create(['name' => 'operations', 'guard_name' => $guard]);
         $accounts = Role::create(['name' => 'accounts', 'guard_name' => $guard]);
@@ -27,6 +28,9 @@ class RolePermissionSeeder extends Seeder
         $permissions = [
             'make-quotations',
             'generate-vouchers',
+            'make-reservations',
+            'upload-confirmed-tours',
+            'view-accounts',
             // New permissions
             'manage-customer-data',
             'manage-hotels',
@@ -50,6 +54,9 @@ class RolePermissionSeeder extends Seeder
         $reservations->givePermissionTo(['make-quotations', 'make-reservations', 'generate-vouchers']);
         $operations->givePermissionTo(['upload-confirmed-tours', 'generate-vouchers']);
         $accounts->givePermissionTo(['view-accounts']);
+
+        // Give director and admin all permissions
+        $director->givePermissionTo(Permission::all());
         $admin->givePermissionTo(Permission::all());
     }
 }
