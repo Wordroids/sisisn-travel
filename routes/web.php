@@ -57,7 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/user-roles', [UserRoleController::class, 'updateRole'])->name('user-roles.update');
     });
 
-    Route::group(['middleware' => ['permission:manage-customers']], function () {
+    Route::group(['middleware' => ['permission:manage-customer-data']], function () {
         // Customers Routes
         Route::get('/customers', [CustomersController::class, 'index'])->name('customers.index');
         Route::get('/customers/create', [CustomersController::class, 'create'])->name('customers.create');
