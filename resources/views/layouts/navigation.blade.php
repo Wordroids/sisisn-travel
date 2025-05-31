@@ -70,99 +70,107 @@
     <div class="overflow-y-auto py-5 px-3 h-full bg-blue-600 ">
 
         <ul class="space-y-2">
-            <!-- Quote  -->
-            <li>
-                @php $isQuotesActive = request()->routeIs('quotations.*'); @endphp
-                <a href="{{ route('quotations.index') }}"
-                    class="flex items-center p-2 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isQuotesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700 test:hover:bg-gray-700' }}">
-                    <svg aria-hidden="true"
-                        class="flex-shrink-0 w-6 h-6 transition duration-75 {{ $isQuotesActive ? 'text-gray-900' : 'text-white group-hover:text-gray-900 test:group-hover:text-white' }}"
-                        fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd"
-                            d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                            clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="flex-1 ml-3 text-left whitespace-nowrap">Quotes</span>
-                </a>
-            </li>
+            @can('make-quotations')
+                <!-- Quotes Dropdown -->
+                <li>
+                    @php
+                        $isQuotesActive = request()->routeIs('quotations.*');
+                        $isQuotationTemplatesActive = request()->routeIs('quotations_templates.*');
+                        $isGroupQuotationsActive = request()->routeIs('group_quotations.*');
+                        $isQuotesDropdownActive =
+                            $isQuotesActive || $isQuotationTemplatesActive || $isGroupQuotationsActive;
+                    @endphp
+                    <button type="button"
+                        class="flex items-center p-2 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isQuotesDropdownActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700 test:hover:bg-gray-700' }}"
+                        aria-controls="dropdown-quotes" data-collapse-toggle="dropdown-quotes"
+                        aria-expanded="{{ $isQuotesDropdownActive ? 'true' : 'false' }}">
+                        <svg aria-hidden="true"
+                            class="flex-shrink-0 w-6 h-6 transition duration-75 {{ $isQuotesDropdownActive ? 'text-gray-900' : 'text-white group-hover:text-gray-900 test:group-hover:text-white' }}"
+                            fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd"
+                                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="flex-1 ml-3 text-left whitespace-nowrap">Quotes</span>
+                        <svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd"
+                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                    <ul id="dropdown-quotes" class="{{ $isQuotesDropdownActive ? '' : 'hidden' }} py-2 space-y-2">
+                        <li>
+                            <a href="{{ route('quotations.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isQuotesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                All Quotes
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('quotations_templates.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isQuotationTemplatesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Quotation Templates
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('group_quotations.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isGroupQuotationsActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Group Quotations
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            @endcan
+            @role('admin|director')
+                <!-- Users  -->
+                <li>
+                    @php
+                        $isUsersActive = request()->routeIs('users.*');
+                        $isUserRolesActive = request()->routeIs('user-roles.*');
+                        $isRolePermissionsActive = request()->routeIs('role-permissions.*');
+                        $isUsersDropdownActive = $isUsersActive || $isUserRolesActive || $isRolePermissionsActive;
+                    @endphp
+                    <button type="button"
+                        class="flex items-center p-2 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isUsersDropdownActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700 test:hover:bg-gray-700' }}"
+                        aria-controls="dropdown-pages" data-collapse-toggle="dropdown-pages"
+                        aria-expanded="{{ $isUsersDropdownActive ? 'true' : 'false' }}">
+                        <svg aria-hidden="true"
+                            class="flex-shrink-0 w-6 h-6 transition duration-75 {{ $isUsersDropdownActive ? 'text-gray-900' : 'text-white group-hover:text-gray-900 test:group-hover:text-white' }}"
+                            fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd"
+                                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="flex-1 ml-3 text-left whitespace-nowrap">Users</span>
+                        <svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd"
+                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                    <ul id="dropdown-pages" class="{{ $isUsersDropdownActive ? '' : 'hidden' }} py-2 space-y-2">
+                        <li>
+                            <a href="{{ route('users.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isUsersActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">All
+                                Users</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('user-roles.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isUserRolesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                User Roles
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('role-permissions.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isRolePermissionsActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Role Permissions
+                            </a>
+                        </li>
 
-            <li>
-                @php $isQuotationTemplatesActive = request()->routeIs('quotations_templates.*' ); @endphp
-                <a href="{{ route('quotations_templates.index') }}"
-                    class="flex items-center p-2 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isQuotationTemplatesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700 test:hover:bg-gray-700' }}">
-                    <svg aria-hidden="true"
-                        class="flex-shrink-0 w-6 h-6 transition duration-75 {{ $isQuotationTemplatesActive ? 'text-gray-900' : 'text-white group-hover:text-gray-900 test:group-hover:text-white' }}"
-                        fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-                        <path fill-rule="evenodd"
-                            d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
-                            clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="flex-1 ml-3 text-left whitespace-nowrap">Quotation Templates</span>
-                </a>
-            </li>
-
-            <!-- Group Quotations Link -->
-            <li>
-                @php $isGroupQuotationsActive = request()->routeIs('group_quotations.*'); @endphp
-                <a href="{{ route('group_quotations.index') }}"
-                    class="flex items-center p-2 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isGroupQuotationsActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700 test:hover:bg-gray-700' }}">
-                    <svg aria-hidden="true"
-                        class="flex-shrink-0 w-6 h-6 transition duration-75 {{ $isGroupQuotationsActive ? 'text-gray-900' : 'text-white group-hover:text-gray-900 test:group-hover:text-white' }}"
-                        fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5z"></path>
-                        <path d="M11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                    </svg>
-                    <span class="flex-1 ml-3 text-left whitespace-nowrap">Group Quotations</span>
-                </a>
-            </li>
-
-            <!-- Users  -->
-            <li>
-                @php
-                    $isUsersActive = request()->routeIs('users.*');
-                    $isUserRolesActive = request()->routeIs('user-roles.*');
-                    $isRolePermissionsActive = request()->routeIs('role-permissions.*');
-                    $isUsersDropdownActive = $isUsersActive || $isUserRolesActive || $isRolePermissionsActive;
-                @endphp
-                <button type="button"
-                    class="flex items-center p-2 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isUsersDropdownActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700 test:hover:bg-gray-700' }}"
-                    aria-controls="dropdown-pages" data-collapse-toggle="dropdown-pages" aria-expanded="{{ $isUsersDropdownActive ? 'true' : 'false' }}">
-                    <svg aria-hidden="true"
-                        class="flex-shrink-0 w-6 h-6 transition duration-75 {{ $isUsersDropdownActive ? 'text-gray-900' : 'text-white group-hover:text-gray-900 test:group-hover:text-white' }}"
-                        fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd"
-                            d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                            clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="flex-1 ml-3 text-left whitespace-nowrap">Users</span>
-                    <svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd"
-                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                            clip-rule="evenodd"></path>
-                    </svg>
-                </button>
-                <ul id="dropdown-pages" class="{{ $isUsersDropdownActive ? '' : 'hidden' }} py-2 space-y-2">
-                    <li>
-                        <a href="{{ route('users.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isUsersActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">All Users</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('user-roles.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isUserRolesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            User Roles
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('role-permissions.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isRolePermissionsActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            Role Permissions
-                        </a>
-                    </li>
-
-                </ul>
-            </li>
+                    </ul>
+                </li>
+            @endrole
 
             <!-- System Data Menu -->
             <li>
@@ -180,11 +188,25 @@
                     $isPaxSlabsActive = request()->routeIs('pax_slabs.*');
                     $isVehicleTypesActive = request()->routeIs('vehicle_types.*');
                     $isMarkupActive = request()->routeIs('markup.*');
-                    $isSystemDataDropdownActive = $isCustomersActive || $isHotelsActive || $isTravelRoutesActive || $isDriversActive || $isGuidesActive || $isMarketsActive || $isCurrenciesActive || $isMealPlansActive || $isRoomCategoriesActive || $isRoomTypesActive || $isPaxSlabsActive || $isVehicleTypesActive || $isMarkupActive;
+                    $isSystemDataDropdownActive =
+                        $isCustomersActive ||
+                        $isHotelsActive ||
+                        $isTravelRoutesActive ||
+                        $isDriversActive ||
+                        $isGuidesActive ||
+                        $isMarketsActive ||
+                        $isCurrenciesActive ||
+                        $isMealPlansActive ||
+                        $isRoomCategoriesActive ||
+                        $isRoomTypesActive ||
+                        $isPaxSlabsActive ||
+                        $isVehicleTypesActive ||
+                        $isMarkupActive;
                 @endphp
                 <button type="button"
                     class="flex items-center p-2 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isSystemDataDropdownActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700 test:hover:bg-gray-700' }}"
-                    aria-controls="dropdown-system-data" data-collapse-toggle="dropdown-system-data" aria-expanded="{{ $isSystemDataDropdownActive ? 'true' : 'false' }}">
+                    aria-controls="dropdown-system-data" data-collapse-toggle="dropdown-system-data"
+                    aria-expanded="{{ $isSystemDataDropdownActive ? 'true' : 'false' }}">
                     <svg aria-hidden="true"
                         class="flex-shrink-0 w-6 h-6 transition duration-75 {{ $isSystemDataDropdownActive ? 'text-gray-900' : 'text-white group-hover:text-gray-900 test:group-hover:text-white' }}"
                         fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -200,85 +222,123 @@
                             clip-rule="evenodd"></path>
                     </svg>
                 </button>
-                <ul id="dropdown-system-data" class="{{ $isSystemDataDropdownActive ? '' : 'hidden' }} py-2 space-y-2">
-                    <li>
-                        <a href="{{ route('customers.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isCustomersActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            Customer Data
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('hotels.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isHotelsActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            Hotels
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('travel_routes.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isTravelRoutesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            Routes
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('drivers.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isDriversActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            Drivers
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('guides.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isGuidesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            Guides
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('markets.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isMarketsActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            Markets
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('currencies.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isCurrenciesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            Currencies
-                        </a>
-                    </li>
+                <ul id="dropdown-system-data"
+                    class="{{ $isSystemDataDropdownActive ? '' : 'hidden' }} py-2 space-y-2">
+
+                    @can('manage-customer-data')
+                        <li>
+                            <a href="{{ route('customers.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isCustomersActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Customer Data
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('manage-hotels')
+                        <li>
+                            <a href="{{ route('hotels.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isHotelsActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Hotels
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('manage-routes')
+                        <li>
+                            <a href="{{ route('travel_routes.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isTravelRoutesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Routes
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('manage-drivers')
+                        <li>
+                            <a href="{{ route('drivers.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isDriversActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Drivers
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('manage-guides')
+                        <li>
+                            <a href="{{ route('guides.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isGuidesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Guides
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('manage-markets')
+                        <li>
+                            <a href="{{ route('markets.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isMarketsActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Markets
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('manage-currencies')
+                        <li>
+                            <a href="{{ route('currencies.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isCurrenciesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Currencies
+                            </a>
+                        </li>
+                    @endcan
+
                     <li>
                         <a href="{{ route('meal_plans.index') }}"
                             class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isMealPlansActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
                             Meals
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ route('room_categories.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isRoomCategoriesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            Room Categories
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('room_types.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isRoomTypesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            Room Types
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('pax_slabs.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isPaxSlabsActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            Pax Slabs
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('vehicle_types.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isVehicleTypesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            Vehicle Types
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('markup.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isMarkupActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
-                            Markup Value
-                        </a>
-                    </li>
+
+                    @can('manage-room-categories')
+                        <li>
+                            <a href="{{ route('room_categories.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isRoomCategoriesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Room Categories
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('manage-room-types')
+                        <li>
+                            <a href="{{ route('room_types.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isRoomTypesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Room Types
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('manage-pax-slabs')
+                        <li>
+                            <a href="{{ route('pax_slabs.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isPaxSlabsActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Pax Slabs
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('manage-vehicle-types')
+                        <li>
+                            <a href="{{ route('vehicle_types.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isVehicleTypesActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Vehicle Types
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('manage-markup-value')
+                        <li>
+                            <a href="{{ route('markup.index') }}"
+                                class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isMarkupActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+                                Markup Value
+                            </a>
+                        </li>
+                    @endcan
                 </ul>
             </li>
         </ul>
