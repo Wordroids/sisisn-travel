@@ -84,7 +84,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Meal Plans Routes
-    Route::group(['middleware' => ['permission:manage-meal-plans']], function () {
+    Route::group(['middleware' => ['permission:manage-hotels']], function () {
         // Meal Plans Routes
         Route::resource('meal_plans', MealPlanController::class);
     });
