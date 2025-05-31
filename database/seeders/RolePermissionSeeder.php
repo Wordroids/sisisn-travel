@@ -14,6 +14,9 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
+        // Reset cached roles and permissions
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
         // Define guard_name
         $guard = 'web';
 
@@ -45,6 +48,9 @@ class RolePermissionSeeder extends Seeder
             'manage-vehicle-types',
             'manage-markup-value',
         ];
+
+        // update cache to know about the newly created permissions (required if using WithoutModelEvents in seeders)
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         foreach ($permissions as $permission) {
             Permission::create(['name' => $permission, 'guard_name' => $guard]);
