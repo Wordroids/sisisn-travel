@@ -287,13 +287,15 @@
                             </a>
                         </li>
                     @endcan
-
+                    
+                    @can('manage-meals')
                     <li>
                         <a href="{{ route('meal_plans.index') }}"
                             class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isMealPlansActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
                             Meals
                         </a>
                     </li>
+                    @endcan
 
                     @can('manage-room-categories')
                         <li>
