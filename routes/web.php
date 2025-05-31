@@ -23,6 +23,7 @@ use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\QuotationTemplateController;
 use App\Http\Controllers\GroupQuotationController;
 
+
 // Link Storage
 Route::get('/linkstorage', function () {
     Illuminate\Support\Facades\Artisan::call('storage:link');
