@@ -29,15 +29,6 @@ Route::get('/linkstorage', function () {
     Illuminate\Support\Facades\Artisan::call('storage:link');
 });
 
-/// DB seeder RBAC
-Route::get('/run-seeder', function () {
-    
-    Illuminate\Support\Facades\Artisan::call('db:seed', [
-        '--class' => 'Database\Seeders\RolePermissionSeeder'
-    ]);
-    
-    return 'Seeder executed successfully!';
-});
 
 Route::get('/', function () {
     return view('dashboard');
@@ -50,7 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    //Route::group(['middleware' => ['role:admin|director']], function () {
+    Route::group(['middleware' => ['role:admin|director']], function () {
         // Admin specific routes can be added here
         // Users Routes
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
@@ -64,7 +55,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/role-permissions', [RolePermissionController::class, 'updatePermissions'])->name('role-permissions.update');
         Route::get('/user-roles', [UserRoleController::class, 'index'])->name('user-roles.index');
         Route::post('/user-roles', [UserRoleController::class, 'updateRole'])->name('user-roles.update');
-    //});
+    });
 
     Route::group(['middleware' => ['permission:manage-customers']], function () {
         // Customers Routes
