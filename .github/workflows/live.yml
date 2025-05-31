@@ -25,7 +25,6 @@ jobs:
           php artisan view:clear
           php artisan route:cache
           php artisan view:cache
-          php artisan db:seed --class=Database\Seeders\RolePermissionSeeder
 
     - name: Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.3.3
