@@ -203,6 +203,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/select-template', [GroupQuotationController::class, 'selectTemplate'])->name('select_template');
 
         Route::post('/process-template', [GroupQuotationController::class, 'processTemplateSelection'])->name('process_template');
+
+        //All Confirmed Quotations
+        Route::get('/all-confirmed-quotations', [QuotationController::class, 'allConfirmedQuotations'])->name('all_confirmed_quotations');
     });
 });
 

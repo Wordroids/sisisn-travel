@@ -28,6 +28,7 @@ use App\Models\QuotationExtra;
 use App\Models\QuotationJeepCharge;
 use App\Models\TempBookRef;
 use App\Models\QuotationMember;
+use App\Models\GroupQuotation;
 
 class QuotationController extends Controller
 {
@@ -1128,6 +1129,23 @@ class QuotationController extends Controller
             'success' => true,
             'message' => 'Quotation status updated successfully!',
         ]);
+    }
+
+    /** 
+     *  Handle All Confirmed quotations Logic
+     */
+
+    public function allConfirmedQuotations(){
+
+        $confirmedQuotations = Quotation::where('status', 'approved')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $groupQuotations = GroupQuotation::where('status', 'approved')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('pages.allquotes.allconfirmedquotations', compact('confirmedQuotations', 'groupQuotations'));
     }
 
     /**

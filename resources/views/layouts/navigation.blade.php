@@ -121,6 +121,7 @@
                     </ul>
                 </li>
             @endcan
+            
             @role('admin|director')
                 <!-- Users  -->
                 <li>
