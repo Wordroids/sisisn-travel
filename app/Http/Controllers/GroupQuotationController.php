@@ -297,7 +297,7 @@ class GroupQuotationController extends Controller
 
     public function store_step_02(Request $request, $id)
     {
-        // dd($request->all()); // You can remove this or keep for debugging
+        //dd($request->all()); // You can remove this or keep for debugging
 
         $groupQuotation = GroupQuotation::findOrFail($id);
 
@@ -314,6 +314,7 @@ class GroupQuotationController extends Controller
             'members.*.phone' => 'nullable|string|max:20',
             'members.*.whatsapp' => 'nullable|string|max:20',
             'members.*.country' => 'nullable|string|max:100',
+            'members.*.member_group' => 'nullable|string|max:100', // Optional member group field
         ]);
 
         // --- Handle Pax Slabs ---
@@ -343,6 +344,7 @@ class GroupQuotationController extends Controller
                     'phone' => $memberInput['phone'] ?? null,
                     'whatsapp' => $memberInput['whatsapp'] ?? null,
                     'country' => $memberInput['country'] ?? null,
+                    'member_group' => $memberInput['member_group'] ?? null, // Optional member group field
                     'group_quotations_id' => $groupQuotation->id,
                 ];
 

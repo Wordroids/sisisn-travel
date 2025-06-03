@@ -77,8 +77,9 @@
                         $isQuotesActive = request()->routeIs('quotations.*');
                         $isQuotationTemplatesActive = request()->routeIs('quotations_templates.*');
                         $isGroupQuotationsActive = request()->routeIs('group_quotations.*');
+                        $isConfirmedQuotationsActive = request()->routeIs('all_confirmed_quotations');
                         $isQuotesDropdownActive =
-                            $isQuotesActive || $isQuotationTemplatesActive || $isGroupQuotationsActive;
+                            $isQuotesActive || $isQuotationTemplatesActive || $isGroupQuotationsActive || $isConfirmedQuotationsActive;
                     @endphp
                     <button type="button"
                         class="flex items-center p-2 w-full text-base font-medium rounded-lg transition duration-75 group {{ $isQuotesDropdownActive ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700 test:hover:bg-gray-700' }}"
@@ -118,9 +119,16 @@
                                 Group Quotations
                             </a>
                         </li>
+                        <li>
+        <a href="{{ route('all_confirmed_quotations') }}"
+            class="flex items-center p-2 pl-11 w-full text-base font-medium rounded-lg transition duration-75 group {{ request()->routeIs('all_confirmed_quotations') ? 'bg-gray-100 text-gray-900' : 'text-white hover:bg-gray-100 hover:text-gray-700' }}">
+            Confirmed Tours
+        </a>
+    </li>
                     </ul>
                 </li>
             @endcan
+            
             @role('admin|director')
                 <!-- Users  -->
                 <li>

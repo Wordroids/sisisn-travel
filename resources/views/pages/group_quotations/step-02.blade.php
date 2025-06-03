@@ -62,7 +62,8 @@
             </div>
         @endif
 
-        <p class="text-gray-700 mt-16 mb-8">Group Quotation Reference: <strong>{{ $groupQuotation->quote_reference }}</strong></p>
+        <p class="text-gray-700 mt-16 mb-8">Group Quotation Reference:
+            <strong>{{ $groupQuotation->quote_reference }}</strong></p>
 
         <form method="POST" action="{{ route('group_quotations.store_step_02', $groupQuotation->id) }}">
             @csrf
@@ -100,8 +101,10 @@
                                         @foreach ($vehicleTypes as $vehicleType)
                                             <option value="{{ $vehicleType->id }}"
                                                 data-rate="{{ $vehicleType->default_rate }}"
-                                                {{ isset($groupQuotation->paxSlabs->where('pax_slab_id', $paxSlab->id)->first()->vehicle_type_id) && 
-                                                $groupQuotation->paxSlabs->where('pax_slab_id', $paxSlab->id)->first()->vehicle_type_id == $vehicleType->id ? 'selected' : '' }}>
+                                                {{ isset($groupQuotation->paxSlabs->where('pax_slab_id', $paxSlab->id)->first()->vehicle_type_id) &&
+                                                $groupQuotation->paxSlabs->where('pax_slab_id', $paxSlab->id)->first()->vehicle_type_id == $vehicleType->id
+                                                    ? 'selected'
+                                                    : '' }}>
                                                 {{ $vehicleType->name }}
                                             </option>
                                         @endforeach
@@ -131,9 +134,13 @@
                     {{-- Member rows will be populated here by JavaScript --}}
                     {{-- Ensure $groupQuotation->members is loaded in your controller, e.g., $groupQuotation->load('members'); --}}
                 </div>
-                <button type="button" id="add-member-btn" class="mt-4 inline-flex items-center px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                <button type="button" id="add-member-btn"
+                    class="mt-4 inline-flex items-center px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                            clip-rule="evenodd" />
                     </svg>
                     Add Member
                 </button>
@@ -160,14 +167,14 @@
                 if (select.value) {
                     let rate = select.options[select.selectedIndex].getAttribute('data-rate');
                     let payoutRateInput = select.closest('tr').querySelector('.payout-rate');
-                    
+
                     // Only set if there's no existing value
                     if (payoutRateInput && !payoutRateInput.value) {
                         payoutRateInput.value = rate;
                     }
                 }
             });
-            
+
             // Add event listeners for vehicle select changes
             document.querySelectorAll('.vehicle-select').forEach(select => {
                 select.addEventListener('change', function() {
@@ -184,7 +191,8 @@
             // --- Members Details Script ---
             const membersContainer = document.getElementById('members-container');
             const addMemberBtn = document.getElementById('add-member-btn');
-            let memberIndex = 0; // To keep track of member array indices, starts at 0 for new members
+            let memberIndex = 0;
+            let memberGroups = []; // Array to store group names
 
             // Helper to escape HTML special characters
             function escapeHtml(unsafe) {
@@ -200,93 +208,198 @@
                     .replace(/'/g, "&#039;");
             }
 
+            // Get group options for select dropdown
+            function getGroupOptions(selectedGroup = '') {
+                let options = '';
+                memberGroups.forEach(group => {
+                    const selected = group === selectedGroup ? 'selected' : '';
+                    options +=
+                        `<option value="${escapeHtml(group)}" ${selected}>${escapeHtml(group)}</option>`;
+                });
+                return options;
+            }
+
+            // Create a new group
+            function createNewGroup(currentRowIndex) {
+                const groupName = prompt('Enter a name for the new group:');
+
+                if (groupName && groupName.trim() !== '') {
+                    // Add to our groups array if not exists
+                    if (!memberGroups.includes(groupName.trim())) {
+                        memberGroups.push(groupName.trim());
+                    }
+
+                    // Update all group dropdowns
+                    document.querySelectorAll('.member-group-select').forEach(select => {
+                        const currentValue = select.value;
+                        select.innerHTML = `<option value="">No Group</option>` + getGroupOptions(
+                            currentValue);
+
+                        // If this is the one that triggered the new group, select it
+                        if (select.id === `member_group_${currentRowIndex}`) {
+                            select.value = groupName.trim();
+                        } else if (currentValue) {
+                            select.value = currentValue;
+                        }
+                    });
+
+                    // Apply simple color coding
+                    applyGroupColors();
+                }
+            }
+
+            // Simple function to apply colors to grouped members
+            function applyGroupColors() {
+                const groupColors = {}; // Simple cache for colors
+
+                document.querySelectorAll('.member-entry').forEach(entry => {
+                    const select = entry.querySelector('.member-group-select');
+                    if (select && select.value) {
+                        const group = select.value;
+
+                        // Generate a color if we don't have one for this group
+                        if (!groupColors[group]) {
+                            // Use a simple hash function for consistent colors
+                            let hash = 0;
+                            for (let i = 0; i < group.length; i++) {
+                                hash = group.charCodeAt(i) + ((hash << 5) - hash);
+                            }
+                            const hue = hash % 360;
+                            groupColors[group] = `hsl(${hue}, 70%, 90%)`;
+                        }
+
+                        // Apply left border with group color
+                        entry.style.borderLeft = `5px solid ${groupColors[group]}`;
+                    } else {
+                        // Reset border for no group
+                        entry.style.borderLeft = '1px solid #d1d5db';
+                    }
+                });
+            }
+
             function addMemberRow(memberData = null) {
-                const currentRowIndex = memberIndex; // Use current index for this row
+                const currentRowIndex = memberIndex;
                 const memberRow = document.createElement('div');
-                memberRow.classList.add('member-entry', 'p-4', 'border', 'border-gray-300', 'rounded-lg', 'bg-gray-50', 'shadow-sm');
+                memberRow.classList.add('member-entry', 'p-4', 'border', 'border-gray-300', 'rounded-lg',
+                    'bg-gray-50', 'shadow-sm');
                 memberRow.setAttribute('id', `member-row-${currentRowIndex}`);
 
                 const memberIdInput = memberData && memberData.id ?
-                    `<input type="hidden" name="members[${currentRowIndex}][id]" value="${escapeHtml(memberData.id)}">` : '';
+                    `<input type="hidden" name="members[${currentRowIndex}][id]" value="${escapeHtml(memberData.id)}">` :
+                    '';
+
+                // Header section with member name and remove button
+                const headerSection = `
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-medium text-gray-700">Member #${currentRowIndex + 1}</h4>
+                        <button type="button" class="remove-member-btn inline-flex items-center px-3 py-1.5 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                            Remove
+                        </button>
+                    </div>
+                `;
 
                 memberRow.innerHTML = `
                     ${memberIdInput}
+                    ${headerSection}
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                         <div>
                             <label for="member_name_${currentRowIndex}" class="block text-sm font-medium text-gray-700">Name <span class="text-red-500">*</span></label>
                             <input type="text" name="members[${currentRowIndex}][name]" id="member_name_${currentRowIndex}"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                   value="${memberData && memberData.name ? escapeHtml(memberData.name) : ''}" required>
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                value="${memberData && memberData.name ? escapeHtml(memberData.name) : ''}" required>
                         </div>
                         <div>
                             <label for="member_email_${currentRowIndex}" class="block text-sm font-medium text-gray-700">Email</label>
                             <input type="email" name="members[${currentRowIndex}][email]" id="member_email_${currentRowIndex}"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                   value="${memberData && memberData.email ? escapeHtml(memberData.email) : ''}">
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                value="${memberData && memberData.email ? escapeHtml(memberData.email) : ''}">
                         </div>
                         <div>
                             <label for="member_phone_${currentRowIndex}" class="block text-sm font-medium text-gray-700">Phone</label>
                             <input type="text" name="members[${currentRowIndex}][phone]" id="member_phone_${currentRowIndex}"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                   value="${memberData && memberData.phone ? escapeHtml(memberData.phone) : ''}">
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                value="${memberData && memberData.phone ? escapeHtml(memberData.phone) : ''}">
                         </div>
                         <div>
                             <label for="member_whatsapp_${currentRowIndex}" class="block text-sm font-medium text-gray-700">WhatsApp</label>
                             <input type="text" name="members[${currentRowIndex}][whatsapp]" id="member_whatsapp_${currentRowIndex}"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                   value="${memberData && memberData.whatsapp ? escapeHtml(memberData.whatsapp) : ''}">
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                value="${memberData && memberData.whatsapp ? escapeHtml(memberData.whatsapp) : ''}">
                         </div>
                         <div>
                             <label for="member_country_${currentRowIndex}" class="block text-sm font-medium text-gray-700">Country</label>
                             <input type="text" name="members[${currentRowIndex}][country]" id="member_country_${currentRowIndex}"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                   value="${memberData && memberData.country ? escapeHtml(memberData.country) : ''}">
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                value="${memberData && memberData.country ? escapeHtml(memberData.country) : ''}">
                         </div>
-                        <div class="flex items-end justify-start sm:justify-end lg:col-span-1">
-                            <button type="button" class="remove-member-btn inline-flex items-center px-4 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 w-full sm:w-auto">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                </svg>
-                                Remove
-                            </button>
+                        <div>
+                            <label for="member_group_${currentRowIndex}" class="block text-sm font-medium text-gray-700">Member Group</label>
+                            <div class="flex space-x-2 items-center">
+                                <select name="members[${currentRowIndex}][member_group]" id="member_group_${currentRowIndex}"
+                                    class="member-group-select mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="">No Group</option>
+                                    ${getGroupOptions(memberData && memberData.member_group ? memberData.member_group : '')}
+                                </select>
+                                <button type="button" class="add-new-group-btn mt-1 px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                                    New
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
-                
+
                 if (membersContainer) {
                     membersContainer.appendChild(memberRow);
                     memberRow.querySelector('.remove-member-btn').addEventListener('click', function() {
                         memberRow.remove();
-                        // Note: Re-indexing is not handled here to keep it simple.
-                        // The backend should handle submitted data based on provided indices and IDs.
                     });
+
+                    memberRow.querySelector('.add-new-group-btn').addEventListener('click', function() {
+                        createNewGroup(currentRowIndex);
+                    });
+
+                    // Add change event to update colors when group changes
+                    memberRow.querySelector('.member-group-select').addEventListener('change', applyGroupColors);
                 }
-                memberIndex++; // Increment index for the next member
+                memberIndex++;
             }
 
+            // Extract existing groups and load members
             function loadExistingMembers() {
-                // Ensure $groupQuotation->members is passed from your controller and is JSON-encoded.
-                // Example: $groupQuotation->load('members'); in controller.
-                const existingMembers = @json($groupQuotation->members ?? []); 
-                
+                const existingMembers = @json($groupQuotation->members ?? []);
+
                 if (existingMembers && existingMembers.length > 0) {
+                    // Extract groups first
+                    existingMembers.forEach(member => {
+                        if (member.member_group && !memberGroups.includes(member.member_group)) {
+                            memberGroups.push(member.member_group);
+                        }
+                    });
+
+                    // Then add member rows
                     existingMembers.forEach(member => {
                         addMemberRow(member);
                     });
+
+                    // Apply colors to show groups
+                    applyGroupColors();
                 }
             }
 
+            // Add member button click handler
             if (addMemberBtn) {
                 addMemberBtn.addEventListener('click', function() {
-                    addMemberRow(); // Add an empty row for a new member
+                    addMemberRow();
                 });
             }
-            
-            // Load existing members if the container exists
+
+            // Load existing members
             if (membersContainer) {
-                 loadExistingMembers();
+                loadExistingMembers();
             }
-            // --- End of Members Details Script ---
         });
     </script>
 </x-app-layout>
