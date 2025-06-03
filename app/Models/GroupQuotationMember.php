@@ -16,6 +16,7 @@ class GroupQuotationMember extends Model
         'phone',
         'whatsapp',
         'country',
+        'member_group'
     ];
 
     /**
