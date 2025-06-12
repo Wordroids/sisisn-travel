@@ -1,4 +1,3 @@
-
 <x-app-layout>
     <div class="py-6">
         <div class="flex justify-between items-center px-10">
@@ -245,14 +244,16 @@
                                                                 {{ $mainRef }}
                                                                 <div class="mt-2">
                                                                     <a href="{{ route('group_quotations.group_vouchers', ['main_ref' => $mainRef]) }}" 
-                                                                    class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                                                                    title="Generate Group Vouchers">
+                                                                        class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                                                        title="Generate Group Vouchers">
+                                                                        <!-- Debug output -->
+                                                                        <!-- {{ $mainRef }} -->
                                                                         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                                             <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
                                                                             <path fill-rule="evenodd" d="M7 9a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm0 3a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" clip-rule="evenodd"></path>
                                                                         </svg>
                                                                         Group Vouchers
-                                                                    </a>
+                                                                        </a>
                                                                 </div>
                                                             </td>
                                                         @endif
@@ -302,12 +303,7 @@
                                                                             clip-rule="evenodd"></path>
                                                                     </svg>
                                                                 </a>
-                                                                <a href="{{ route('group_quotations.hotel_vouchers', $quotation->id) }}" class="text-green-600 hover:text-green-900" title="Generate Hotel Vouchers">
-                                                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
-                                                                        <path fill-rule="evenodd" d="M8 11a1 1 0 112 0v5a1 1 0 11-2 0v-5zm4 0a1 1 0 112 0v5a1 1 0 11-2 0v-5z" clip-rule="evenodd"></path>
-                                                                    </svg>
-                                                                </a>
+                                                               
                                                             </div>
                                                         </td>
                                                     </tr>

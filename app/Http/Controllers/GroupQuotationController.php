@@ -153,7 +153,7 @@ class GroupQuotationController extends Controller
                 // Format as two digits: 01, 02, etc.
                 $bookingSequencePadded = str_pad($currentBookingSequence, 2, '0', STR_PAD_LEFT);
                 $generatedBookingRef = $baseBookingRefWithFixed . '/' . $bookingSequencePadded;
-                
+
                 if (!GroupQuotation::where('booking_reference', $generatedBookingRef)->exists()) {
                     $finalBookingReference = $generatedBookingRef;
                     break;
@@ -1028,140 +1028,184 @@ class GroupQuotationController extends Controller
         }
     }
 
- public function hotelVouchers($id)
-{
-    // Load the group quotation with its accommodations
-    $groupQuotation = GroupQuotation::with([
-        'accommodations.hotel', 
-        'accommodations.mealPlan', 
-        'accommodations.roomCategory',
-        'accommodations.roomDetails',
-        'accommodations.additionalRooms',
-        // Load related members and their quotations
-        'members.quotation.accommodations.hotel',
-        'members.quotation.accommodations.mealPlan',
-        'members.quotation.accommodations.roomCategory',
-        'members.quotation.accommodations.roomDetails'
-    ])->findOrFail($id);
-    
-    // Collect related sub-quotations through members for easier access in the view
-    $subQuotations = collect();
-    foreach ($groupQuotation->members as $member) {
-        if ($member->quotation && !$subQuotations->contains('id', $member->quotation->id)) {
-            $subQuotations->push($member->quotation);
-        }
-    }
-    
-    return view('pages.allquotes.hotel_voucher.hotel_vouchers', compact('groupQuotation', 'subQuotations'));
-}
+    public function hotelVouchers($id)
+    {
+        // Load the group quotation with its accommodations
+        $groupQuotation = GroupQuotation::with([
+            'accommodations.hotel',
+            'accommodations.mealPlan',
+            'accommodations.roomCategory',
+            'accommodations.roomDetails',
+            'accommodations.additionalRooms',
+            // Load related members and their quotations
+            'members.quotation.accommodations.hotel',
+            'members.quotation.accommodations.mealPlan',
+            'members.quotation.accommodations.roomCategory',
+            'members.quotation.accommodations.roomDetails',
+        ])->findOrFail($id);
 
-public function editHotelVoucher($quotationId, $accommodationId)
-{
-    $quotation = GroupQuotation::with(['market', 'members'])->findOrFail($quotationId);
-    $accommodation = GroupQuotationAccommodation::with([
-        'hotel', 
-        'mealPlan',
-        'roomCategory', 
-        'roomDetails',
-        'additionalRooms'
-    ])->findOrFail($accommodationId);
-    
-    $hotel = $accommodation->hotel;
-    
-    if (!$hotel) {
-        return redirect()->route('group_quotations.hotel_vouchers', $quotationId)
-            ->with('error', 'No hotel found for this accommodation');
-    }
-    
-    // Calculate dates
-    $checkIn = $accommodation->start_date;
-    $checkOut = $accommodation->end_date;
-    $nights = $accommodation->nights ?? $checkIn->diffInDays($checkOut);
-    
-    // Count rooms by type
-    $roomCounts = [
-        'single' => 0,
-        'double' => 0,
-        'twin' => 0,
-        'triple' => 0,
-        'guide' => 0
-    ];
-    
-    // Count room configurations from room details
-    if ($accommodation->roomDetails) {
-        foreach ($accommodation->roomDetails as $detail) {
-            if (stripos($detail->room_type, 'single') !== false) {
-                $roomCounts['single'] += $detail->quantity ?? 1;
-            } elseif (stripos($detail->room_type, 'double') !== false) {
-                $roomCounts['double'] += $detail->quantity ?? 1;
-            } elseif (stripos($detail->room_type, 'twin') !== false) {
-                $roomCounts['twin'] += $detail->quantity ?? 1;
-            } elseif (stripos($detail->room_type, 'triple') !== false) {
-                $roomCounts['triple'] += $detail->quantity ?? 1;
-            } elseif (stripos($detail->room_type, 'guide') !== false) {
-                $roomCounts['guide'] += $detail->quantity ?? 1;
+        // Collect related sub-quotations through members for easier access in the view
+        $subQuotations = collect();
+        foreach ($groupQuotation->members as $member) {
+            if ($member->quotation && !$subQuotations->contains('id', $member->quotation->id)) {
+                $subQuotations->push($member->quotation);
             }
         }
+
+        return view('pages.allquotes.hotel_voucher.hotel_vouchers', compact('groupQuotation', 'subQuotations'));
     }
-    
-    // Get adults/children count
-    $adults = $quotation->members->where('type', 'adult')->count();
-    $children = $quotation->members->where('type', 'child')->count();
-    
-    // Get room category
-    $roomCategory = $accommodation->roomCategory ? $accommodation->roomCategory->name : 'Standard';
-    
-    // Get meal plan
-    $mealPlan = $accommodation->mealPlan ? $accommodation->mealPlan->code : 'BB';
-    
-    // Special information
-    $specialNotes = $accommodation->special_notes ?? '';
-    $remarks = ""; // Build remarks from room pricing if available
-    
-    if ($accommodation->roomDetails) {
-        $remarkParts = [];
-        foreach ($accommodation->roomDetails as $detail) {
-            if ($detail->per_night_cost) {
-                $remarkParts[] = "{$mealPlan} {$detail->room_type} USD " . number_format($detail->per_night_cost, 2);
+
+    public function groupVouchers($mainRef)
+    {
+        // Find all quotations with booking references that match the main reference pattern
+        $quotations = GroupQuotation::where('booking_reference', 'like', $mainRef . '%')
+            ->where('status', 'approved')
+            ->get();
+
+        if ($quotations->isEmpty()) {
+            return redirect()->back()->with('error', 'No approved quotations found for this reference.');
+        }
+
+        return view('pages.allquotes.voucherselection', compact('mainRef', 'quotations'));
+    }
+
+    public function editHotelVoucher($quotationId, $accommodationId)
+    {
+        $quotation = GroupQuotation::findOrFail($quotationId);
+        $accommodation = GroupQuotationAccommodation::findOrFail($accommodationId);
+        $hotel = $accommodation->hotel;
+
+        // Get the main reference (strip everything after the last slash if it exists)
+        $mainRef = preg_replace('/\/.*$/', '', $quotation->booking_reference);
+
+        // Find all related accommodations for this hotel across all quotations in the group
+        $relatedQuotations = GroupQuotation::where(function ($query) use ($mainRef) {
+            $query->where('booking_reference', $mainRef)->orWhere('booking_reference', 'like', $mainRef . '/%');
+        })
+            ->where('status', 'approved')
+            ->get();
+
+        $relatedAccommodations = GroupQuotationAccommodation::whereIn('group_quotation_id', $relatedQuotations->pluck('id'))->where('hotel_id', $hotel->id)->get();
+
+        // Calculate total room counts across all related accommodations
+        $roomCounts = [
+            'single' => 0,
+            'double' => 0,
+            'twin' => 0,
+            'triple' => 0,
+            'guide' => 0,
+        ];
+
+        $adults = 0;
+        $children = 0;
+
+        foreach ($relatedAccommodations as $relatedAccommodation) {
+            // Add room counts based on your data structure
+            // This is an example - adjust according to your actual data model
+            $roomCounts['single'] += $relatedAccommodation->single_rooms ?? 0;
+            $roomCounts['double'] += $relatedAccommodation->double_rooms ?? 0;
+            $roomCounts['twin'] += $relatedAccommodation->twin_rooms ?? 0;
+            $roomCounts['triple'] += $relatedAccommodation->triple_rooms ?? 0;
+            $roomCounts['guide'] += $relatedAccommodation->guide_rooms ?? 0;
+
+            // Add adults and children counts
+            $adults += $relatedAccommodation->adults ?? 0;
+            $children += $relatedAccommodation->children ?? 0;
+        }
+
+        // Get meal plan and room category from the first accommodation
+        $mealPlan = $accommodation->mealPlan ? $accommodation->mealPlan->name : 'N/A';
+        $roomCategory = $accommodation->roomCategory ? $accommodation->roomCategory->name : 'N/A';
+
+        return view('pages.allquotes.hotel_voucher.edit_hotel_voucher', compact('quotation', 'accommodation', 'hotel', 'roomCounts', 'adults', 'children', 'mealPlan', 'roomCategory', 'relatedAccommodations'));
+    }
+
+    public function generateHotelVouchers($mainRef)
+    {
+        // Remove the dd() debug statement
+        // dd($mainRef);
+
+        // Decode the mainRef if it was URL encoded
+        $mainRef = urldecode($mainRef);
+
+        // Find the main group quotation - modified to handle both formats
+        // First try exact match
+        $groupQuotation = GroupQuotation::where('booking_reference', $mainRef)->where('status', 'approved')->first();
+
+        // If not found, check if this is already a sub-reference (like ST/SIC/1001/01)
+        if (!$groupQuotation) {
+            // Extract the main part (remove the last segment if it has more than 2 slashes)
+            $parts = explode('/', $mainRef);
+            if (count($parts) > 2) {
+                // Remove the last segment to get the main reference
+                array_pop($parts);
+                $mainRef = implode('/', $parts);
+
+                // Try to find the main quotation again
+                $groupQuotation = GroupQuotation::where('booking_reference', $mainRef)->where('status', 'approved')->first();
+
+                // If still not found, try finding a quotation with this reference pattern
+                if (!$groupQuotation) {
+                    $groupQuotation = GroupQuotation::where('booking_reference', 'like', $mainRef . '/%')
+                        ->where('status', 'approved')
+                        ->first();
+                }
             }
         }
-        if (!empty($remarkParts)) {
-            $remarks = implode(', ', $remarkParts) . " (Reservation Code – {$quotation->booking_reference})";
+
+        if (!$groupQuotation) {
+            return redirect()
+                ->back()
+                ->with('error', 'Group quotation not found for reference: ' . $mainRef);
         }
-    }
-    
-    // Contact person - Get from authenticated user or from settings
-    $contactPerson = auth()->user()->name . ' - ' . (auth()->user()->phone ?? '');
-    
-    return view('pages.allquotes.hotel_voucher.edit_hotel_voucher', compact(
-        'quotation', 
-        'accommodation',
-        'hotel', 
-        'checkIn', 
-        'checkOut', 
-        'nights', 
-        'adults', 
-        'children', 
-        'roomCategory', 
-        'mealPlan',
-        'roomCounts',
-        'specialNotes',
-        'remarks',
-        'contactPerson'
-    ));
-}
 
-public function groupVouchers($mainRef)
-{
-    // Find all quotations with booking references that match the main reference pattern
-    $quotations = GroupQuotation::where('booking_reference', 'like', $mainRef . '%')
-                                ->where('status', 'approved')
-                                ->get();
-    
-    if ($quotations->isEmpty()) {
-        return redirect()->back()->with('error', 'No approved quotations found for this reference.');
-    }
+        // Get the base reference (without sub-numbers)
+        $baseRef = preg_replace('/\/\d+$/', '', $groupQuotation->booking_reference);
 
-    return view('pages.allquotes.voucherselection', compact('mainRef', 'quotations'));
-}
+        // Ensure accommodations relationship is loaded
+        $groupQuotation->load('accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomCategory');
+
+        // Find all quotations with this booking reference pattern (both main and sub)
+        $allQuotations = GroupQuotation::where(function ($query) use ($baseRef) {
+            $query->where('booking_reference', $baseRef)->orWhere('booking_reference', 'like', $baseRef . '/%');
+        })
+            ->where('status', 'approved')
+            ->with(['accommodations.hotel', 'accommodations.mealPlan', 'accommodations.roomCategory'])
+            ->get();
+
+        // Set the main quotation (either the one found or the first one with this pattern)
+        $mainQuotation = $groupQuotation;
+
+        // Set sub-quotations (all except the main one)
+        $subQuotations = $allQuotations->where('id', '!=', $mainQuotation->id);
+
+        // Initialize an array to store hotels and their accommodations
+        $hotelGroups = [];
+
+        // Process all quotations to group accommodations by hotel
+        foreach ($allQuotations as $quotation) {
+            foreach ($quotation->accommodations as $accommodation) {
+                // Skip if this accommodation doesn't have a hotel
+                if (!$accommodation->hotel_id || !$accommodation->hotel) {
+                    continue;
+                }
+
+                $hotelId = $accommodation->hotel_id;
+
+                if (!isset($hotelGroups[$hotelId])) {
+                    $hotelGroups[$hotelId] = [
+                        'hotel' => $accommodation->hotel,
+                        'accommodations' => [],
+                        'quotations' => [],
+                    ];
+                }
+
+                $hotelGroups[$hotelId]['accommodations'][] = $accommodation;
+                $hotelGroups[$hotelId]['quotations'][$quotation->id] = $quotation;
+            }
+        }
+
+        // Return the view with hotel groups data
+        return view('pages.allquotes.hotel_voucher.hotel_vouchers', compact('groupQuotation', 'subQuotations', 'hotelGroups'));
+    }
 }
