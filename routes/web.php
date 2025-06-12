@@ -23,12 +23,10 @@ use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\QuotationTemplateController;
 use App\Http\Controllers\GroupQuotationController;
 
-
 // Link Storage
 Route::get('/linkstorage', function () {
     Illuminate\Support\Facades\Artisan::call('storage:link');
 });
-
 
 Route::get('/', function () {
     return view('dashboard');
@@ -206,7 +204,40 @@ Route::middleware('auth')->group(function () {
 
         //All Confirmed Quotations
         Route::get('/all-confirmed-quotations', [QuotationController::class, 'allConfirmedQuotations'])->name('all_confirmed_quotations');
+
+        
     });
+
+    // For group tours
+    Route::get('/group-quotations/{quotation}/hotel-vouchers', [GroupQuotationController::class, 'hotelVouchers'])->name('group_quotations.hotel_vouchers');
+
+    Route::get('/group-quotations/{quotation}/hotel-vouchers', [GroupQuotationController::class, 'hotelVouchers'])->name('group_quotations.hotel_vouchers');
+
+    Route::get('/group-quotations/{quotation}/hotel-vouchers/{accommodation}/edit', [GroupQuotationController::class, 'editHotelVoucher'])->name('group_quotations.edit_hotel_voucher');
+
+    Route::get('/group-quotations/group-vouchers/{main_ref}', [GroupQuotationController::class, 'generateGroupVouchers'])->name('group_quotations.group_vouchers');
 });
+
+
+Route::get('/group-quotations/group-vouchers/{main_ref}', [GroupQuotationController::class, 'groupVouchers'])
+     ->name('group_quotations.group_vouchers');
+     
+Route::get('/group-quotations/hotel-vouchers/{main_ref}', [GroupQuotationController::class, 'generateHotelVouchers'])
+     ->name('group_quotations.generate_hotel_vouchers');
+     
+Route::get('/group-quotations/transport-vouchers/{main_ref}', [GroupQuotationController::class, 'generateTransportVouchers'])
+     ->name('group_quotations.generate_transport_vouchers');
+     
+Route::get('/group-quotations/activity-vouchers/{main_ref}', [GroupQuotationController::class, 'generateActivityVouchers'])
+     ->name('group_quotations.generate_activity_vouchers');
+     
+Route::get('/group-quotations/meal-vouchers/{main_ref}', [GroupQuotationController::class, 'generateMealVouchers'])
+     ->name('group_quotations.generate_meal_vouchers');
+     
+Route::get('/group-quotations/complete-voucher/{main_ref}', [GroupQuotationController::class, 'generateCompleteVoucher'])
+     ->name('group_quotations.generate_complete_voucher');
+     
+Route::get('/group-quotations/all-vouchers/{main_ref}', [GroupQuotationController::class, 'generateAllVouchers'])
+     ->name('group_quotations.generate_all_vouchers');
 
 require __DIR__ . '/auth.php';
