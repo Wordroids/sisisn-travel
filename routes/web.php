@@ -22,6 +22,7 @@ use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\QuotationTemplateController;
 use App\Http\Controllers\GroupQuotationController;
+use App\Http\Controllers\VoucherController;
 
 // Link Storage
 Route::get('/linkstorage', function () {
@@ -207,39 +208,55 @@ Route::middleware('auth')->group(function () {
 
 
         //Voucher Routes 
-        Route::get('/group-quotations/group-vouchers/{main_ref}', [GroupQuotationController::class, 'groupVouchers'])
+        Route::get('/group-quotations/group-vouchers/{main_ref}', [VoucherController::class, 'groupVouchers'])
         ->name('group_quotations.group_vouchers')
         ->where('main_ref', '.*');  
 
-        Route::get('/group-quotations/generate-hotel-vouchers/{main_ref}', [GroupQuotationController::class, 'generateHotelVouchers'])
+        Route::get('/group-quotations/generate-hotel-vouchers/{main_ref}', [VoucherController::class, 'generateHotelVouchers'])
         ->name('group_quotations.generate_hotel_vouchers')
         ->where('main_ref', '.*');
 
         Route::get('/hotel-voucher/{quotation}/{accommodation}/edit', 
-        [GroupQuotationController::class, 'editHotelVoucher'])
+        [VoucherController::class, 'editHotelVoucher'])
         ->name('group_quotations.edit_hotel_voucher');
 
+        Route::get('/hotel-voucher/{quotation}/{accommodation}/edit2', 
+        [VoucherController::class, 'editHotelVoucher2'])
+        ->name('group_quotations.edit_hotel_voucher2');
+
+        Route::post('/quotations/{quotation}/hotels/{hotel}/voucher/amendment', 
+        [VoucherController::class, 'storeAmendment'])
+        ->name('hotel_voucher.store_amendment')
+        ->where(['quotation' => '[0-9]+', 'hotel' => '[0-9]+']);
+
+        Route::post('/quotations/{quotation}/hotels/{hotel}/voucher/amendment', 
+        [VoucherController::class, 'storeAmendment2'])
+        ->name('hotel_voucher.store_amendment2')
+        ->where(['quotation' => '[0-9]+', 'hotel' => '[0-9]+']);
+
+
         Route::get('/group-quotations/hotel-vouchers/{quotation}', 
-        [GroupQuotationController::class, 'hotelVouchers'])
+        [VoucherController::class, 'hotelVouchers'])
         ->name('group_quotations.hotel_vouchers');
+        
             
-        Route::get('/group-quotations/generate-transport-vouchers/{main_ref}', [GroupQuotationController::class, 'generateTransportVouchers'])
+        Route::get('/group-quotations/generate-transport-vouchers/{main_ref}', [VoucherController::class, 'generateTransportVouchers'])
             ->name('group_quotations.generate_transport_vouchers')
             ->where('main_ref', '.*');
-        
-        Route::get('/group-quotations/generate-activity-vouchers/{main_ref}', [GroupQuotationController::class, 'generateActivityVouchers'])
+
+        Route::get('/group-quotations/generate-activity-vouchers/{main_ref}', [VoucherController::class, 'generateActivityVouchers'])
             ->name('group_quotations.generate_activity_vouchers')
             ->where('main_ref', '.*');
-            
-        Route::get('/group-quotations/generate-meal-vouchers/{main_ref}', [GroupQuotationController::class, 'generateMealVouchers'])
+
+        Route::get('/group-quotations/generate-meal-vouchers/{main_ref}', [VoucherController::class, 'generateMealVouchers'])
             ->name('group_quotations.generate_meal_vouchers')
             ->where('main_ref', '.*');
             
-        Route::get('/group-quotations/generate-complete-voucher/{main_ref}', [GroupQuotationController::class, 'generateCompleteVoucher'])
+        Route::get('/group-quotations/generate-complete-voucher/{main_ref}', [VoucherController::class, 'generateCompleteVoucher'])
             ->name('group_quotations.generate_complete_voucher')
             ->where('main_ref', '.*');
             
-        Route::get('/group-quotations/generate-all-vouchers/{main_ref}', [GroupQuotationController::class, 'generateAllVouchers'])
+        Route::get('/group-quotations/generate-all-vouchers/{main_ref}', [VoucherController::class, 'generateAllVouchers'])
             ->name('group_quotations.generate_all_vouchers')
             ->where('main_ref', '.*');
 

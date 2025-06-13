@@ -12,36 +12,12 @@
 
         <div class="bg-white shadow overflow-hidden rounded-lg">
             <div class="px-4 py-5 sm:px-6">
-                <!-- Company Information -->
-                <div class="mb-6 border-b pb-4">
-                    <h3 class="text-lg font-bold text-gray-900 mb-1">
-                        Sisin Travels (Pvt) Ltd
-                    </h3>
-                    <p class="text-sm text-gray-600">
-                        50/9, Mahalwara, Pannipitiya, Sri Lanka
-                    </p>
-                    <div class="grid grid-cols-2 mt-2 text-sm text-gray-600">
-                        <div>
-                            <p>Telephone: 0094 11 2840404</p>
-                            <p>Hot Line: 0094 777904999</p>
-                        </div>
-                        <div>
-                            <p>Reservation: 0777343748</p>
-                            <p>reservations@sisintravels.com</p>
-                        </div>
-                    </div>
-                    <h4 class="text-base font-semibold text-center mt-4">HOTEL RESERVATION VOUCHER</h4>
-                </div>
                 
-                <h3 class="text-lg leading-6 font-medium text-gray-900">
-                    Voucher Information
-                </h3>
-                <p class="mt-1 max-w-2xl text-sm text-gray-500">
-                    Review and add additional information for the hotel voucher.
-                </p>
+                    <h4 class="text-base font-semibold text-center mt-4">HOTEL RESERVATION VOUCHER AMENDMENT 1</h4>
+
             </div>
 
-            <form action="" method="POST">
+            <form action="{{ route('hotel_voucher.store_amendment', ['quotation' => $quotation->id, 'hotel' => $hotel->id]) }}" method="POST">
                 @csrf
                 <div class="px-4 py-5 sm:p-6">
                     <!-- Tour Information -->
@@ -51,7 +27,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Tour No</label>
                                 <div class="mt-1 p-2 bg-gray-50 border border-gray-200 rounded-md">
-                                    {{ $quotation->booking_reference }}
+                                    {{ $quotation->template->booking_reference }}
                                 </div>
                             </div>
                             <div>
@@ -197,19 +173,7 @@
                                 </div>
                             </div>
                             
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Guide Meal Plan</label>
-                                <div class="mt-1">
-                                    <select name="guide_meal_plan" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
-                                        <option value="BB">Bed & Breakfast (BB)</option>
-                                        <option value="HB">Half Board (HB)</option>
-                                        <option value="FB" selected>Full Board (FB)</option>
-                                        <option value="AI">All Inclusive (AI)</option>
-                                        <option value="RO">Room Only (RO)</option>
-                                    </select>
-                                </div>
-                                <input type="text" name="guide_notes" class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm" placeholder="Guide special instructions" value="GUIDE – (1ST NIGHT – FB / 2ND & 3RD NIGHT – HB)">
-                            </div>
+                            
                         </div>
                     </div>
 
