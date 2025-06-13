@@ -531,5 +531,35 @@ class VoucherController extends Controller
     return $pdf->download('hotel_voucher_' . $hotel->name . '_' . now()->format('Y-m-d') . '.pdf');
 }
 
+public function downloadHotelVoucherPDF2(Request $request, $quotationId, $hotelId)
+{
+    // Find the models from IDs
+    $quotation = GroupQuotation::findOrFail($quotationId);
+    $hotel = Hotel::findOrFail($hotelId);
+    
+    // Find the latest amendment for this hotel and quotation
+    $amendment = HotelVoucherAmendment::where('group_quotation_id', $quotation->id)
+        ->where('hotel_id', $hotel->id)
+        ->latest()
+        ->firstOrFail();
+    
+    // Generate PDF
+    $pdf = PDF::loadView('pages.allquotes.pdf.hotel_voucher_pdf_amendment2', [
+        'amendment' => $amendment,
+        'quotation' => $quotation,
+        'hotel' => $hotel,
+        'arrivalDate' => \Carbon\Carbon::parse($amendment->arrival_date),
+        'departureDate' => \Carbon\Carbon::parse($amendment->departure_date),
+        'totalNights' => $amendment->total_nights,
+        'roomCounts' => $amendment->room_counts,
+        'dailyRooms' => $amendment->daily_rooms ?? [],
+        'roomingList' => $amendment->rooming_list ?? [],
+        'amendmentNumber' => $amendment->amendment_number
+    ]);
+    
+    // Download the PDF
+    return $pdf->download('hotel_voucher_amendment2_' . $hotel->name . '_' . now()->format('Y-m-d') . '.pdf');
+}
+
 
 }

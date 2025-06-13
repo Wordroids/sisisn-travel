@@ -243,6 +243,12 @@ Route::middleware('auth')->group(function () {
     [VoucherController::class, 'downloadHotelVoucherPDF'])
     ->name('hotel_voucher.download_pdf')
     ->where(['quotation' => '[0-9]+', 'hotel' => '[0-9]+']);
+
+    // Route for downloading the second amendment PDF
+Route::get('/quotations/{quotation}/hotels/{hotel}/voucher/amendment2/pdf/{amendment?}', 
+    [VoucherController::class, 'downloadHotelVoucherPDF2'])
+    ->name('hotel_voucher.download_pdf2')
+    ->where(['quotation' => '[0-9]+', 'hotel' => '[0-9]+', 'amendment' => '[0-9]+']);
         
             
         Route::get('/group-quotations/generate-transport-vouchers/{main_ref}', [VoucherController::class, 'generateTransportVouchers'])
