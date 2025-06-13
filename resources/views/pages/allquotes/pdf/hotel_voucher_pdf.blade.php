@@ -246,7 +246,7 @@
         </div>
 
         <div class="content">
-            <div class="voucher-title">HOTEL RESERVATION VOUCHER{{ isset($amendmentNumber) ? ' - AMENDMENT ' . $amendmentNumber : '' }}</div>
+            <div class="voucher-title">HOTEL RESERVATION VOUCHER - AMENDMENT 1</div>
 
             <div class="section">
                 <div class="info-row">
@@ -347,63 +347,7 @@
                 </tbody>
             </table>
             
-            @if(!empty($dailyRooms))
-            <div class="voucher-title" style="margin-top: 20px; font-size: 14px;">DAILY ROOM DETAILS</div>
-            <table class="daily-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>SGL</th>
-                        <th>DBL</th>
-                        <th>TWIN</th>
-                        <th>TPL</th>
-                        <th>PAX</th>
-                        <th>Meal</th>
-                        <th>Guide</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($dailyRooms as $room)
-                    <tr>
-                        <td>{{ \Carbon\Carbon::parse($room['date'])->format('d/m/Y') }}</td>
-                        <td>{{ $room['single'] ?? 0 }}</td>
-                        <td>{{ $room['double'] ?? 0 }}</td>
-                        <td>{{ $room['twin'] ?? 0 }}</td>
-                        <td>{{ $room['triple'] ?? 0 }}</td>
-                        <td>{{ $room['pax'] ?? 0 }}</td>
-                        <td>{{ $room['meal_plan'] ?? '-' }}</td>
-                        <td>{{ $room['guide_room'] ?? '-' }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            @endif
-
-            @if(!empty($roomingList))
-            <div class="voucher-title" style="margin-top: 20px; font-size: 14px;">ROOMING LIST</div>
-            <table class="rooming-table">
-                <thead>
-                    <tr>
-                        <th width="5%">#</th>
-                        <th width="40%">Guest Name</th>
-                        <th width="20%">Arrival</th>
-                        <th width="20%">Departure</th>
-                        <th width="15%">Remarks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($roomingList as $index => $guest)
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $guest['guest_name'] ?? '-' }}</td>
-                        <td>{{ isset($guest['arrival_date']) ? \Carbon\Carbon::parse($guest['arrival_date'])->format('d/m/Y') : '-' }}</td>
-                        <td>{{ isset($guest['departure_date']) ? \Carbon\Carbon::parse($guest['departure_date'])->format('d/m/Y') : '-' }}</td>
-                        <td>{{ $guest['remarks'] ?? '-' }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            @endif
+            
 
             <div class="notes-section">
                 <div class="info-row">
