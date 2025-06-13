@@ -4,6 +4,11 @@
             <h2 class="text-xl font-semibold text-gray-800">
                 Edit Hotel Voucher - {{ $hotel->name }}
             </h2>
+            {{-- Add this new direct Download PDF button --}}
+    <a href="{{ route('hotel_voucher.download_pdf', ['quotation' => $quotation->id, 'hotel' => $hotel->id]) }}" 
+        class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+        Download PDF
+    </a>
             <a href="{{ route('group_quotations.hotel_vouchers', $quotation->id) }}" 
                 class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm">
                 Back to Hotels
@@ -199,7 +204,7 @@
                         <div>
                             <label for="reservation_note" class="block text-sm font-medium text-gray-700">Reservation Note</label>
                             <textarea id="reservation_note" name="reservation_note" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">{{ $reservationNote ?? 'Please reserve and confirm the above arrangements. Client will arrive for the given meal against the day.
-Please return duplicate duly singed as confirmation, and triplicate along with your bill.' }}</textarea>
+                            Please return duplicate duly signed as confirmation, and triplicate along with your bill.' }}</textarea>
                         </div>
                         
                         <div>
@@ -218,7 +223,7 @@ Please return duplicate duly singed as confirmation, and triplicate along with y
         </div>
     </div>
 
-    @push('scripts')
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // You can add client-side validation or other functionality here
@@ -231,5 +236,5 @@ Please return duplicate duly singed as confirmation, and triplicate along with y
             });
         });
     </script>
-    @endpush
+
 </x-app-layout>

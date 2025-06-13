@@ -13,6 +13,7 @@ use App\Models\RoomDetail;
 use Illuminate\Support\Facades\DB;
 use App\Models\HotelVoucherAmendment;
 use App\Models\Quotation;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class VoucherController extends Controller
 {
@@ -458,4 +459,77 @@ class VoucherController extends Controller
         // Redirect with success message
         return redirect()->back()->with('success', 'Hotel voucher amendment created successfully!');
     }
+
+    public function downloadHotelVoucherPDF($quotationId, $hotelId)
+{
+    $quotation = GroupQuotation::findOrFail($quotationId);
+    $hotel = Hotel::findOrFail($hotelId);
+    
+    // Find existing amendment or create temporary one for PDF
+    $amendment = HotelVoucherAmendment::where('group_quotation_id', $quotation->id)
+        ->where('hotel_id', $hotel->id)
+        ->latest()
+        ->first();
+    
+    // If no amendment exists, create a temporary one with basic data
+    if (!$amendment) {
+        $accommodation = GroupQuotationAccommodation::where('group_quotation_id', $quotation->id)
+            ->where('hotel_id', $hotel->id)
+            ->first();
+        
+        if (!$accommodation) {
+            return back()->with('error', 'No accommodation data found for this hotel');
+        }
+        
+        // Create a temporary amendment object (not saved to database)
+        $amendment = new HotelVoucherAmendment();
+        $amendment->group_quotation_id = $quotation->id;
+        $amendment->hotel_id = $hotel->id;
+        $amendment->booking_name = $quotation->name;
+        $amendment->voucher_date = now()->format('Y-m-d');
+        $amendment->hotel_address = $hotel->location ?? 'No address available';
+        $amendment->arrival_date = $accommodation->start_date;
+        $amendment->departure_date = $accommodation->end_date;
+        $amendment->total_nights = $accommodation->start_date->diffInDays($accommodation->end_date);
+        $amendment->room_category = $accommodation->roomCategory ? $accommodation->roomCategory->name : 'Standard';
+        $amendment->meal_plan = $accommodation->mealPlan ? $accommodation->mealPlan->name : 'BB';
+        $amendment->room_counts = [
+            'single' => $accommodation->single_rooms ?? 0,
+            'double' => $accommodation->double_rooms ?? 0,
+            'twin' => $accommodation->twin_rooms ?? 0,
+            'triple' => $accommodation->triple_rooms ?? 0,
+            'guide' => $accommodation->guide_rooms ?? 0,
+        ];
+        $amendment->adults = $accommodation->adults ?? 1;
+        $amendment->children = $accommodation->children ?? 0;
+        $amendment->special_notes = 'Generated PDF for preview';
+        $amendment->billing_instructions = 'Extras to be collected from client directly';
+        $amendment->remarks = 'HB SGL USD 85, HB DBL USD 90, HB TPL USD 130 (Reservation Code – ST2025)';
+        $amendment->reservation_note = 'Please reserve and confirm the above arrangements. Client will arrive for the given meal against the day.';
+        $amendment->contact_person = 'Nethini Guruge - 0777343748';
+        $amendment->amendment_number = 1;
+    }
+    
+    // Calculate total people from adults and children
+    $totalPeople = $amendment->adults + $amendment->children;
+    
+    // Generate PDF
+    $pdf = PDF::loadView('pages.allquotes.pdf.hotel_voucher_pdf', [
+    'amendment' => $amendment,
+    'quotation' => $quotation,
+    'hotel' => $hotel,
+    'arrivalDate' => \Carbon\Carbon::parse($amendment->arrival_date),
+    'departureDate' => \Carbon\Carbon::parse($amendment->departure_date),
+    'totalNights' => $amendment->total_nights,
+    'roomCounts' => $amendment->room_counts,
+    'dailyRooms' => $amendment->daily_rooms ?? [],
+    'roomingList' => $amendment->rooming_list ?? [],
+    'amendmentNumber' => $amendment->amendment_number
+]);
+    
+    // Force download the PDF
+    return $pdf->download('hotel_voucher_' . $hotel->name . '_' . now()->format('Y-m-d') . '.pdf');
+}
+
+
 }
