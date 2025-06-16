@@ -27,6 +27,7 @@ class GroupQuotation extends Model
         'guide_id',
         'description',
         'is_template',
+        'template_id',
     ];
 
     protected $casts = [
@@ -100,5 +101,10 @@ class GroupQuotation extends Model
     public function members()
     {
         return $this->hasMany(GroupQuotationMember::class, 'group_quotations_id');
+    }
+
+    public function template()
+    {
+        return $this->belongsTo(QuotationTemplate::class, 'template_id');
     }
 }
