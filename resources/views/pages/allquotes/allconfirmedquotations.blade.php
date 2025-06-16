@@ -35,7 +35,6 @@
                             </button>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -66,10 +65,8 @@
                         <!-- Individual Tours Content -->
                         <div id="individual" class="tab-content block space-y-6">
                             @if ($confirmedQuotations->count() > 0)
-
                                 <div class="mt-2 overflow-x-auto">
                                     <div class="flex items-center justify-between mb-4">
-
                                         <div class="flex items-center">
                                             <span class="text-sm text-gray-500">Total:
                                                 {{ $confirmedQuotations->count() }}</span>
@@ -179,92 +176,139 @@
                         <!-- Group Tours Content -->
                         <div id="group" class="tab-content hidden space-y-6">
                             @if ($groupQuotations->count() > 0)
-
                                 <div class="mt-2 overflow-x-auto">
                                     <div class="flex items-center justify-between mb-4">
-
                                         <div class="flex items-center">
-                                            <span class="text-sm text-gray-500">Total:
-                                                {{ $groupQuotations->count() }}</span>
+                                            <span class="text-sm text-gray-500">Total: {{ $groupQuotations->count() }}</span>
                                         </div>
                                     </div>
+
+                                    @php
+                                        // Group quotations by main booking reference (part before the last slash)
+                                        $groupedQuotations = [];
+                                        foreach ($groupQuotations as $quotation) {
+                                            $refParts = explode('/', $quotation->booking_reference);
+                                            
+                                            // If there's a sub-reference pattern (like ST/SIC/1001/02)
+                                            if (count($refParts) > 3) {
+                                                // Remove the last part to get the main reference
+                                                $mainRef = implode('/', array_slice($refParts, 0, count($refParts) - 1));
+                                            } else {
+                                                // Use the full reference as the main reference
+                                                $mainRef = $quotation->booking_reference;
+                                            }
+                                            
+                                            if (!isset($groupedQuotations[$mainRef])) {
+                                                $groupedQuotations[$mainRef] = [];
+                                            }
+                                            
+                                            $groupedQuotations[$mainRef][] = $quotation;
+                                        }
+                                    @endphp
+
                                     <table class="min-w-full bg-white border border-gray-200">
                                         <thead>
                                             <tr>
-                                                <th
-                                                    class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                <th class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Main Booking Ref</th>
+                                                <th class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Sub Reference</th>
+                                                <th class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                                     Group Name</th>
-                                                <th
-                                                    class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                    Tour Ref</th>
-                                                <th
-                                                    class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                <th class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                                     Customer</th>
-                                                <th
-                                                    class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                <th class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                                     Market</th>
-                                                <th
-                                                    class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                <th class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                                     Period</th>
-                                                <th
-                                                    class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                <th class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                                     Duration</th>
-                                                <th
-                                                    class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                <th class="py-3 px-4 border-b border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                                     Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach ($groupQuotations as $quotation)
-                                                <tr class="hover:bg-gray-50"
-                                                    data-quote-ref="{{ $quotation->quote_reference }}"
-                                                    data-booking-ref="{{ $quotation->booking_reference }}">
-                                                    <td
-                                                        class="py-3 px-4 border-b border-gray-200 font-medium text-gray-900">
-                                                        {{ $quotation->name }}</td>
-                                                    <td class="py-3 px-4 border-b border-gray-200">
-                                                        {{ $quotation->booking_reference }}</td>
-                                                    <td class="py-3 px-4 border-b border-gray-200">
-                                                        {{ $quotation->customer ? $quotation->customer->name : 'N/A' }}
-                                                    </td>
-                                                    <td class="py-3 px-4 border-b border-gray-200">
-                                                        {{ $quotation->market ? $quotation->market->name : 'N/A' }}
-                                                    </td>
-                                                    <td class="py-3 px-4 border-b border-gray-200">
-                                                        {{ $quotation->start_date->format('d M Y') }} -
-                                                        {{ $quotation->end_date->format('d M Y') }}
-                                                    </td>
-                                                    <td class="py-3 px-4 border-b border-gray-200">
-                                                        {{ $quotation->duration }} days</td>
-                                                    <td class="py-3 px-4 border-b border-gray-200">
-                                                        <div class="flex items-center justify-center space-x-3">
-                                                            <a href="{{ route('group_quotations.show', $quotation->id) }}"
-                                                                class="text-blue-600 hover:text-blue-900">
-                                                                <svg class="w-5 h-5" fill="currentColor"
-                                                                    viewBox="0 0 20 20"
-                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-                                                                    <path fill-rule="evenodd"
-                                                                        d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                                                        clip-rule="evenodd"></path>
-                                                                </svg>
-                                                            </a>
-                                                            <a href="{{ route('group_quotations.step_01', $quotation->id) }}"
-                                                                class="text-yellow-600 hover:text-yellow-900">
-                                                                <svg class="w-5 h-5" fill="currentColor"
-                                                                    viewBox="0 0 20 20"
-                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                    <path
-                                                                        d="M13.586 3.586a2 2 0 112.828 2.828l-10 10a2 2 0 01-1.414.586H3V15h1.586a1 1 0 00.707-.293l10-10z">
-                                                                    </path>
-                                                                    <path
-                                                                        d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-                                                                        clip-rule="evenodd"></path>
-                                                                </svg>
-                                                            </a>
-                                                        </div>
-                                                    </td>
-                                                </tr>
+                                            @foreach ($groupedQuotations as $mainRef => $quotations)
+                                                @php 
+                                                    $isFirst = true;
+                                                    $rowCount = count($quotations);
+                                                @endphp
+                                                
+                                                @foreach ($quotations as $index => $quotation)
+                                                    <tr class="hover:bg-gray-50 {{ $isFirst ? 'bg-gray-50' : '' }}"
+                                                        data-quote-ref="{{ $quotation->quote_reference }}"
+                                                        data-booking-ref="{{ $quotation->booking_reference }}">
+                                                        
+                                                        @if ($isFirst)
+                                                            <td class="py-3 px-4 border-b border-gray-200 font-medium text-gray-900" rowspan="{{ $rowCount }}">
+                                                                {{ $mainRef }}
+                                                                <div class="mt-2">
+                                                                    <a href="{{ route('group_quotations.group_vouchers', ['main_ref' => $mainRef]) }}" 
+                                                                        class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                                                        title="Generate Group Vouchers">
+                                                                        <!-- Debug output -->
+                                                                        <!-- {{ $mainRef }} -->
+                                                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
+                                                                            <path fill-rule="evenodd" d="M7 9a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm0 3a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                                                                        </svg>
+                                                                        Group Vouchers
+                                                                        </a>
+                                                                </div>
+                                                            </td>
+                                                        @endif
+                                                        
+                                                        <td class="py-3 px-4 border-b border-gray-200">
+                                                            {{ $quotation->booking_reference }}
+                                                        </td>
+                                                        <td class="py-3 px-4 border-b border-gray-200 font-medium text-gray-900">
+                                                            {{ $quotation->name }}
+                                                        </td>
+                                                        <td class="py-3 px-4 border-b border-gray-200">
+                                                            {{ $quotation->customer ? $quotation->customer->name : 'N/A' }}
+                                                        </td>
+                                                        <td class="py-3 px-4 border-b border-gray-200">
+                                                            {{ $quotation->market ? $quotation->market->name : 'N/A' }}
+                                                        </td>
+                                                        <td class="py-3 px-4 border-b border-gray-200">
+                                                            {{ $quotation->start_date->format('d M Y') }} -
+                                                            {{ $quotation->end_date->format('d M Y') }}
+                                                        </td>
+                                                        <td class="py-3 px-4 border-b border-gray-200">
+                                                            {{ $quotation->duration }} days
+                                                        </td>
+                                                        <td class="py-3 px-4 border-b border-gray-200">
+                                                            <div class="flex items-center justify-center space-x-3">
+                                                                <a href="{{ route('group_quotations.show', $quotation->id) }}"
+                                                                    class="text-blue-600 hover:text-blue-900">
+                                                                    <svg class="w-5 h-5" fill="currentColor"
+                                                                        viewBox="0 0 20 20"
+                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                                                                        <path fill-rule="evenodd"
+                                                                            d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                                                            clip-rule="evenodd"></path>
+                                                                    </svg>
+                                                                </a>
+                                                                <a href="{{ route('group_quotations.step_01', $quotation->id) }}"
+                                                                    class="text-yellow-600 hover:text-yellow-900">
+                                                                    <svg class="w-5 h-5" fill="currentColor"
+                                                                        viewBox="0 0 20 20"
+                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                        <path
+                                                                            d="M13.586 3.586a2 2 0 112.828 2.828l-10 10a2 2 0 01-1.414.586H3V15h1.586a1 1 0 00.707-.293l10-10z">
+                                                                        </path>
+                                                                        <path
+                                                                            d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+                                                                            clip-rule="evenodd"></path>
+                                                                    </svg>
+                                                                </a>
+                                                               
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    @php $isFirst = false; @endphp
+                                                @endforeach
                                             @endforeach
                                         </tbody>
                                     </table>
@@ -277,8 +321,7 @@
                                             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
                                         </path>
                                     </svg>
-                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No confirmed group tours found
-                                    </h3>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No confirmed group tours found</h3>
                                     <p class="text-gray-500">There are no approved group quotations at the moment.</p>
                                 </div>
                             @endif
@@ -370,8 +413,6 @@
                     alert('Export feature will be implemented here');
                 });
             }
-
-
         });
 
         // Search functionality

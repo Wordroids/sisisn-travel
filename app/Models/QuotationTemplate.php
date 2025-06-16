@@ -57,4 +57,9 @@ class QuotationTemplate extends Model
     {
         return $query->where('is_active', true);
     }
+
+    public function quotations()
+    {
+        return $this->hasMany(GroupQuotation::class, 'template_id');
+    }
 }
