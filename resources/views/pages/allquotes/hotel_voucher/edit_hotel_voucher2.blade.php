@@ -9,7 +9,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
-        Download Amendment 2 PDF
+        Download Voucher PDF
     </a>
             <a href="{{ route('group_quotations.hotel_vouchers', $quotation->id) }}"
                 class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm">
@@ -19,8 +19,21 @@
 
         <div class="bg-white shadow overflow-hidden rounded-lg">
             <div class="px-4 py-5 sm:px-6">
-                <h4 class="text-base font-semibold text-center mt-4">HOTEL RESERVATION VOUCHER AMENDMENT 2</h4>
+                <h4 class="text-base font-semibold text-center mt-4">HOTEL RESERVATION VOUCHER</h4>
             </div>
+
+            <!-- Error Messages -->
+            @if ($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+                    role="alert">
+                    <strong class="font-bold">Whoops!</strong>
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <form
                 action="{{ route('hotel_voucher.store_amendment2', ['quotation' => $quotation->id, 'hotel' => $hotel->id]) }}"
@@ -142,7 +155,7 @@
                             <h4 class="text-md font-medium text-gray-700">Room Information</h4>
 
                             <!-- Room counts -->
-                            <div class="grid grid-cols-5 gap-2">
+                           <div class="grid grid-cols-5 gap-2">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Single</label>
                                     <input type="number" name="room_counts[single]" min="0"
@@ -173,7 +186,9 @@
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-center"
                                         value="{{ $roomCounts['guide'] ?? 0 }}">
                                 </div>
-                            </div>
+                            </div> 
+
+                            
 
                             <!-- Meal plan -->
                             <div>

@@ -215,23 +215,13 @@ Route::middleware('auth')->group(function () {
             ->name('group_quotations.generate_hotel_vouchers')
             ->where('main_ref', '.*');
 
-        Route::get('/hotel-voucher/{quotation}/{accommodation}/edit', [VoucherController::class, 'editHotelVoucher'])->name('group_quotations.edit_hotel_voucher');
-
         Route::get('/hotel-voucher/{quotation}/{accommodation}/edit2', [VoucherController::class, 'editHotelVoucher2'])->name('group_quotations.edit_hotel_voucher2');
-
-        Route::post('/quotations/{quotation}/hotels/{hotel}/voucher/amendment', [VoucherController::class, 'storeAmendment'])
-            ->name('hotel_voucher.store_amendment')
-            ->where(['quotation' => '[0-9]+', 'hotel' => '[0-9]+']);
-
+        
         Route::post('/quotations/{quotation}/hotels/{hotel}/voucher/amendment2', [VoucherController::class, 'storeAmendment2'])
             ->name('hotel_voucher.store_amendment2')
             ->where(['quotation' => '[0-9]+', 'hotel' => '[0-9]+']);
 
         Route::get('/group-quotations/hotel-vouchers/{quotation}', [VoucherController::class, 'hotelVouchers'])->name('group_quotations.hotel_vouchers');
-
-        Route::get('/quotations/{quotation}/hotels/{hotel}/download-voucher-pdf', [VoucherController::class, 'downloadHotelVoucherPDF'])
-            ->name('hotel_voucher.download_pdf')
-            ->where(['quotation' => '[0-9]+', 'hotel' => '[0-9]+']);
 
         // Route for downloading the second amendment PDF
         Route::get('/quotations/{quotation}/hotels/{hotel}/voucher/amendment2/pdf/{amendment?}', [VoucherController::class, 'downloadHotelVoucherPDF2'])

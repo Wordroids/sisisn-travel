@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hotel Reservation Voucher - 2nd Amendment</title>
+    <title>Hotel Reservation Voucher </title>
     <style>
         * {
             margin: 0;
@@ -276,7 +276,11 @@
         </div>
 
         <div class="content">
-            <div class="voucher-title">HOTEL RESERVATION VOUCHER - <span class="amendment-text">2<span class="superscript">ND</span> AMENDMENT</span></div>
+            <div class="voucher-title">HOTEL RESERVATION VOUCHER 
+                @if(!empty($amendmentText))
+                - <span class="amendment-text">{!! $amendmentText !!}</span>
+                @endif
+            </div>
 
             <div class="section">
                 <div class="info-row">
