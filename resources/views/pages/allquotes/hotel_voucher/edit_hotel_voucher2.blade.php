@@ -19,8 +19,21 @@
 
         <div class="bg-white shadow overflow-hidden rounded-lg">
             <div class="px-4 py-5 sm:px-6">
-                <h4 class="text-base font-semibold text-center mt-4">HOTEL RESERVATION VOUCHER AMENDMENT 2</h4>
+                <h4 class="text-base font-semibold text-center mt-4">HOTEL RESERVATION VOUCHER</h4>
             </div>
+
+            <!-- Error Messages -->
+            @if ($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+                    role="alert">
+                    <strong class="font-bold">Whoops!</strong>
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <form
                 action="{{ route('hotel_voucher.store_amendment2', ['quotation' => $quotation->id, 'hotel' => $hotel->id]) }}"
@@ -142,7 +155,7 @@
                             <h4 class="text-md font-medium text-gray-700">Room Information</h4>
 
                             <!-- Room counts -->
-                          <!--  <div class="grid grid-cols-5 gap-2">
+                           <div class="grid grid-cols-5 gap-2">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Single</label>
                                     <input type="number" name="room_counts[single]" min="0"
@@ -173,7 +186,9 @@
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-center"
                                         value="{{ $roomCounts['guide'] ?? 0 }}">
                                 </div>
-                            </div> -->
+                            </div> 
+
+                            
 
                             <!-- Meal plan -->
                             <div>
