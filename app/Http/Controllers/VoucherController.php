@@ -219,310 +219,215 @@ class VoucherController extends Controller
         return view('pages.allquotes.hotel_voucher.hotel_vouchers', compact('groupQuotation', 'subQuotations', 'hotelGroups'));
     }
 
-    public function storeAmendment(Request $request, $quotation, $hotel)
-    {
-        // Find the models from IDs
-        $quotation = GroupQuotation::findOrFail($quotation);
-        $hotel = Hotel::findOrFail($hotel);
-
-        $validatedData = $request->validate([
-            'booking_name' => 'required|string|max:255',
-            'voucher_date' => 'required|date',
-            'hotel_address' => 'nullable|string',
-            'arrival_date' => 'required|date',
-            'departure_date' => 'required|date|after:arrival_date',
-            'total_nights' => 'required|integer|min:1',
-            'meal_plan' => 'required|string',
-            'room_counts' => 'required|array',
-            'adults' => 'required|integer|min:1',
-            'children' => 'nullable|integer|min:0',
-            'special_notes' => 'nullable|string',
-            'billing_instructions' => 'nullable|string',
-            'remarks' => 'nullable|string',
-            'reservation_note' => 'nullable|string',
-            'contact_person' => 'nullable|string',
-        ]);
-
-        // Create hotel voucher amendment record
-        $voucher = HotelVoucherAmendment::updateOrCreate([
-            'group_quotation_id' => $quotation->id,
-            'hotel_id' => $hotel->id,
-            'booking_name' => $validatedData['booking_name'],
-            'voucher_date' => $validatedData['voucher_date'],
-            'hotel_address' => $validatedData['hotel_address'],
-            'arrival_date' => $validatedData['arrival_date'],
-            'departure_date' => $validatedData['departure_date'],
-            'total_nights' => $validatedData['total_nights'],
-            'room_category' => $request->input('room_category'),
-            'meal_plan' => $validatedData['meal_plan'],
-            'room_counts' => $validatedData['room_counts'],
-            'adults' => $validatedData['adults'],
-            'children' => $validatedData['children'] ?? 0,
-            'special_notes' => $validatedData['special_notes'],
-            'billing_instructions' => $validatedData['billing_instructions'],
-            'remarks' => $validatedData['remarks'],
-            'reservation_note' => $validatedData['reservation_note'],
-            'contact_person' => $validatedData['contact_person'],
-            'is_amendment' => true,
-            'amendment_number' => 1,
-        ]);
-
-        // Redirect with success message
-        return redirect()->back()->with('success', 'Hotel voucher amendment created successfully!');
-    }
 
     public function editHotelVoucher2($quotationId, $accommodationId)
-    {
-        $quotation = GroupQuotation::findOrFail($quotationId);
-        $accommodation = GroupQuotationAccommodation::findOrFail($accommodationId);
-        $hotel = $accommodation->hotel;
+{
+    $quotation = GroupQuotation::findOrFail($quotationId);
+    $accommodation = GroupQuotationAccommodation::findOrFail($accommodationId);
+    $hotel = $accommodation->hotel;
 
-        // Get the main reference (strip everything after the last slash if it exists)
-        $mainRef = preg_replace('/\/.*$/', '', $quotation->booking_reference);
+    // Get the main reference (strip everything after the last slash if it exists)
+    $mainRef = preg_replace('/\/.*$/', '', $quotation->booking_reference);
 
-        // Find all related accommodations for this hotel across all quotations in the group
-        $relatedQuotations = GroupQuotation::where(function ($query) use ($mainRef) {
-            $query->where('booking_reference', $mainRef)->orWhere('booking_reference', 'like', $mainRef . '/%');
-        })
-            ->where('status', 'approved')
-            ->get();
+    // Find all related accommodations for this hotel across all quotations in the group
+    $relatedQuotations = GroupQuotation::where(function ($query) use ($mainRef) {
+        $query->where('booking_reference', $mainRef)->orWhere('booking_reference', 'like', $mainRef . '/%');
+    })
+        ->where('status', 'approved')
+        ->get();
 
-        $relatedAccommodations = GroupQuotationAccommodation::whereIn('group_quotation_id', $relatedQuotations->pluck('id'))->where('hotel_id', $hotel->id)->get();
+    $relatedAccommodations = GroupQuotationAccommodation::whereIn('group_quotation_id', $relatedQuotations->pluck('id'))->where('hotel_id', $hotel->id)->get();
 
-        // Get all members from the group
-        $allMembers = [];
+    // Get all members from the group
+    $allMembers = [];
 
-        // Get members directly from the group quotation
-        $groupMembers = $quotation->members;
+    // Get members directly from the group quotation
+    $groupMembers = $quotation->members;
 
-        foreach ($groupMembers as $member) {
-            if (!isset($allMembers[$member->id])) {
-                // Add member to the list - avoid trying to access non-existent quotation relationship
-                $allMembers[$member->id] = [
-                    'name' => $member->name ?? 'Member #' . $member->id,
-                    'country' => $member->country ?? '',
-                    'email' => $member->email ?? '',
-                    'phone' => $member->phone ?? '',
-                    'arrival_date' => $accommodation->start_date->format('Y-m-d'),
-                    'departure_date' => $accommodation->end_date->format('Y-m-d'),
-                    'remarks' => $member->member_group == 'honeymoon' ? 'HONEYMOONERS' : '',
+    foreach ($groupMembers as $member) {
+        if (!isset($allMembers[$member->id])) {
+            // Add member to the list - avoid trying to access non-existent quotation relationship
+            $allMembers[$member->id] = [
+                'name' => $member->name ?? 'Member #' . $member->id,
+                'country' => $member->country ?? '',
+                'email' => $member->email ?? '',
+                'phone' => $member->phone ?? '',
+                'arrival_date' => $accommodation->start_date->format('Y-m-d'),
+                'departure_date' => $accommodation->end_date->format('Y-m-d'),
+                'remarks' => $member->member_group == 'honeymoon' ? 'HONEYMOONERS' : '',
+            ];
+        }
+    }
+
+    // Initialize variables with default values
+    $specialNotes = '';
+    $billingInstructions = '';
+    $remarks = '';
+    $reservationNote = '';
+    $contactPerson = '';
+    $dailyRooms = [];
+    $roomingList = [];
+    $amendmentNumber = 1; // Start with amendment number 1 for fresh vouchers
+
+    // Calculate total room counts across all related accommodations
+    $roomCounts = [
+        'single' => 0,
+        'double' => 0,
+        'twin' => 0,
+        'triple' => 0,
+        'guide' => 0,
+    ];
+
+    $adults = 0;
+    $children = 0;
+
+    // Get the latest amendment for this hotel voucher
+    $latestAmendment = HotelVoucherAmendment::where('group_quotation_id', $quotation->id)->where('hotel_id', $hotel->id)->latest()->first();
+
+    // If we have a previous amendment, use its values for room counts and additional info
+    if ($latestAmendment) {
+        // Use room counts from amendment
+        $roomCounts = $latestAmendment->room_counts;
+        $adults = $latestAmendment->adults;
+        $children = $latestAmendment->children;
+
+        // Get additional information from amendment
+        $specialNotes = $latestAmendment->special_notes;
+        $billingInstructions = $latestAmendment->billing_instructions;
+        $remarks = $latestAmendment->remarks;
+        $reservationNote = $latestAmendment->reservation_note;
+        $contactPerson = $latestAmendment->contact_person;
+        $mealPlan = $latestAmendment->meal_plan;
+
+        // Get daily rooms and rooming list if they exist
+        $dailyRooms = $latestAmendment->daily_rooms ?? [];
+        $roomingList = $latestAmendment->rooming_list ?? [];
+
+        // Calculate next amendment number
+        $amendmentNumber = $latestAmendment->amendment_number + 1;
+    } else {
+        // Calculate from accommodations if no amendment exists
+        foreach ($relatedAccommodations as $relatedAccommodation) {
+            $roomCounts['single'] += $relatedAccommodation->single_rooms ?? 0;
+            $roomCounts['double'] += $relatedAccommodation->double_rooms ?? 0;
+            $roomCounts['twin'] += $relatedAccommodation->twin_rooms ?? 0;
+            $roomCounts['triple'] += $relatedAccommodation->triple_rooms ?? 0;
+            $roomCounts['guide'] += $relatedAccommodation->guide_rooms ?? 0;
+
+            $adults += $relatedAccommodation->adults ?? 0;
+            $children += $relatedAccommodation->children ?? 0;
+        }
+
+        $mealPlan = $accommodation->mealPlan ? $accommodation->mealPlan->name : 'BB';
+
+        // Create rooming list from group members if available
+        $roomingList = [];
+        if (count($allMembers) > 0) {
+            foreach ($allMembers as $member) {
+                $roomingList[] = [
+                    'guest_name' => $member['name'],
+                    'arrival_date' => $member['arrival_date'],
+                    'departure_date' => $member['departure_date'],
+                    'remarks' => $member['remarks'],
                 ];
             }
         }
 
-        // Calculate total room counts across all related accommodations
-        $roomCounts = [
-            'single' => 0,
-            'double' => 0,
-            'twin' => 0,
-            'triple' => 0,
-            'guide' => 0,
-        ];
-
-        $adults = 0;
-        $children = 0;
-
-        // Get the latest amendment for this hotel voucher
-        $latestAmendment = HotelVoucherAmendment::where('group_quotation_id', $quotation->id)->where('hotel_id', $hotel->id)->latest()->first();
-
-        // If we have a previous amendment, use its values for room counts and additional info
-        if ($latestAmendment) {
-            // Use room counts from amendment
-            $roomCounts = $latestAmendment->room_counts;
-            $adults = $latestAmendment->adults;
-            $children = $latestAmendment->children;
-
-            // Get additional information from amendment
-            $specialNotes = $latestAmendment->special_notes;
-            $billingInstructions = $latestAmendment->billing_instructions;
-            $remarks = $latestAmendment->remarks;
-            $reservationNote = $latestAmendment->reservation_note;
-            $contactPerson = $latestAmendment->contact_person;
-            $mealPlan = $latestAmendment->meal_plan;
-
-            // Get daily rooms and rooming list if they exist
-            $dailyRooms = $latestAmendment->daily_rooms ?? [];
-            $roomingList = $latestAmendment->rooming_list ?? [];
-
-            // Calculate next amendment number
-            $amendmentNumber = $latestAmendment->amendment_number + 1;
-        } else {
-            // Calculate from accommodations if no amendment exists
-            foreach ($relatedAccommodations as $relatedAccommodation) {
-                $roomCounts['single'] += $relatedAccommodation->single_rooms ?? 0;
-                $roomCounts['double'] += $relatedAccommodation->double_rooms ?? 0;
-                $roomCounts['twin'] += $relatedAccommodation->twin_rooms ?? 0;
-                $roomCounts['triple'] += $relatedAccommodation->triple_rooms ?? 0;
-                $roomCounts['guide'] += $relatedAccommodation->guide_rooms ?? 0;
-
-                $adults += $relatedAccommodation->adults ?? 0;
-                $children += $relatedAccommodation->children ?? 0;
-            }
-
-            $mealPlan = $accommodation->mealPlan ? $accommodation->mealPlan->name : 'BB';
-
-            // Create rooming list from group members if available
-            $roomingList = [];
-            if (count($allMembers) > 0) {
-                foreach ($allMembers as $member) {
-                    $roomingList[] = [
-                        'guest_name' => $member['name'],
-                        'arrival_date' => $member['arrival_date'],
-                        'departure_date' => $member['departure_date'],
-                        'remarks' => $member['remarks'],
-                    ];
-                }
-            }
-
-            // Create daily room details from related accommodations
-            $dailyRooms = [];
-            foreach ($relatedAccommodations as $acc) {
-                // Only add if we have valid dates
-                if ($acc->start_date) {
-                    $dailyRooms[] = [
-                        'date' => $acc->start_date->format('Y-m-d'),
-                        'single' => $acc->single_rooms ?? 0,
-                        'double' => $acc->double_rooms ?? 0,
-                        'twin' => $acc->twin_rooms ?? 0,
-                        'triple' => $acc->triple_rooms ?? 0,
-                        'pax' => ($acc->adults ?? 0) + ($acc->children ?? 0),
-                        'meal_plan' => $acc->mealPlan ? $acc->mealPlan->name : 'HB',
-                        'guide_room' => $acc->guide_rooms > 0 ? '01 - HB' : '',
-                    ];
-                }
+        // Create daily room details from related accommodations
+        $dailyRooms = [];
+        foreach ($relatedAccommodations as $acc) {
+            // Only add if we have valid dates
+            if ($acc->start_date) {
+                $dailyRooms[] = [
+                    'date' => $acc->start_date->format('Y-m-d'),
+                    'single' => $acc->single_rooms ?? 0,
+                    'double' => $acc->double_rooms ?? 0,
+                    'twin' => $acc->twin_rooms ?? 0,
+                    'triple' => $acc->triple_rooms ?? 0,
+                    'pax' => ($acc->adults ?? 0) + ($acc->children ?? 0),
+                    'meal_plan' => $acc->mealPlan ? $acc->mealPlan->name : 'HB',
+                    'guide_room' => $acc->guide_rooms > 0 ? '01 - HB' : '',
+                ];
             }
         }
-
-        // Get meal plan and room category from the first accommodation
-        $roomCategory = $accommodation->roomCategory ? $accommodation->roomCategory->name : 'N/A';
-
-        // Get all members for the member selection dropdown
-        $availableMembers = $quotation->members;
-
-        return view('pages.allquotes.hotel_voucher.edit_hotel_voucher2', compact('quotation', 'accommodation', 'hotel', 'roomCounts', 'adults', 'children', 'mealPlan', 'roomCategory', 'relatedAccommodations', 'specialNotes', 'billingInstructions', 'remarks', 'reservationNote', 'contactPerson', 'amendmentNumber', 'dailyRooms', 'roomingList', 'availableMembers'));
     }
+
+    // Get meal plan and room category from the first accommodation
+    $roomCategory = $accommodation->roomCategory ? $accommodation->roomCategory->name : 'N/A';
+
+    // Get all members for the member selection dropdown
+    $availableMembers = $quotation->members;
+
+    return view('pages.allquotes.hotel_voucher.edit_hotel_voucher2', compact('quotation', 'accommodation', 'hotel', 'roomCounts', 'adults', 'children', 'mealPlan', 'roomCategory', 'relatedAccommodations', 'specialNotes', 'billingInstructions', 'remarks', 'reservationNote', 'contactPerson', 'amendmentNumber', 'dailyRooms', 'roomingList', 'availableMembers'));
+}
 
     public function storeAmendment2(Request $request, $quotation, $hotel)
-    {
-        // Find the models from IDs
-        $quotation = GroupQuotation::findOrFail($quotation);
-        $hotel = Hotel::findOrFail($hotel);
+{
+    //dd($request->all());
+    // Find the models from IDs
+    $quotation = GroupQuotation::findOrFail($quotation);
+    $hotel = Hotel::findOrFail($hotel);
 
-        $validatedData = $request->validate([
-            'booking_name' => 'required|string|max:255',
-            'voucher_date' => 'required|date',
-            'hotel_address' => 'nullable|string',
-            'arrival_date' => 'required|date',
-            'departure_date' => 'required|date|after:arrival_date',
-            'total_nights' => 'required|integer|min:1',
-            'meal_plan' => 'required|string',
-            'room_counts' => 'required|array',
-            'adults' => 'required|integer|min:1',
-            'children' => 'nullable|integer|min:0',
-            'special_notes' => 'nullable|string',
-            'billing_instructions' => 'nullable|string',
-            'remarks' => 'nullable|string',
-            'reservation_note' => 'nullable|string',
-            'contact_person' => 'nullable|string',
-            'daily_rooms' => 'nullable|array',
-            'rooming_list' => 'nullable|array',
-        ]);
+    $validatedData = $request->validate([
+        'booking_name' => 'required|string|max:255',
+        'voucher_date' => 'nullable|date',
+        'hotel_address' => 'nullable|string',
+        'arrival_date' => 'nullable|date',
+        'departure_date' => 'nullable|date|after:arrival_date',
+        'total_nights' => 'nullable|integer|min:1',
+        'meal_plan' => 'nullable|string',
+        'room_counts' => 'nullable|array',
+        'adults' => 'nullable|integer|min:1',
+        'children' => 'nullable|integer|min:0',
+        'special_notes' => 'nullable|string',
+        'billing_instructions' => 'nullable|string',
+        'remarks' => 'nullable|string',
+        'reservation_note' => 'nullable|string',
+        'contact_person' => 'nullable|string',
+        'daily_rooms' => 'nullable|array',
+        'rooming_list' => 'nullable|array',
+    ]);
+//dd($validatedData);
+    // Get the latest amendment number for this hotel and quotation
+    $lastAmendment = HotelVoucherAmendment::where('group_quotation_id', $quotation->id)
+        ->where('hotel_id', $hotel->id)
+        ->orderBy('amendment_number', 'desc')
+        ->first();
+        
+    // If this is a fresh voucher, start with amendment number 1
+    $amendmentNumber = $lastAmendment ? ($lastAmendment->amendment_number + 1) : 1;
 
-        // Create hotel voucher amendment record
-        $voucher = HotelVoucherAmendment::updateOrCreate([
-            'group_quotation_id' => $quotation->id,
-            'hotel_id' => $hotel->id,
-            'booking_name' => $validatedData['booking_name'],
-            'voucher_date' => $validatedData['voucher_date'],
-            'hotel_address' => $validatedData['hotel_address'],
-            'arrival_date' => $validatedData['arrival_date'],
-            'departure_date' => $validatedData['departure_date'],
-            'total_nights' => $validatedData['total_nights'],
-            'room_category' => $request->input('room_category'),
-            'meal_plan' => $validatedData['meal_plan'],
-            'room_counts' => $validatedData['room_counts'],
-            'adults' => $validatedData['adults'],
-            'children' => $validatedData['children'] ?? 0,
-            'special_notes' => $validatedData['special_notes'],
-            'billing_instructions' => $validatedData['billing_instructions'],
-            'remarks' => $validatedData['remarks'],
-            'reservation_note' => $validatedData['reservation_note'],
-            'contact_person' => $validatedData['contact_person'],
-            'daily_rooms' => $request->input('daily_rooms') ?? [],
-            'rooming_list' => $request->input('rooming_list') ?? [],
-            'is_amendment' => true,
-            'amendment_number' => 2,
-        ]);
+    // Create a new amendment record
+    $voucher = HotelVoucherAmendment::create([
+        'group_quotation_id' => $quotation->id,
+        'hotel_id' => $hotel->id,
+        'booking_name' => $validatedData['booking_name'],
+        'voucher_date' => $validatedData['voucher_date'],
+        'hotel_address' => $validatedData['hotel_address'],
+        'arrival_date' => $validatedData['arrival_date'],
+        'departure_date' => $validatedData['departure_date'],
+        'total_nights' => $validatedData['total_nights'],
+        'room_category' => $request->input('room_category'),
+        'meal_plan' => $validatedData['meal_plan'],
+        'room_counts' => $validatedData['room_counts'],
+        'adults' => $validatedData['adults'],
+        'children' => $validatedData['children'] ?? 0,
+        'special_notes' => $validatedData['special_notes'],
+        'billing_instructions' => $validatedData['billing_instructions'],
+        'remarks' => $validatedData['remarks'],
+        'reservation_note' => $validatedData['reservation_note'],
+        'contact_person' => $validatedData['contact_person'],
+        'daily_rooms' => $request->input('daily_rooms') ?? [],
+        'rooming_list' => $request->input('rooming_list') ?? [],
+        'is_amendment' => true,
+        'amendment_number' => $amendmentNumber,
+    ]);
 
-        // Redirect with success message
-        return redirect()->back()->with('success', 'Hotel voucher amendment created successfully!');
-    }
+    // Redirect to download the PDF
+    return redirect()->back()->with('success', 'Hotel voucher amendment saved successfully.');
+}
 
-    public function downloadHotelVoucherPDF($quotationId, $hotelId)
-    {
-        $quotation = GroupQuotation::findOrFail($quotationId);
-        $hotel = Hotel::findOrFail($hotelId);
-
-        // Find existing amendment or create temporary one for PDF
-        $amendment = HotelVoucherAmendment::where('group_quotation_id', $quotation->id)->where('hotel_id', $hotel->id)->latest()->first();
-
-        // If no amendment exists, create a temporary one with basic data
-        if (!$amendment) {
-            $accommodation = GroupQuotationAccommodation::where('group_quotation_id', $quotation->id)->where('hotel_id', $hotel->id)->first();
-
-            if (!$accommodation) {
-                return back()->with('error', 'No accommodation data found for this hotel');
-            }
-
-            // Create a temporary amendment object (not saved to database)
-            $amendment = new HotelVoucherAmendment();
-            $amendment->group_quotation_id = $quotation->id;
-            $amendment->hotel_id = $hotel->id;
-            $amendment->booking_name = $quotation->name;
-            $amendment->voucher_date = now()->format('Y-m-d');
-            $amendment->hotel_address = $hotel->location ?? 'No address available';
-            $amendment->arrival_date = $accommodation->start_date;
-            $amendment->departure_date = $accommodation->end_date;
-            $amendment->total_nights = $accommodation->start_date->diffInDays($accommodation->end_date);
-            $amendment->room_category = $accommodation->roomCategory ? $accommodation->roomCategory->name : 'Standard';
-            $amendment->meal_plan = $accommodation->mealPlan ? $accommodation->mealPlan->name : 'BB';
-            $amendment->room_counts = [
-                'single' => $accommodation->single_rooms ?? 0,
-                'double' => $accommodation->double_rooms ?? 0,
-                'twin' => $accommodation->twin_rooms ?? 0,
-                'triple' => $accommodation->triple_rooms ?? 0,
-                'guide' => $accommodation->guide_rooms ?? 0,
-            ];
-            $amendment->adults = $accommodation->adults ?? 1;
-            $amendment->children = $accommodation->children ?? 0;
-            $amendment->special_notes = 'Generated PDF for preview';
-            $amendment->billing_instructions = 'Extras to be collected from client directly';
-            $amendment->remarks = 'HB SGL USD 85, HB DBL USD 90, HB TPL USD 130 (Reservation Code – ST2025)';
-            $amendment->reservation_note = 'Please reserve and confirm the above arrangements. Client will arrive for the given meal against the day.';
-            $amendment->contact_person = 'Nethini Guruge - 0777343748';
-            $amendment->amendment_number = 1;
-        }
-
-        // Calculate total people from adults and children
-        $totalPeople = $amendment->adults + $amendment->children;
-
-        // Generate PDF
-        $pdf = PDF::loadView('pages.allquotes.pdf.hotel_voucher_pdf', [
-            'amendment' => $amendment,
-            'quotation' => $quotation,
-            'hotel' => $hotel,
-            'arrivalDate' => \Carbon\Carbon::parse($amendment->arrival_date),
-            'departureDate' => \Carbon\Carbon::parse($amendment->departure_date),
-            'totalNights' => $amendment->total_nights,
-            'roomCounts' => $amendment->room_counts,
-            'dailyRooms' => $amendment->daily_rooms ?? [],
-            'roomingList' => $amendment->rooming_list ?? [],
-            'amendmentNumber' => $amendment->amendment_number,
-        ]);
-
-        // Force download the PDF
-        return $pdf->download('hotel_voucher_' . $hotel->name . '_' . now()->format('Y-m-d') . '.pdf');
-    }
+    
 
     public function downloadHotelVoucherPDF2(Request $request, $quotationId, $hotelId)
     {
@@ -531,7 +436,29 @@ class VoucherController extends Controller
         $hotel = Hotel::findOrFail($hotelId);
 
         // Find the latest amendment for this hotel and quotation
-        $amendment = HotelVoucherAmendment::where('group_quotation_id', $quotation->id)->where('hotel_id', $hotel->id)->latest()->firstOrFail();
+        $amendment = HotelVoucherAmendment::where('group_quotation_id', $quotation->id)
+            ->where('hotel_id', $hotel->id)
+            ->latest()
+            ->firstOrFail();
+            
+        // Calculate amendment number suffix (1st, 2nd, 3rd, etc.)
+        $amendmentText = '';
+        $suffix = '';
+        
+        if ($amendment->amendment_number > 0) {
+            // Only show amendment text if it's an amendment (number > 0)
+            if ($amendment->amendment_number <= 3) {
+                switch($amendment->amendment_number) {
+                    case 1: $suffix = 'ST'; break;
+                    case 2: $suffix = 'ND'; break;
+                    case 3: $suffix = 'RD'; break;
+                }
+            } else {
+                $suffix = 'TH';
+            }
+            
+            $amendmentText = $amendment->amendment_number . '<span class="superscript">' . $suffix . '</span> AMENDMENT';
+        }
 
         // Generate PDF
         $pdf = PDF::loadView('pages.allquotes.pdf.hotel_voucher_pdf_amendment2', [
