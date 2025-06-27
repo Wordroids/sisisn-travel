@@ -12,49 +12,38 @@
         }
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.4;
-            color: #000;
-            background: #fff;
-        }
-        .page-break {
-            page-break-after: always;
-        }
-        .logo-image {
-            max-height: 80px;
-        }
-        .amendment-text {
-            background: #ffff00;
-            padding: 2px 4px;
-            font-weight: bold;
         }
         .border-table th, .border-table td {
-            border: 2px solid #333;
+            border: 0.5px solid #333;
             padding: 8px;
         }
         .border-table th {
             background: #f0f0f0;
             font-weight: bold;
         }
-        @media print {
-            .voucher-container {
-                border: none;
-                width: 100%;
-                max-width: none;
-                box-shadow: none;
-            }
+        .amendment-text {
+            background: #ffff00;
+            padding: 2px 4px;
+            font-weight: bold;
+        }
+        .logo-image {
+            max-height: 80px;
         }
     </style>
 </head>
-<body class="p-5">
-    <div class="voucher-container border border-gray-300">
+<body class="p-5 text-sm leading-normal text-black bg-white">
+    <div class="voucher-container border border-gray-300 bg-white">
         <!-- Header -->
         <div class="p-4">
             <div class="flex justify-between items-center mb-3">
-                <!-- Logo -->
-                <img src="{{ public_path('images/Sisin Travel New.jpg') }}" alt="Sisin Travels" class="logo-image">
                 
+                <div></div>
+
                 <!-- Company Info -->
-                <div class="text-right text-sm">
+                <div class="text-right">
+                    <!-- Logo -->
+                <img src="{{ public_path('images/Sisin Travel New.jpg') }}" alt="Sisin Travels" class="logo-image">
+
                     <div class="font-bold">Sisin Travels (Pvt) Ltd</div>
                     <div>50/9, Mahalwara, Pannipitiya, Sri Lanka</div>
                     <div>Telephone: 0094 11 2840404</div>
@@ -77,7 +66,7 @@
         <div class="px-6 pb-6">
             <!-- Basic Information Section -->
             <div class="mb-6">
-                <table class="w-full text-sm">
+                <table class="w-full">
                     <tr>
                         <td class="py-1 font-bold w-32">Date</td>
                         <td class="py-1 pr-2">:</td>
@@ -93,26 +82,13 @@
                         <td class="py-1 pr-2">:</td>
                         <td class="py-1">{{ $mealVoucher->hotel_address ?? 'N/A' }}</td>
                     </tr>
-                    <tr>
-                        <td class="py-1 font-bold">Tour No</td>
-                        <td class="py-1 pr-2">:</td>
-                        <td class="py-1">{{ $quotation->template->booking_reference ?? 'N/A' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="py-1 font-bold">Tour Name</td>
-                        <td class="py-1 pr-2">:</td>
-                        <td class="py-1">{{ $quotation->name }}</td>
-                    </tr>
+                    
                     <tr>
                         <td class="py-1 font-bold">Market</td>
                         <td class="py-1 pr-2">:</td>
                         <td class="py-1">{{ $mealVoucher->market ?? 'N/A' }}</td>
                     </tr>
-                    <tr>
-                        <td class="py-1 font-bold">Meal Plan</td>
-                        <td class="py-1 pr-2">:</td>
-                        <td class="py-1 font-bold">{{ $mealVoucher->meal_plan }}</td>
-                    </tr>
+                    
                 </table>
             </div>
 
@@ -121,57 +97,80 @@
 
             <!-- Meal Schedule Table -->
             <div class="mb-6">
-                <table class="w-full border-table">
+                <table class="w-full border-table border">
                     <thead>
                         <tr class="text-center">
                             <th>Tour No</th>
                             <th>Guest Name</th>
-                            <th>Date</th>
+                            <th>{{ $mealVoucher->meal_plan }} Date</th>
                             <th>No. of Packs</th>
                             <th>Guide Details</th>
                         </tr>
                     </thead>
                     <tbody>
                         @php
-                            $tourData = json_decode($mealVoucher->selected_tours_data, true) ?? [];
-                            $totalPacks = 0;
+                            try {
+                                $tourData = json_decode($mealVoucher->selected_tours_data, true) ?? [];
+                                $totalPacks = 0;
+                            } catch (\Exception $e) {
+                                $tourData = [];
+                                $totalPacks = 0;
+                            }
                         @endphp
 
                         @foreach($tourData as $tourNo => $tour)
-                            @php $firstRow = true; @endphp
-                            @foreach($tour['mealDates'] as $mealDate)
-                                @php $totalPacks += intval($mealDate['noOfPacks']); @endphp
+                            @php 
+                                $firstRow = true; 
+                                $mealDates = $tour['mealDates'] ?? [];
+                                $mealDatesCount = count($mealDates);
+                            @endphp
+                            
+                            @foreach($mealDates as $index => $mealDate)
+                                @php 
+                                    try {
+                                        $totalPacks += intval($mealDate['noOfPacks'] ?? 0);
+                                        $dateFormatted = \Carbon\Carbon::parse($mealDate['date'])->format('d/m/Y');
+                                    } catch (\Exception $e) {
+                                        $dateFormatted = 'Invalid Date';
+                                    }
+                                @endphp
                                 <tr class="text-sm">
                                     @if($firstRow)
-                                        <td rowspan="{{ count($tour['mealDates']) }}" class="text-center">
+                                        <td rowspan="{{ $mealDatesCount > 0 ? $mealDatesCount : 1 }}" class="text-center">
                                             {{ $tourNo }}
                                         </td>
-                                        <td rowspan="{{ count($tour['mealDates']) }}" class="text-center">
-                                            {{ $tour['guestName'] }}
+                                        <td rowspan="{{ $mealDatesCount > 0 ? $mealDatesCount : 1 }}" class="text-center">
+                                            {{ $tour['guestName'] ?? 'N/A' }}
                                         </td>
                                         @php $firstRow = false; @endphp
                                     @endif
                                     <td class="text-center">
-                                        {{ \Carbon\Carbon::parse($mealDate['date'])->format('d/m/Y') }}
+                                        {{ $dateFormatted }}
                                     </td>
                                     <td class="text-center">
-                                        {{ $mealDate['noOfPacks'] }}
+                                        {{ $mealDate['noOfPacks'] ?? '0' }}
                                     </td>
-                                    @if($firstRow === false && $loop->first)
-                                        <td rowspan="{{ count($tour['mealDates']) }}" class="text-center">
+                                    @if($index === 0)
+                                        <td rowspan="{{ $mealDatesCount > 0 ? $mealDatesCount : 1 }}" class="text-center">
                                             {{ $tour['guideDetails'] ?? '-' }}
                                         </td>
                                     @endif
                                 </tr>
                             @endforeach
                         @endforeach
-                        <tr>
-                            <td colspan="3" class="text-right font-bold">Total Packs:</td>
-                            <td class="text-center font-bold">{{ $totalPacks }}</td>
-                            <td></td>
-                        </tr>
+                        
+                        
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Meal Plan -->
+            <div class="mb-4">
+                <div class="flex">
+                    <div class="font-bold w-32">Meal Plan</div>
+                    <div class="pr-2">:</div>
+                    <div class="text-xl font-bold">{{ $mealVoucher->meal_plan ?: '-' }}</div>
+                </div>
             </div>
 
             <!-- Special Notes -->
@@ -210,17 +209,7 @@
                 </div>
             </div>
 
-            <!-- Signature Area -->
-            <div class="flex justify-between mt-20">
-                <div class="w-5/12 text-center">
-                    <div class="border-t border-black w-full"></div>
-                    <div class="mt-1">Hotel Signature & Stamp</div>
-                </div>
-                <div class="w-5/12 text-center">
-                    <div class="border-t border-black w-full"></div>
-                    <div class="mt-1">For Sisin Travels (Pvt) Ltd.</div>
-                </div>
-            </div>
+            
         </div>
     </div>
 </body>

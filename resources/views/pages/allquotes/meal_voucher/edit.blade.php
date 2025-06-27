@@ -228,6 +228,7 @@
                         </button>
                     </div>
                     </form>
+                    <a href="{{ route('meal_vouchers.pdf', ['main_ref' => $mainRef, 'id' => $mealVoucher->id]) }}" class="text-green-600 hover:text-green-900" target="_blank">PDF</a>
                 </div>
             </div>
         </div>
@@ -505,4 +506,5 @@
         console.log('Updated table. Current tour data:', selectedTours);
     }
 </script>
+
 </x-app-layout>

@@ -30,6 +30,8 @@ Route::get('/linkstorage', function () {
     Illuminate\Support\Facades\Artisan::call('storage:link');
 });
 
+//Route::view('/meal', 'pages.allquotes.pdf.meal_voucher_pdf');
+
 Route::get('/', function () {
     return view('dashboard');
 })
@@ -243,6 +245,8 @@ Route::middleware('auth')->group(function () {
                 ->name('meal_vouchers.update')->where('main_ref', '.*');
             Route::delete('/group-quotations/{main_ref}/meal-vouchers/{id}', [MealVoucherController::class, 'destroy'])
                 ->name('meal_vouchers.destroy')->where('main_ref', '.*');
+            Route::get('/group-quotations/{main_ref}/meal-vouchers/{id}/pdf', [MealVoucherController::class, 'generatePdf'])
+                ->name('meal_vouchers.pdf')->where('main_ref', '.*');
     });
 });
 

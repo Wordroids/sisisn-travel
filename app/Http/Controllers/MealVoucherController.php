@@ -7,6 +7,9 @@ use App\Models\GroupQuotation;
 use App\Models\Hotel;
 use Illuminate\Http\Request;
 use App\Models\Market;
+use Spatie\Browsershot\Browsershot;
+use Spatie\LaravelPdf\Facades\Pdf;
+use Spatie\LaravelPdf\Enums\Format;
 
 class MealVoucherController extends Controller
 {
@@ -171,5 +174,23 @@ class MealVoucherController extends Controller
 
         return redirect()->route('meal_vouchers.index', $mainRef)
             ->with('success', 'Meal voucher deleted successfully.');
+    }
+
+    public function generatePdf($mainRef, $id)
+{
+    $mealVoucher = MealVoucherAmendment::findOrFail($id);
+        $quotation = GroupQuotation::findOrFail($mealVoucher->group_quotation_id);
+        
+        $amendmentText = null; // Set this if it's an amendment
+        
+        // Spatie PDF generation is different from DomPDF
+        return Pdf::view('pages.allquotes.pdf.meal_voucher_pdf', [
+            'mealVoucher' => $mealVoucher,
+            'quotation' => $quotation,
+            'amendmentText' => $amendmentText
+        ])
+          ->format('a4')
+          ->name('meal_voucher.pdf')
+         ->download();
     }
 }
