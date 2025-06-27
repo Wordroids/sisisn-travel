@@ -23,11 +23,14 @@ use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\QuotationTemplateController;
 use App\Http\Controllers\GroupQuotationController;
 use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\MealVoucherController;
 
 // Link Storage
 Route::get('/linkstorage', function () {
     Illuminate\Support\Facades\Artisan::call('storage:link');
 });
+
+//Route::view('/meal', 'pages.allquotes.pdf.meal_voucher_pdf');
 
 Route::get('/', function () {
     return view('dashboard');
@@ -194,7 +197,7 @@ Route::middleware('auth')->group(function () {
                 Route::put('/edit/{id}/step-05/store', [GroupQuotationController::class, 'store_step_05'])->name('store_step_05');
 
                 Route::get('/group-quotation/{id}', [GroupQuotationController::class, 'show'])->name('show');
-                Route::put('/edit/{id}/step-02/store', [GroupQuotationController::class, 'store_step_02'])->name('store_step_02');
+                //Route::put('/edit/{id}/step-02/store', [GroupQuotationController::class, 'store_step_02'])->name('store_step_02');
             });
 
         Route::post('/group-quotations/update-status/{id}', [GroupQuotationController::class, 'updateStatus'])->name('group_quotations.updateStatus');
@@ -227,26 +230,23 @@ Route::middleware('auth')->group(function () {
         Route::get('/quotations/{quotation}/hotels/{hotel}/voucher/amendment2/pdf/{amendment?}', [VoucherController::class, 'downloadHotelVoucherPDF2'])
             ->name('hotel_voucher.download_pdf2')
             ->where(['quotation' => '[0-9]+', 'hotel' => '[0-9]+', 'amendment' => '[0-9]+']);
+        
 
-        Route::get('/group-quotations/generate-transport-vouchers/{main_ref}', [VoucherController::class, 'generateTransportVouchers'])
-            ->name('group_quotations.generate_transport_vouchers')
-            ->where('main_ref', '.*');
-
-        Route::get('/group-quotations/generate-activity-vouchers/{main_ref}', [VoucherController::class, 'generateActivityVouchers'])
-            ->name('group_quotations.generate_activity_vouchers')
-            ->where('main_ref', '.*');
-
-        Route::get('/group-quotations/generate-meal-vouchers/{main_ref}', [VoucherController::class, 'generateMealVouchers'])
-            ->name('group_quotations.generate_meal_vouchers')
-            ->where('main_ref', '.*');
-
-        Route::get('/group-quotations/generate-complete-voucher/{main_ref}', [VoucherController::class, 'generateCompleteVoucher'])
-            ->name('group_quotations.generate_complete_voucher')
-            ->where('main_ref', '.*');
-
-        Route::get('/group-quotations/generate-all-vouchers/{main_ref}', [VoucherController::class, 'generateAllVouchers'])
-            ->name('group_quotations.generate_all_vouchers')
-            ->where('main_ref', '.*');
+            // Meal Voucher Routes
+            Route::get('/group-quotations/{main_ref}/meal-vouchers', [MealVoucherController::class, 'index'])
+                ->name('meal_vouchers.index')->where('main_ref', '.*');
+            Route::get('/group-quotations/{main_ref}/meal-vouchers/create', [MealVoucherController::class, 'create'])
+                ->name('meal_vouchers.create')->where('main_ref', '.*');
+            Route::post('/group-quotations/{main_ref}/meal-vouchers/store', [MealVoucherController::class, 'store'])
+                ->name('meal_vouchers.store')->where('main_ref', '.*');
+            Route::get('/group-quotations/{main_ref}/meal-vouchers/{id}/edit', [MealVoucherController::class, 'edit'])
+                ->name('meal_vouchers.edit')->where('main_ref', '.*');
+            Route::put('/group-quotations/{main_ref}/meal-vouchers/{id}', [MealVoucherController::class, 'update'])
+                ->name('meal_vouchers.update')->where('main_ref', '.*');
+            Route::delete('/group-quotations/{main_ref}/meal-vouchers/{id}', [MealVoucherController::class, 'destroy'])
+                ->name('meal_vouchers.destroy')->where('main_ref', '.*');
+            Route::get('/group-quotations/{main_ref}/meal-vouchers/{id}/pdf', [MealVoucherController::class, 'generatePdf'])
+                ->name('meal_vouchers.pdf')->where('main_ref', '.*');
     });
 });
 
