@@ -77,13 +77,14 @@
                     @endif
 
                     @if (isset($mealVoucher->id))
-    <form action="{{ route('meal_vouchers.update', ['main_ref' => $mainRef, 'id' => $mealVoucher->id]) }}"
-        method="POST" class="space-y-6">
-        @method('PUT')
-@else
-    <form action="{{ route('meal_vouchers.store', $mainRef) }}" method="POST"
-        class="space-y-6">
-@endif
+                        <form
+                            action="{{ route('meal_vouchers.update', ['main_ref' => $mainRef, 'id' => $mealVoucher->id]) }}"
+                            method="POST" class="space-y-6">
+                            @method('PUT')
+                        @else
+                            <form action="{{ route('meal_vouchers.store', $mainRef) }}" method="POST"
+                                class="space-y-6">
+                    @endif
                     @csrf
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -228,195 +229,208 @@
                         </button>
                     </div>
                     </form>
-                    <a href="{{ route('meal_vouchers.pdf', ['main_ref' => $mainRef, 'id' => $mealVoucher->id]) }}" class="text-green-600 hover:text-green-900" target="_blank">PDF</a>
+                    <div class="flex justify-end mt-4 gap-4">
+                        @if (isset($mealVoucher->id))
+                            <a href="{{ route('meal_vouchers.pdf', ['main_ref' => $mainRef, 'id' => $mealVoucher->id]) }}"
+                                target="_blank"
+                                class="inline-flex items-center px-4 py-2 border border-green-600 rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Download PDF
+                            </a>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-    // Object to track selected tours and their meal dates
-    const selectedTours = {};
-    let rowCounter = 0;
-    let mealDateCounter = 0;
+        // Object to track selected tours and their meal dates
+        const selectedTours = {};
+        let rowCounter = 0;
+        let mealDateCounter = 0;
 
-    // Initialize from existing data if available
-    document.addEventListener('DOMContentLoaded', function() {
-        // Make sure the hotel name is updated when the page loads
-        updateHotelName();
-        
-        const existingData = document.getElementById('selected_tours_data').value;
-        if (existingData && existingData.trim() !== '') {
-            try {
-                const parsedData = JSON.parse(existingData);
-                Object.assign(selectedTours, parsedData);
+        // Initialize from existing data if available
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make sure the hotel name is updated when the page loads
+            updateHotelName();
 
-                // Find the highest mealDateCounter
-                Object.keys(selectedTours).forEach(tourNo => {
-                    if (selectedTours[tourNo].mealDates) {
-                        selectedTours[tourNo].mealDates.forEach(date => {
-                            const id = parseInt(date.id.split('_')[2] || 0);
-                            mealDateCounter = Math.max(mealDateCounter, id + 1);
-                        });
+            const existingData = document.getElementById('selected_tours_data').value;
+            if (existingData && existingData.trim() !== '') {
+                try {
+                    const parsedData = JSON.parse(existingData);
+                    Object.assign(selectedTours, parsedData);
+
+                    // Find the highest mealDateCounter
+                    Object.keys(selectedTours).forEach(tourNo => {
+                        if (selectedTours[tourNo].mealDates) {
+                            selectedTours[tourNo].mealDates.forEach(date => {
+                                const id = parseInt(date.id.split('_')[2] || 0);
+                                mealDateCounter = Math.max(mealDateCounter, id + 1);
+                            });
+                        }
+                    });
+
+                    rowCounter = Object.keys(selectedTours).length;
+                    updateSelectedToursTable();
+                } catch (e) {
+                    console.error("Error parsing existing tour data", e);
+                }
+            }
+        });
+
+        function updateHotelName() {
+            const selectElement = document.getElementById('hotel_id');
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+
+            if (selectedOption && selectedOption.value) {
+                document.getElementById('hotel_name').value = selectedOption.dataset.name;
+            } else {
+                document.getElementById('hotel_name').value = '';
+            }
+        }
+
+        function addTourToSelection(tourNo, guestName) {
+            // Always add the tour, even if it exists (this allows multiple entries for the same tour)
+            // Check if this tour already exists
+            if (!selectedTours[tourNo]) {
+                selectedTours[tourNo] = {
+                    tourNo: tourNo,
+                    guestName: guestName,
+                    guideDetails: '',
+                    remarks: '',
+                    mealDates: []
+                };
+
+                // Add first meal date entry by default
+                addMealDateToTour(tourNo);
+
+                updateSelectedToursTable();
+
+                // Highlight the newly added row
+                setTimeout(() => {
+                    const tourRow = document.getElementById('tour_' + tourNo);
+                    if (tourRow) {
+                        tourRow.classList.add('bg-yellow-50');
+                        setTimeout(() => {
+                            tourRow.classList.remove('bg-yellow-50');
+                        }, 2000);
                     }
+                }, 100);
+
+                // Log success
+                console.log('Tour added successfully:', tourNo);
+            } else {
+                console.log('Tour already exists, adding new meal date:', tourNo);
+                addMealDateToTour(tourNo);
+            }
+        }
+
+        function addMealDateToTour(tourNo) {
+            if (selectedTours[tourNo]) {
+                const mealDateId = 'meal_date_' + mealDateCounter++;
+
+                // Use today's date as default
+                const today = new Date().toISOString().split('T')[0];
+
+                // Get default no of packs
+                const defaultPacks = document.getElementById('no_of_packs')?.value || '1';
+
+                selectedTours[tourNo].mealDates.push({
+                    id: mealDateId,
+                    date: today,
+                    noOfPacks: defaultPacks
                 });
 
-                rowCounter = Object.keys(selectedTours).length;
                 updateSelectedToursTable();
-            } catch (e) {
-                console.error("Error parsing existing tour data", e);
+
+                // Highlight the newly added meal date row
+                setTimeout(() => {
+                    const dateRow = document.getElementById(mealDateId);
+                    if (dateRow) {
+                        dateRow.classList.add('bg-yellow-50');
+                        setTimeout(() => {
+                            dateRow.classList.remove('bg-yellow-50');
+                        }, 2000);
+                    }
+                }, 100);
+
+                // Log success
+                console.log('Meal date added successfully:', mealDateId);
             }
         }
-    });
 
-    function updateHotelName() {
-        const selectElement = document.getElementById('hotel_id');
-        const selectedOption = selectElement.options[selectElement.selectedIndex];
-        
-        if (selectedOption && selectedOption.value) {
-            document.getElementById('hotel_name').value = selectedOption.dataset.name;
-        } else {
-            document.getElementById('hotel_name').value = '';
-        }
-    }
-
-    function addTourToSelection(tourNo, guestName) {
-        // Always add the tour, even if it exists (this allows multiple entries for the same tour)
-        // Check if this tour already exists
-        if (!selectedTours[tourNo]) {
-            selectedTours[tourNo] = {
-                tourNo: tourNo,
-                guestName: guestName,
-                guideDetails: '',
-                remarks: '',
-                mealDates: []
-            };
-
-            // Add first meal date entry by default
-            addMealDateToTour(tourNo);
-            
-            updateSelectedToursTable();
-
-            // Highlight the newly added row
-            setTimeout(() => {
-                const tourRow = document.getElementById('tour_' + tourNo);
-                if (tourRow) {
-                    tourRow.classList.add('bg-yellow-50');
-                    setTimeout(() => {
-                        tourRow.classList.remove('bg-yellow-50');
-                    }, 2000);
-                }
-            }, 100);
-            
-            // Log success
-            console.log('Tour added successfully:', tourNo);
-        } else {
-            console.log('Tour already exists, adding new meal date:', tourNo);
-            addMealDateToTour(tourNo);
-        }
-    }
-
-    function addMealDateToTour(tourNo) {
-        if (selectedTours[tourNo]) {
-            const mealDateId = 'meal_date_' + mealDateCounter++;
-
-            // Use today's date as default
-            const today = new Date().toISOString().split('T')[0];
-
-            // Get default no of packs
-            const defaultPacks = document.getElementById('no_of_packs')?.value || '1';
-
-            selectedTours[tourNo].mealDates.push({
-                id: mealDateId,
-                date: today,
-                noOfPacks: defaultPacks
-            });
-
-            updateSelectedToursTable();
-
-            // Highlight the newly added meal date row
-            setTimeout(() => {
-                const dateRow = document.getElementById(mealDateId);
-                if (dateRow) {
-                    dateRow.classList.add('bg-yellow-50');
-                    setTimeout(() => {
-                        dateRow.classList.remove('bg-yellow-50');
-                    }, 2000);
-                }
-            }, 100);
-            
-            // Log success
-            console.log('Meal date added successfully:', mealDateId);
-        }
-    }
-
-    function removeTour(tourNo) {
-        if (selectedTours[tourNo]) {
-            delete selectedTours[tourNo];
-            updateSelectedToursTable();
-        }
-    }
-
-    function removeMealDate(tourNo, mealDateId) {
-        if (selectedTours[tourNo] && selectedTours[tourNo].mealDates) {
-            selectedTours[tourNo].mealDates = selectedTours[tourNo].mealDates.filter(date => date.id !== mealDateId);
-
-            // If there are no more meal dates, remove the tour
-            if (selectedTours[tourNo].mealDates.length === 0) {
+        function removeTour(tourNo) {
+            if (selectedTours[tourNo]) {
                 delete selectedTours[tourNo];
+                updateSelectedToursTable();
             }
-
-            updateSelectedToursTable();
         }
-    }
 
-    function updateTourField(tourNo, field, value) {
-        if (selectedTours[tourNo]) {
-            selectedTours[tourNo][field] = value;
-            document.getElementById('selected_tours_data').value = JSON.stringify(selectedTours);
-            console.log(`Updated tour ${tourNo}, field ${field}:`, value);
+        function removeMealDate(tourNo, mealDateId) {
+            if (selectedTours[tourNo] && selectedTours[tourNo].mealDates) {
+                selectedTours[tourNo].mealDates = selectedTours[tourNo].mealDates.filter(date => date.id !== mealDateId);
+
+                // If there are no more meal dates, remove the tour
+                if (selectedTours[tourNo].mealDates.length === 0) {
+                    delete selectedTours[tourNo];
+                }
+
+                updateSelectedToursTable();
+            }
         }
-    }
 
-    function updateMealDateField(tourNo, mealDateId, field, value) {
-        if (selectedTours[tourNo] && selectedTours[tourNo].mealDates) {
-            const mealDate = selectedTours[tourNo].mealDates.find(date => date.id === mealDateId);
-            if (mealDate) {
-                mealDate[field] = value;
+        function updateTourField(tourNo, field, value) {
+            if (selectedTours[tourNo]) {
+                selectedTours[tourNo][field] = value;
                 document.getElementById('selected_tours_data').value = JSON.stringify(selectedTours);
-                console.log(`Updated meal date ${mealDateId}, field ${field}:`, value);
+                console.log(`Updated tour ${tourNo}, field ${field}:`, value);
             }
         }
-    }
 
-    function updateSelectedToursTable() {
-        const tableBody = document.getElementById('selectedToursBody');
-        if (!tableBody) {
-            console.error('Table body not found');
-            return;
+        function updateMealDateField(tourNo, mealDateId, field, value) {
+            if (selectedTours[tourNo] && selectedTours[tourNo].mealDates) {
+                const mealDate = selectedTours[tourNo].mealDates.find(date => date.id === mealDateId);
+                if (mealDate) {
+                    mealDate[field] = value;
+                    document.getElementById('selected_tours_data').value = JSON.stringify(selectedTours);
+                    console.log(`Updated meal date ${mealDateId}, field ${field}:`, value);
+                }
+            }
         }
 
-        // Clear existing rows
-        tableBody.innerHTML = '';
+        function updateSelectedToursTable() {
+            const tableBody = document.getElementById('selectedToursBody');
+            if (!tableBody) {
+                console.error('Table body not found');
+                return;
+            }
 
-        // Show/hide the "no tours" row based on whether we have selected tours
-        const tourNos = Object.keys(selectedTours);
-        if (tourNos.length === 0) {
-            tableBody.innerHTML =
-                `<tr id="noToursRow"><td colspan="5" class="px-4 py-4 text-center text-sm text-gray-500">No tours selected yet</td></tr>`;
-            return;
-        }
+            // Clear existing rows
+            tableBody.innerHTML = '';
 
-        // Add rows for each selected tour
-        tourNos.forEach(tourNo => {
-            const tour = selectedTours[tourNo];
+            // Show/hide the "no tours" row based on whether we have selected tours
+            const tourNos = Object.keys(selectedTours);
+            if (tourNos.length === 0) {
+                tableBody.innerHTML =
+                    `<tr id="noToursRow"><td colspan="5" class="px-4 py-4 text-center text-sm text-gray-500">No tours selected yet</td></tr>`;
+                return;
+            }
 
-            // Create the main tour row
-            const tourRow = document.createElement('tr');
-            tourRow.id = 'tour_' + tourNo;
-            tourRow.className = 'border-t-2 border-gray-200 bg-gray-50';
+            // Add rows for each selected tour
+            tourNos.forEach(tourNo => {
+                const tour = selectedTours[tourNo];
 
-            tourRow.innerHTML = `
+                // Create the main tour row
+                const tourRow = document.createElement('tr');
+                tourRow.id = 'tour_' + tourNo;
+                tourRow.className = 'border-t-2 border-gray-200 bg-gray-50';
+
+                tourRow.innerHTML = `
             <td class="px-4 py-3 text-sm font-medium text-gray-900">
                 ${tour.tourNo}
                 <input type="hidden" name="tours[${tourNo}][tour_no]" value="${tour.tourNo}">
@@ -452,16 +466,16 @@
             </td>
         `;
 
-            tableBody.appendChild(tourRow);
+                tableBody.appendChild(tourRow);
 
-            // Add rows for each meal date
-            if (tour.mealDates && tour.mealDates.length > 0) {
-                tour.mealDates.forEach(mealDate => {
-                    const dateRow = document.createElement('tr');
-                    dateRow.id = mealDate.id;
-                    dateRow.className = 'border-gray-100';
+                // Add rows for each meal date
+                if (tour.mealDates && tour.mealDates.length > 0) {
+                    tour.mealDates.forEach(mealDate => {
+                        const dateRow = document.createElement('tr');
+                        dateRow.id = mealDate.id;
+                        dateRow.className = 'border-gray-100';
 
-                    dateRow.innerHTML = `
+                        dateRow.innerHTML = `
                     <td class="pl-8 py-2 text-sm text-gray-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-3 w-3 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -496,15 +510,15 @@
                     </td>
                 `;
 
-                    tableBody.appendChild(dateRow);
-                });
-            }
-        });
+                        tableBody.appendChild(dateRow);
+                    });
+                }
+            });
 
-        // Update the hidden field with JSON data
-        document.getElementById('selected_tours_data').value = JSON.stringify(selectedTours);
-        console.log('Updated table. Current tour data:', selectedTours);
-    }
-</script>
+            // Update the hidden field with JSON data
+            document.getElementById('selected_tours_data').value = JSON.stringify(selectedTours);
+            console.log('Updated table. Current tour data:', selectedTours);
+        }
+    </script>
 
 </x-app-layout>
