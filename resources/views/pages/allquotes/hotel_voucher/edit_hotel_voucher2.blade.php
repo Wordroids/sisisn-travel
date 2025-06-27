@@ -155,7 +155,7 @@
                             <h4 class="text-md font-medium text-gray-700">Room Information</h4>
 
                             <!-- Room counts -->
-                           <div class="grid grid-cols-5 gap-2">
+                            <div class="grid grid-cols-5 gap-2">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Single</label>
                                     <input type="number" name="room_counts[single]" min="0"
@@ -187,8 +187,6 @@
                                         value="{{ $roomCounts['guide'] ?? 0 }}">
                                 </div>
                             </div> 
-
-                            
 
                             <!-- Meal plan -->
                             <div>
