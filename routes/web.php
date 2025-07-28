@@ -24,6 +24,7 @@ use App\Http\Controllers\QuotationTemplateController;
 use App\Http\Controllers\GroupQuotationController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\MealVoucherController;
+use App\Http\Controllers\TourplanController;
 
 // Link Storage
 Route::get('/linkstorage', function () {
@@ -247,6 +248,14 @@ Route::middleware('auth')->group(function () {
                 ->name('meal_vouchers.destroy')->where('main_ref', '.*');
             Route::get('/group-quotations/{main_ref}/meal-vouchers/{id}/pdf', [MealVoucherController::class, 'generatePdf'])
                 ->name('meal_vouchers.pdf')->where('main_ref', '.*');
+
+                    // Tour Plan Voucher Routes
+                    Route::get('/group-quotations/{main_ref}/tour-plan-vouchers', [TourplanController::class, 'index'])
+            ->name('tour_plan_vouchers.index')->where('main_ref', '.*');
+
+            Route::get('/group-quotations/{main_ref}/tour-plan-vouchers/create', [TourplanController::class, 'create'])
+    ->name('tour_plan_vouchers.create')->where('main_ref', '.*');
+            
     });
 });
 
