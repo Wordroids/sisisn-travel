@@ -24,11 +24,16 @@ use App\Http\Controllers\QuotationTemplateController;
 use App\Http\Controllers\GroupQuotationController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\MealVoucherController;
+use App\Http\Controllers\TourplanController;
 
 // Link Storage
 Route::get('/linkstorage', function () {
     Illuminate\Support\Facades\Artisan::call('storage:link');
 });
+
+Route::post('/group-quotations/tour-plan/{main_ref}/store', [TourplanController::class, 'store'])
+    ->name('tour_plan.store')
+    ->where('main_ref', '.*');
 
 //Route::view('/meal', 'pages.allquotes.pdf.meal_voucher_pdf');
 
@@ -219,7 +224,7 @@ Route::middleware('auth')->group(function () {
             ->where('main_ref', '.*');
 
         Route::get('/hotel-voucher/{quotation}/{accommodation}/edit2', [VoucherController::class, 'editHotelVoucher2'])->name('group_quotations.edit_hotel_voucher2');
-        
+
         Route::post('/quotations/{quotation}/hotels/{hotel}/voucher/amendment2', [VoucherController::class, 'storeAmendment2'])
             ->name('hotel_voucher.store_amendment2')
             ->where(['quotation' => '[0-9]+', 'hotel' => '[0-9]+']);
@@ -230,23 +235,66 @@ Route::middleware('auth')->group(function () {
         Route::get('/quotations/{quotation}/hotels/{hotel}/voucher/amendment2/pdf/{amendment?}', [VoucherController::class, 'downloadHotelVoucherPDF2'])
             ->name('hotel_voucher.download_pdf2')
             ->where(['quotation' => '[0-9]+', 'hotel' => '[0-9]+', 'amendment' => '[0-9]+']);
-        
 
-            // Meal Voucher Routes
-            Route::get('/group-quotations/{main_ref}/meal-vouchers', [MealVoucherController::class, 'index'])
-                ->name('meal_vouchers.index')->where('main_ref', '.*');
-            Route::get('/group-quotations/{main_ref}/meal-vouchers/create', [MealVoucherController::class, 'create'])
-                ->name('meal_vouchers.create')->where('main_ref', '.*');
-            Route::post('/group-quotations/{main_ref}/meal-vouchers/store', [MealVoucherController::class, 'store'])
-                ->name('meal_vouchers.store')->where('main_ref', '.*');
-            Route::get('/group-quotations/{main_ref}/meal-vouchers/{id}/edit', [MealVoucherController::class, 'edit'])
-                ->name('meal_vouchers.edit')->where('main_ref', '.*');
-            Route::put('/group-quotations/{main_ref}/meal-vouchers/{id}', [MealVoucherController::class, 'update'])
-                ->name('meal_vouchers.update')->where('main_ref', '.*');
-            Route::delete('/group-quotations/{main_ref}/meal-vouchers/{id}', [MealVoucherController::class, 'destroy'])
-                ->name('meal_vouchers.destroy')->where('main_ref', '.*');
-            Route::get('/group-quotations/{main_ref}/meal-vouchers/{id}/pdf', [MealVoucherController::class, 'generatePdf'])
-                ->name('meal_vouchers.pdf')->where('main_ref', '.*');
+        // Meal Voucher Routes
+        Route::get('/group-quotations/{main_ref}/meal-vouchers', [MealVoucherController::class, 'index'])
+            ->name('meal_vouchers.index')
+            ->where('main_ref', '.*');
+        Route::get('/group-quotations/{main_ref}/meal-vouchers/create', [MealVoucherController::class, 'create'])
+            ->name('meal_vouchers.create')
+            ->where('main_ref', '.*');
+        Route::post('/group-quotations/{main_ref}/meal-vouchers/store', [MealVoucherController::class, 'store'])
+            ->name('meal_vouchers.store')
+            ->where('main_ref', '.*');
+        Route::get('/group-quotations/{main_ref}/meal-vouchers/{id}/edit', [MealVoucherController::class, 'edit'])
+            ->name('meal_vouchers.edit')
+            ->where('main_ref', '.*');
+        Route::put('/group-quotations/{main_ref}/meal-vouchers/{id}', [MealVoucherController::class, 'update'])
+            ->name('meal_vouchers.update')
+            ->where('main_ref', '.*');
+        Route::delete('/group-quotations/{main_ref}/meal-vouchers/{id}', [MealVoucherController::class, 'destroy'])
+            ->name('meal_vouchers.destroy')
+            ->where('main_ref', '.*');
+        Route::get('/group-quotations/{main_ref}/meal-vouchers/{id}/pdf', [MealVoucherController::class, 'generatePdf'])
+            ->name('meal_vouchers.pdf')
+            ->where('main_ref', '.*');
+
+        // Tour Plan Voucher Routes
+        Route::get('/group-quotations/{main_ref}/tour-plan-vouchers', [TourplanController::class, 'index'])
+            ->name('tour_plan_vouchers.index')
+            ->where('main_ref', '.*');
+
+        Route::get('/group-quotations/{main_ref}/tour-plan-vouchers/create', [TourplanController::class, 'create'])
+            ->name('tour_plan_vouchers.create')
+            ->where('main_ref', '.*');
+
+        Route::get('/group-quotations/{main_ref}/tour-plan-vouchers/{id}/edit', [TourplanController::class, 'edit'])
+            ->name('tour_plan_vouchers.edit')
+            ->where('main_ref', '.*');
+
+            Route::put('/group-quotations/{main_ref}/tour-plan-vouchers/{id}', [TourplanController::class, 'update'])
+    ->name('tour_plan_vouchers.update')
+    ->where('main_ref', '.*');
+
+        Route::get('/group-quotations/{main_ref}/tour-plan-vouchers/{id}/pdf', [TourplanController::class, 'generatePdf'])
+            ->name('tour_plan_vouchers.pdf')
+            ->where('main_ref', '.*');
+
+        Route::delete('/group-quotations/{main_ref}/tour-plan-vouchers/{id}', [TourplanController::class, 'destroy'])
+            ->name('tour_plan_vouchers.destroy')
+            ->where('main_ref', '.*');
+
+            Route::get('/group-quotations/{main_ref}/tour-plan-vouchers/select', [TourplanController::class, 'select'])
+    ->name('tour_plan_vouchers.select')
+    ->where('main_ref', '.*');
+
+    Route::get('/group-quotations/{main_ref}/tour-plan-vouchers/create/template/{template_id}', [TourplanController::class, 'createFromTemplate'])
+    ->name('tour_plan_vouchers.create_from_template')
+    ->where('main_ref', '.*');
+
+Route::get('/group-quotations/{main_ref}/tour-plan-vouchers/create/detailed', [TourplanController::class, 'createDetailed'])
+    ->name('tour_plan_vouchers.create_detailed')
+    ->where('main_ref', '.*');
     });
 });
 
