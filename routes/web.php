@@ -276,9 +276,9 @@ Route::middleware('auth')->group(function () {
     ->name('tour_plan_vouchers.update')
     ->where('main_ref', '.*');
 
-        Route::get('/group-quotations/{main_ref}/tour-plan-vouchers/{id}/pdf', [TourplanController::class, 'generatePdf'])
-            ->name('tour_plan_vouchers.pdf')
-            ->where('main_ref', '.*');
+        Route::get('/group-quotations/tour-plan/{main_ref}/{id}/pdf', [TourplanController::class, 'generatePdf'])
+    ->name('tour_plan_vouchers.pdf')
+    ->where('main_ref', '.*');
 
         Route::delete('/group-quotations/{main_ref}/tour-plan-vouchers/{id}', [TourplanController::class, 'destroy'])
             ->name('tour_plan_vouchers.destroy')
