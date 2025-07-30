@@ -88,6 +88,28 @@
                             </div>
                         </div>
 
+                         <!-- Tour Plan Vouchers -->
+                        <div
+                            class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
+                            <div class="p-5">
+                                <div class="flex items-center mb-4">
+                                    <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                        </svg>
+                                    </div>
+                                    <h3 class="ml-3 text-lg font-medium text-gray-900">Tour Plan Vouchers</h3>
+                                </div>
+                                <p class="text-gray-500 mb-4">Generate detailed tour plan vouchers with daily activities and itineraries.</p>
+                                <a href="{{ route('tour_plan_vouchers.index', ['main_ref' => $mainRef]) }}"
+                                    class="inline-flex items-center justify-center w-full px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Generate Tour Plan Vouchers
+                                </a>
+                            </div>
+                        </div>
+
                         
 
                         

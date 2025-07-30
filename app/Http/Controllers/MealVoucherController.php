@@ -14,27 +14,27 @@ use Spatie\LaravelPdf\Enums\Format;
 class MealVoucherController extends Controller
 {
     public function index($mainRef)
-{
-    // First find the group quotation record(s) that match this main reference
-    $quotations = GroupQuotation::where('booking_reference', $mainRef)
-        ->orWhere('booking_reference', 'like', $mainRef . '/%')
-        ->where('status', 'approved')
-        ->get();
+    {
+        // First find the group quotation record(s) that match this main reference
+        $quotations = GroupQuotation::where('booking_reference', $mainRef)
+            ->orWhere('booking_reference', 'like', $mainRef . '/%')
+            ->where('status', 'approved')
+            ->get();
 
-    if ($quotations->isEmpty()) {
-        return redirect()->back()->with('error', 'Group quotation not found');
+        if ($quotations->isEmpty()) {
+            return redirect()->back()->with('error', 'Group quotation not found');
+        }
+
+        // Get all the quotation IDs
+        $quotationIds = $quotations->pluck('id')->toArray();
+
+        // Now fetch meal vouchers that are linked to any of these quotations
+        $mealVouchers = MealVoucherAmendment::whereIn('group_quotation_id', $quotationIds)
+            ->orderBy('voucher_date', 'desc')
+            ->get();
+
+        return view('pages.allquotes.meal_voucher.meal_vouchers', compact('mealVouchers', 'mainRef'));
     }
-
-    // Get all the quotation IDs
-    $quotationIds = $quotations->pluck('id')->toArray();
-
-    // Now fetch meal vouchers that are linked to any of these quotations
-    $mealVouchers = MealVoucherAmendment::whereIn('group_quotation_id', $quotationIds)
-        ->orderBy('voucher_date', 'desc')
-        ->get();
-
-    return view('pages.allquotes.meal_voucher.meal_vouchers', compact('mealVouchers', 'mainRef'));
-}
 
     public function create($mainRef)
     {
