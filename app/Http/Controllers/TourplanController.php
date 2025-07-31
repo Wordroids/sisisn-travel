@@ -7,6 +7,8 @@ use App\Models\GroupQuotation;
 use App\Models\TourPlanGroup;
 use App\Models\Quotation;
 use Illuminate\Support\Carbon;
+use Spatie\LaravelPdf\Facades\Pdf;
+use Spatie\LaravelPdf\Enums\Format;
 
 class TourplanController extends Controller
 {
@@ -125,68 +127,93 @@ class TourplanController extends Controller
     }
 
     public function edit($main_ref, $id)
-{
-    // Find the tour plan
-    $tourPlan = TourPlanGroup::findOrFail($id);
-    
-    // Find all quotations with this booking reference pattern (both main and sub)
-    $allQuotations = GroupQuotation::where(function ($query) use ($main_ref) {
-        $query->where('booking_reference', $main_ref)
-              ->orWhere('booking_reference', 'like', $main_ref . '/%');
-    })
-    ->where('status', 'approved')
-    ->orderBy('start_date', 'asc')
-    ->get();
-    
-    // Get the earliest start date and latest end date from all quotations
-    $tourStartDate = $allQuotations->min('start_date');
-    $tourEndDate = $allQuotations->max('end_date');
-    
-    // Format dates if they exist
-    $tourStartDate = $tourStartDate ? Carbon::parse($tourStartDate)->format('Y-m-d') : null;
-    $tourEndDate = $tourEndDate ? Carbon::parse($tourEndDate)->format('Y-m-d') : null;
-    
-    return view('pages.allquotes.tour_plan.tour_plan_edit', [
-        'tourPlan' => $tourPlan,
-        'groupQuotations' => $allQuotations,
-        'main_ref' => $main_ref,
-        'tourStartDate' => $tourStartDate,
-        'tourEndDate' => $tourEndDate,
-    ]);
-}
-
-public function update(Request $request, $main_ref, $id)
-{
-    // Validate the form data
-    $validated = $request->validate([
-        'guests' => 'nullable|array',
-        'detailed_guests' => 'nullable|array',
-        'tour_notes' => 'nullable|string',
-        'itinerary' => 'nullable|array',
-        'important_notes' => 'nullable|string',
-    ]);
-    
-    try {
-        // Find and update the tour plan
+    {
+        // Find the tour plan
         $tourPlan = TourPlanGroup::findOrFail($id);
-        $tourPlan->tour_notes = $request->input('tour_notes');
-        $tourPlan->important_notes = $request->input('important_notes');
-        $tourPlan->guests = $request->input('guests', []);
-        $tourPlan->detailed_guests = $request->input('detailed_guests', []);
-        $tourPlan->itinerary_days = $request->input('itinerary', []);
-        $tourPlan->save();
-        
-        return redirect()->route('tour_plan_vouchers.index', $main_ref)
-                        ->with('success', 'Tour plan updated successfully!');
-    } catch (\Exception $e) {
-        // Log the error
-        \Log::error('Error updating tour plan: ' . $e->getMessage());
-        
-        // Redirect with error message
-        return back()->withInput()
-                    ->with('error', 'Failed to update tour plan: ' . $e->getMessage());
+
+        // Find all quotations with this booking reference pattern (both main and sub)
+        $allQuotations = GroupQuotation::where(function ($query) use ($main_ref) {
+            $query->where('booking_reference', $main_ref)->orWhere('booking_reference', 'like', $main_ref . '/%');
+        })
+            ->where('status', 'approved')
+            ->orderBy('start_date', 'asc')
+            ->get();
+
+        // Get the earliest start date and latest end date from all quotations
+        $tourStartDate = $allQuotations->min('start_date');
+        $tourEndDate = $allQuotations->max('end_date');
+
+        // Format dates if they exist
+        $tourStartDate = $tourStartDate ? Carbon::parse($tourStartDate)->format('Y-m-d') : null;
+        $tourEndDate = $tourEndDate ? Carbon::parse($tourEndDate)->format('Y-m-d') : null;
+
+        return view('pages.allquotes.tour_plan.tour_plan_edit', [
+            'tourPlan' => $tourPlan,
+            'groupQuotations' => $allQuotations,
+            'main_ref' => $main_ref,
+            'tourStartDate' => $tourStartDate,
+            'tourEndDate' => $tourEndDate,
+        ]);
     }
-}
+
+    public function update(Request $request, $main_ref, $id)
+    {
+        // Validate the form data
+        $validated = $request->validate([
+            'guests' => 'nullable|array',
+            'detailed_guests' => 'nullable|array',
+            'tour_notes' => 'nullable|string',
+            'itinerary' => 'nullable|array',
+            'important_notes' => 'nullable|string',
+        ]);
+
+        try {
+            // Find and update the tour plan
+            $tourPlan = TourPlanGroup::findOrFail($id);
+            $tourPlan->tour_notes = $request->input('tour_notes');
+            $tourPlan->important_notes = $request->input('important_notes');
+            $tourPlan->guests = $request->input('guests', []);
+            $tourPlan->detailed_guests = $request->input('detailed_guests', []);
+            $tourPlan->itinerary_days = $request->input('itinerary', []);
+            $tourPlan->save();
+
+            return redirect()->route('tour_plan_vouchers.index', $main_ref)->with('success', 'Tour plan updated successfully!');
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Error updating tour plan: ' . $e->getMessage());
+
+            // Redirect with error message
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to update tour plan: ' . $e->getMessage());
+        }
+    }
+
+    public function destroy($main_ref, $id)
+    {
+        try {
+            // Find the tour plan
+            $tourPlan = TourPlanGroup::findOrFail($id);
+
+            // Check if the user has permission (optional, if you want to add permission check)
+            // if (auth()->user()->cannot('delete', $tourPlan)) {
+            //     return redirect()->route('tour_plan_vouchers.index', $main_ref)
+            //         ->with('error', 'You do not have permission to delete this tour plan.');
+            // }
+
+            // Delete the tour plan
+            $tourPlan->delete();
+
+            return redirect()->route('tour_plan_vouchers.index', $main_ref)->with('success', 'Tour plan deleted successfully.');
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Error deleting tour plan: ' . $e->getMessage());
+
+            return redirect()
+                ->route('tour_plan_vouchers.index', $main_ref)
+                ->with('error', 'Failed to delete tour plan: ' . $e->getMessage());
+        }
+    }
 
     public function select($main_ref)
     {
@@ -219,5 +246,71 @@ public function update(Request $request, $main_ref, $id)
         ]);
     }
 
-    
+    public function generatePdf($main_ref, $id)
+{
+    try {
+        // Find the tour plan
+        $tourPlan = TourPlanGroup::findOrFail($id);
+        
+        // Find main quotation
+        $quotation = GroupQuotation::where('booking_reference', $main_ref)
+            ->where('status', 'approved')
+            ->first();
+        
+        // Get all related quotations
+        $allQuotations = GroupQuotation::where(function ($query) use ($main_ref) {
+            $query->where('booking_reference', $main_ref)
+                  ->orWhere('booking_reference', 'like', $main_ref . '/%');
+        })
+        ->where('status', 'approved')
+        ->orderBy('start_date', 'asc')
+        ->get();
+        
+        // Calculate start and end dates from itinerary if available
+        $startDate = null;
+        $endDate = null;
+        $duration = null;
+        
+        if (!empty($tourPlan->itinerary_days)) {
+            $dates = collect($tourPlan->itinerary_days)
+                ->pluck('date')
+                ->filter()
+                ->filter(function ($date) {
+                    return !empty($date) && $date !== '0000-00-00';
+                })
+                ->values();
+
+            if ($dates->isNotEmpty()) {
+                try {
+                    $startDate = Carbon::parse($dates->min())->format('d M Y');
+                    $endDate = Carbon::parse($dates->max())->format('d M Y');
+                    $duration = Carbon::parse($dates->min())->diffInDays(Carbon::parse($dates->max())) + 1;
+                } catch (\Exception $e) {
+                    \Log::error('Error calculating dates for tour plan PDF: ' . $e->getMessage());
+                }
+            }
+        }
+        
+        // Generate the PDF in landscape orientation
+        return Pdf::view('pages.allquotes.pdf.tour_plan_pdf', [
+            'tourPlan' => $tourPlan,
+            'quotation' => $quotation,
+            'allQuotations' => $allQuotations,
+            'main_ref' => $main_ref,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'duration' => $duration
+        ])
+        ->format('a4')
+        ->landscape()  // Set to landscape orientation
+        ->name('tour_plan_' . $main_ref . '.pdf')
+        ->download();
+        
+    } catch (\Exception $e) {
+        \Log::error('Error generating tour plan PDF: ' . $e->getMessage());
+        
+        return redirect()->route('tour_plan_vouchers.index', $main_ref)
+            ->with('error', 'Failed to generate PDF: ' . $e->getMessage());
+    }
+}
 }
