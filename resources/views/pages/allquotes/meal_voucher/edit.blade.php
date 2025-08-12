@@ -3,6 +3,17 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm rounded-lg">
                 <div class="p-6">
+                <!-- Error -->
+                    @if ($errors->any())
+                        <div class="mb-4">
+                            <div class="text-red-600 font-semibold mb-2">Please fix the following errors:</div>
+                            <ul class="list-disc pl-5 text-red-600">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-semibold text-gray-800">
                             {{ isset($mealVoucher->id) ? 'Edit' : 'Create' }} Meal Voucher
