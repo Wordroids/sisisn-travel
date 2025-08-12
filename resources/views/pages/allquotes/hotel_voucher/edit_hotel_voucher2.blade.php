@@ -11,10 +11,7 @@
         </svg>
         Download Voucher PDF
     </a>
-            <a href="{{ route('group_quotations.hotel_vouchers', $quotation->id) }}"
-                class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm">
-                Back to Hotels
-            </a>
+            
         </div>
 
         <div class="bg-white shadow overflow-hidden rounded-lg">
