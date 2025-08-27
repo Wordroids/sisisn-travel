@@ -18,6 +18,11 @@ class QuotationAccommodation extends Model
         'room_category_id',
     ];
 
+    protected $casts = [
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+    ];
+
     public function quotation()
     {
         return $this->belongsTo(Quotation::class);
