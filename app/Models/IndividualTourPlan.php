@@ -23,11 +23,12 @@ class IndividualTourPlan extends Model
         'itinerary_days'
     ];
 
-    protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
-    ];
-
+   protected $casts = [
+    'start_date' => 'date',
+    'end_date' => 'date',
+    'guests' => 'array',
+    'itinerary_days' => 'array',
+];
     public function quotation()
     {
         return $this->belongsTo(Quotation::class);

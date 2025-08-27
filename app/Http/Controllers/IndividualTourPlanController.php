@@ -6,7 +6,10 @@ use App\Models\Quotation;
 use App\Models\IndividualTourPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Spatie\Browsershot\Browsershot;
 use Spatie\LaravelPdf\Facades\Pdf;
+use Spatie\LaravelPdf\Enums\Format;
+
 
 class IndividualTourPlanController extends Controller
 {
@@ -161,19 +164,32 @@ class IndividualTourPlanController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function generatePdf($quotationId, $id)
-    {
-        $tourPlan = IndividualTourPlan::with('quotation')->findOrFail($id);
-        $quotation = $tourPlan->quotation;
+    public function generatePdf($mainRef, $id)
+{
+    // Fetch the tour plan
+    $tourPlan = IndividualTourPlan::findOrFail($id);
 
-        $pdf = Pdf::view('pages.allsinglequotes.pdf.tour_plan_pdf', [
-            'tourPlan' => $tourPlan,
-            'quotation' => $quotation,
-            'guests' => json_decode($tourPlan->guests, true) ?? [],
-            'itineraryDays' => json_decode($tourPlan->itinerary_days, true) ?? []
-        ])
-        ->format('a4')
-        ->name('tour_plan_' . str_replace(['/', '\\'], '_', $quotation->booking_reference) . '.pdf')
-        ->download();
-    }
+    // Fetch related quotation
+    $quotation = $tourPlan->quotation;
+
+    // Prepare variables for the view
+    $main_ref = $mainRef;
+    $startDate = $tourPlan->start_date ? $tourPlan->start_date->format('d M Y') : null;
+    $endDate = $tourPlan->end_date ? $tourPlan->end_date->format('d M Y') : null;
+    $duration = $tourPlan->duration ?? null;
+
+    // Generate PDF using Spatie
+    return Pdf::view('pages.allquotes.pdf.tour_plan_pdf', [
+        'quotation' => $quotation,
+        'tourPlan' => $tourPlan,
+        'main_ref' => $main_ref,
+        'startDate' => $startDate,
+        'endDate' => $endDate,
+        'duration' => $duration
+    ])
+    ->format('a4')
+    ->name("Tour_Plan_{$tourPlan->title}.pdf")
+    ->download(); // Use ->stream() to open in browser
+}
+
 }
