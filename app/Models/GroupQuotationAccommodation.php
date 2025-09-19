@@ -10,6 +10,7 @@ class GroupQuotationAccommodation extends Model
     use HasFactory;
 
     protected $fillable = [
+
         'group_quotation_id',
         'hotel_id',
         'start_date',
@@ -17,6 +18,7 @@ class GroupQuotationAccommodation extends Model
         'nights',
         'meal_plan_id',
         'room_category_id',
+
     ];
 
     protected $casts = [
@@ -52,5 +54,10 @@ class GroupQuotationAccommodation extends Model
     public function additionalRooms()
     {
         return $this->hasMany(GroupAdditionalRoom::class, 'group_quotation_accommodation_id');
+    }
+
+    public function allocatedGroups()
+    {
+        return $this->hasMany(AllocatedGroup::class, 'accommodation_id');
     }
 }

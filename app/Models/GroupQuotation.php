@@ -107,4 +107,27 @@ class GroupQuotation extends Model
     {
         return $this->belongsTo(QuotationTemplate::class, 'template_id');
     }
+
+    public function getUniqueGroupNames()
+{
+    return $this->members()
+        ->whereNotNull('member_group')
+        ->where('member_group', '!=', '')
+        ->distinct('member_group')
+        ->pluck('member_group')
+        ->toArray();
+}
+
+/**
+ * Check if this quotation has any ungrouped members
+ */
+public function hasUngroupedMembers()
+{
+    return $this->members()
+        ->where(function($query) {
+            $query->whereNull('member_group')
+                  ->orWhere('member_group', '');
+        })
+        ->exists();
+}
 }

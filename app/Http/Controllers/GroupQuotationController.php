@@ -288,10 +288,10 @@ class GroupQuotationController extends Controller
 
         // Validate the incoming request, including members
         $validatedData = $request->validate([
-            'pax_slab' => 'required|array',
-            'pax_slab.*.exact_pax' => 'required|integer|min:1',
-            'pax_slab.*.vehicle_type_id' => 'required|exists:vehicle_types,id',
-            'pax_slab.*.vehicle_payout_rate' => 'required|numeric|min:0',
+            'pax_slab' => 'nullable|array',
+            'pax_slab.*.exact_pax' => 'nullable|integer|min:0',
+            'pax_slab.*.vehicle_type_id' => 'nullable|exists:vehicle_types,id',
+            'pax_slab.*.vehicle_payout_rate' => 'nullable|numeric|min:0',
             'members' => 'nullable|array', // Add validation for members
             'members.*.id' => 'nullable|exists:group_quotation_members,id', // For existing members
             'members.*.name' => 'required_with:members|string|max:255', // name is required if members array is present
@@ -366,8 +366,16 @@ class GroupQuotationController extends Controller
      */
     public function step_03($id)
     {
-        $quotation = GroupQuotation::with(['accommodations.hotel', 'accommodations.roomDetails', 'accommodations.additionalRooms'])->findOrFail($id);
+        $quotation = GroupQuotation::with([
+        'accommodations.hotel', 
+        'accommodations.mealPlan', 
+        'accommodations.roomCategory',
+        'accommodations.roomDetails',
+        'accommodations.additionalRooms',
+        'accommodations.allocatedGroups'  // This is crucial
+        ])->findOrFail($id);
 
+        //dd($quotation->toArray());
         // Get data for select fields
         $hotels = Hotel::all();
         $mealPlans = MealPlan::all();
@@ -402,61 +410,79 @@ class GroupQuotationController extends Controller
             'accommodations.*.additional_rooms.guide.nights' => 'nullable|integer|min:0',
             'accommodations.*.additional_rooms.guide.total_cost' => 'nullable|numeric|min:0',
             'accommodations.*.additional_rooms.guide.provided_by_hotel' => 'nullable|boolean',
+            'accommodations.*.groups' => 'nullable|array',
+            'accommodations.*.groups.*' => 'nullable|string',
         ]);
 
         // Delete existing accommodations
-        $groupQuotation->accommodations()->each(function ($accommodation) {
-            $accommodation->roomDetails()->delete();
-            $accommodation->additionalRooms()->delete();
-            $accommodation->delete();
-        });
+    $groupQuotation->accommodations()->each(function ($accommodation) {
+        // Delete allocated groups first
+        $accommodation->allocatedGroups()->delete();
+        
+        // Then delete other related data
+        $accommodation->roomDetails()->delete();
+        $accommodation->additionalRooms()->delete();
+        $accommodation->delete();
+    });
 
-        foreach ($request->accommodations as $accommodation) {
-            // Calculate total nights from all room types
-            $totalNights = collect($accommodation['room_types'])->sum('nights');
+    foreach ($request->accommodations as $accommodation) {
+        // Calculate total nights from all room types
+        $totalNights = collect($accommodation['room_types'])->sum('nights');
 
-            // Create the accommodation record
-            $groupAccommodation = GroupQuotationAccommodation::create([
-                'group_quotation_id' => $groupQuotation->id,
-                'hotel_id' => $accommodation['hotel_id'],
-                'start_date' => $accommodation['start_date'],
-                'end_date' => $accommodation['end_date'],
-                'nights' => $totalNights,
-                'meal_plan_id' => $accommodation['meal_plan_id'],
-                'room_category_id' => $accommodation['room_category_id'],
-            ]);
+        // Create the accommodation record
+        $groupAccommodation = GroupQuotationAccommodation::create([
+            'group_quotation_id' => $groupQuotation->id,
+            'hotel_id' => $accommodation['hotel_id'],
+            'start_date' => $accommodation['start_date'],
+            'end_date' => $accommodation['end_date'],
+            'nights' => $totalNights,
+            'meal_plan_id' => $accommodation['meal_plan_id'],
+            'room_category_id' => $accommodation['room_category_id'],
+        ]);
 
-            // Store room details for each room type (single, double, triple)
-            foreach ($accommodation['room_types'] as $type => $details) {
-                // Only create records if nights is greater than 0
-                if (!empty($details['nights']) && $details['nights'] > 0) {
-                    GroupRoomDetail::create([
-                        'group_quotation_accommodation_id' => $groupAccommodation->id,
-                        'room_type' => ucfirst($type),
-                        'per_night_cost' => $details['per_night_cost'],
-                        'nights' => $details['nights'],
-                        'total_cost' => $details['total_cost'],
+        // Store group allocations for this accommodation
+        if (isset($accommodation['groups']) && is_array($accommodation['groups'])) {
+            foreach ($accommodation['groups'] as $groupName) {
+                // Only create if group name is not empty
+                if (!empty($groupName)) {
+                    $groupAccommodation->allocatedGroups()->create([
+                        'group_name' => $groupName
                     ]);
                 }
             }
+        }
 
-            // Store room details for additional rooms (driver, guide)
-            if (isset($accommodation['additional_rooms'])) {
-                foreach ($accommodation['additional_rooms'] as $type => $details) {
-                    // Create records for all additional rooms, not just those provided by hotel
-                    if (isset($details['nights']) && $details['nights'] > 0) {
-                        GroupAdditionalRoom::create([
-                            'group_quotation_accommodation_id' => $groupAccommodation->id,
-                            'room_type' => ucfirst($type), // Make sure to capitalize for consistency
-                            'per_night_cost' => $details['per_night_cost'] ?? 0,
-                            'nights' => $details['nights'],
-                            'total_cost' => $details['total_cost'] ?? 0,
-                            'provided_by_hotel' => isset($details['provided_by_hotel']) ? $details['provided_by_hotel'] : false,
-                        ]);
-                    }
+        // Store room details for each room type (single, double, triple)
+        foreach ($accommodation['room_types'] as $type => $details) {
+            // Only create records if nights is greater than 0
+            if (!empty($details['nights']) && $details['nights'] > 0) {
+                GroupRoomDetail::create([
+                    'group_quotation_accommodation_id' => $groupAccommodation->id,
+                    'room_type' => ucfirst($type),
+                    'per_night_cost' => $details['per_night_cost'],
+                    'nights' => $details['nights'],
+                    'total_cost' => $details['total_cost'],
+                ]);
+            }
+        }
+
+        // Store room details for additional rooms (driver, guide)
+        if (isset($accommodation['additional_rooms'])) {
+            foreach ($accommodation['additional_rooms'] as $type => $details) {
+                // Create records for all additional rooms, not just those provided by hotel
+                if (isset($details['nights']) && $details['nights'] > 0) {
+                    GroupAdditionalRoom::create([
+                        'group_quotation_accommodation_id' => $groupAccommodation->id,
+                        'room_type' => ucfirst($type), // Make sure to capitalize for consistency
+                        'per_night_cost' => $details['per_night_cost'] ?? 0,
+                        'nights' => $details['nights'],
+                        'total_cost' => $details['total_cost'] ?? 0,
+                        'provided_by_hotel' => isset($details['provided_by_hotel']) ? $details['provided_by_hotel'] : false,
+                    ]);
                 }
             }
         }
+    }
 
         return redirect()->route('group_quotations.step_04', $groupQuotation->id)->with('success', 'Accommodation details saved! Proceed to Travel Plans.');
     }
